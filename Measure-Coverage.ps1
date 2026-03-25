@@ -15,10 +15,10 @@ try {
     Get-ChildItem -Directory tests/*.Test*/TestResults/* | Remove-Item -Recurse
 
     # rebuild target project to generate source generator files
-    dotnet build RuneString.slnx --no-incremental --property:EmitCompilerGeneratedFiles=true
+    dotnet build RunaString.slnx --no-incremental --property:EmitCompilerGeneratedFiles=true
 
     # test and measure coverage
-    dotnet test RuneString.slnx --collect:"XPlat Code Coverage" --settings tests/etc/coverlet.runsettings
+    dotnet test RunaString.slnx --collect:"XPlat Code Coverage" --settings tests/etc/coverlet.runsettings
 
     # export HTML coverage report
     Get-ChildItem tests/*.Test*/TestResults/*/coverage.cobertura.xml `

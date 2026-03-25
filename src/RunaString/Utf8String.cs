@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace RuneString;
+namespace RunaString;
 
 /// <summary>
 /// Represents an immutable UTF-8 encoded string.

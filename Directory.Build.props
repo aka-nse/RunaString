@@ -9,9 +9,9 @@
     <!-- package configs -->
     <PropertyGroup>
         <Authors>aka-nse</Authors>
-        <PackageProjectUrl>https://github.com/aka-nse/RuneString</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/aka-nse/RunaString</PackageProjectUrl>
         <PackageReadmeFile>readme.md</PackageReadmeFile>
-        <RepositoryUrl>https://github.com/aka-nse/RuneString</RepositoryUrl>
+        <RepositoryUrl>https://github.com/aka-nse/RunaString</RepositoryUrl>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <PackageIcon>icon.png</PackageIcon>
     </PropertyGroup>

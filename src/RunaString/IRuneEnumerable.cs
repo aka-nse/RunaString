@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace RuneString;
+namespace RunaString;
 
 /// <summary>
 /// Defines a type that represents a seekable index into a source buffer for an

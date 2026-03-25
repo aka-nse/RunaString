@@ -1,7 +1,7 @@
 using System.Buffers;
 using System.Text;
 
-namespace RuneString;
+namespace RunaString;
 
 /// <summary>
 /// Extensions for <see cref="ReadOnlySpan{Char}"/>, <see cref="ReadOnlyMemory{Char}"/>,

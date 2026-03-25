@@ -1,7 +1,7 @@
 using System.Buffers;
 using System.Text;
 
-namespace RuneString;
+namespace RunaString;
 
 /// <summary>
 /// A struct that represents a seekable index into a UTF-8 encoded buffer for an <see cref="Utf8SpanEnumerator"/> or <see cref="Utf8MemoryEnumerator"/>.

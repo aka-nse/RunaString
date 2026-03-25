@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace RuneString;
+namespace RunaString;
 
 /// <summary>
 /// Provides methods for comparing UTF-8 encoded strings and spans, as well as computing their hash codes.

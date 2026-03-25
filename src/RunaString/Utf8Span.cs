@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace RuneString;
+namespace RunaString;
 
 /// <summary>
 /// Represents a read-only span of UTF-8 encoded bytes.

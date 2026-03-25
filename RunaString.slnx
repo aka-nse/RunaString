@@ -9,9 +9,9 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/RuneString/RuneString.csproj" />
+    <Project Path="src/RunaString/RunaString.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/RuneString.Test/RuneString.Test.csproj" />
+    <Project Path="tests/RunaString.Test/RunaString.Test.csproj" />
   </Folder>
 </Solution>
