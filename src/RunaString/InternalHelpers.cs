@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Unicode;
 
-namespace RuneString;
+namespace RunaString;
 
 internal static class InternalHelpers
 {

@@ -1,4 +1,4 @@
-# Copilot Instructions for RuneString
+# Copilot Instructions for RunaString
 
 ## What's this file for?
 
@@ -24,7 +24,7 @@
 
 ## Project overview
 
-RuneString is a .NET library designed to provide well-abstracted and more
+RunaString is a .NET library designed to provide well-abstracted and more
 efficient way to manipulate strings. It offers a range of features that allow
 developers to perform common string operations with improved performance and
 reduced memory usage compared to traditional string handling in .NET.
@@ -43,7 +43,7 @@ This project has the following directory structure:
 +-- Directory.Build.props            # MSBuild shared properties for the project
 +-- LICENSE.txt                      # License information for the project
 +-- Measure-Coverage.ps1             # PowerShell script for measuring code coverage
-+-- RuneString.slnx                  # Visual Studio solution file
++-- RunaString.slnx                  # Visual Studio solution file
 +-- README.md                        # Project overview and documentation
 +-- global.json                      # .NET SDK version configuration
 +-- .github/
@@ -52,9 +52,9 @@ This project has the following directory structure:
 |   +-- copilot-instructions.md      # This file: instructions for GitHub Copilot
 +-- resources/                       # Misc. resource files for the project
 +-- src/                             # Source code for the library
-|   +-- RuneString/                  # Main library code
+|   +-- RunaString/                  # Main library code
 +-- tests/                           # Unit tests for the library
-    +-- RuneString.Tests/            # Unit tests for the library
+    +-- RunaString.Tests/            # Unit tests for the library
 ```
 
 ## Coding style

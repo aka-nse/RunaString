@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace RuneString.Test;
+namespace RunaString.Test;
 
 public partial class RuneEnumeratorTest
 {

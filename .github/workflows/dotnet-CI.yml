@@ -19,10 +19,10 @@ jobs:
         dotnet-version: '10.0.x'
 
     - name: Restore dependencies
-      run: dotnet restore RuneString.slnx
+      run: dotnet restore RunaString.slnx
 
     - name: Build solution
-      run: dotnet build RuneString.slnx --no-restore
+      run: dotnet build RunaString.slnx --no-restore
 
     - name: Run tests
-      run: dotnet test RuneString.slnx --no-build --verbosity normal
+      run: dotnet test RunaString.slnx --no-build --verbosity normal

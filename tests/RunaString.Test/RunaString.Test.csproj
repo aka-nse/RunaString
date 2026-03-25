@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\RuneString\RuneString.csproj" />
+    <ProjectReference Include="..\..\src\RunaString\RunaString.csproj" />
   </ItemGroup>
 
   <ItemGroup>
