@@ -23,6 +23,10 @@ public readonly struct Utf32RuneIndex : ISeekIndex
     {
         RuneIndex = runePosition;
     }
+
+    /// <inheritdoc />
+    public override string ToString() =>
+        $"Utf32RuneIndex {{ RuneIndex = {RuneIndex} }}";
 }
 
 /// <summary>
