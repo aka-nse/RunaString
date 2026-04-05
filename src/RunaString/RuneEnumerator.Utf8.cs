@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace RunaString;
@@ -11,7 +12,7 @@ namespace RunaString;
 /// It is not valid for other sequences, even if they contain the same data.
 /// The behavior is undefined if used with a different source sequence.
 /// </remarks>
-public readonly struct Utf8RuneIndex : ISeekIndex
+public readonly struct Utf8RuneIndex : ISeekIndex<Utf8RuneIndex>
 {
     /// <summary></summary>
     public int ByteIndex { get; }
@@ -29,6 +30,65 @@ public readonly struct Utf8RuneIndex : ISeekIndex
         ByteIndex = byteIndex;
         RuneIndex = runePosition;
     }
+
+    /// <inheritdoc />
+    public override string ToString() =>
+        $"Utf8RuneIndex {{ ByteIndex = {ByteIndex}, RuneIndex = {RuneIndex} }}";
+
+    /// <inheritdoc />
+    public override int GetHashCode() =>
+        ByteIndex.GetHashCode() ^ RuneIndex.GetHashCode();
+
+    /// <inheritdoc />
+    public override bool Equals([NotNullWhen(true)] object? obj) =>
+        obj is Utf8RuneIndex other && Equals(this, other);
+
+    /// <inheritdoc />
+    public bool Equals(Utf8RuneIndex other) => Equals(this, other);
+
+    /// <inheritdoc />
+    /// <exception cref="ArgumentException">
+    /// There is an inconsistency between the byte indices and the rune indices.
+    /// These instances may have been originated from different strings.
+    /// </exception>
+    public int CompareTo(Utf8RuneIndex other) => Compare(this, other);
+
+    /// <inheritdoc />
+    public static bool Equals(Utf8RuneIndex x, Utf8RuneIndex y) =>
+        x.ByteIndex == y.ByteIndex && x.RuneIndex == y.RuneIndex;
+
+    /// <inheritdoc />
+    public static int Compare(Utf8RuneIndex x, Utf8RuneIndex y)
+    {
+        if (x.ByteIndex == y.ByteIndex && x.RuneIndex == y.RuneIndex)
+        {
+            return 0;
+        }
+        return (x.ByteIndex < y.ByteIndex, x.RuneIndex < y.RuneIndex) switch
+        {
+            (true, true) => -1,
+            (false, false) => +1,
+            _ => throw new ArgumentException($"Inconsistent source hash codes: x and y may be from different source strings."),
+        };
+    }
+
+    /// <inheritdoc />
+    public static bool operator ==(Utf8RuneIndex x, Utf8RuneIndex y) => Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator !=(Utf8RuneIndex x, Utf8RuneIndex y) => !Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator<(Utf8RuneIndex x, Utf8RuneIndex y) => Compare(x, y) < 0;
+
+    /// <inheritdoc />
+    public static bool operator >(Utf8RuneIndex x, Utf8RuneIndex y) => Compare(x, y) > 0;
+
+    /// <inheritdoc />
+    public static bool operator <=(Utf8RuneIndex x, Utf8RuneIndex y) => Compare(x, y) <= 0;
+
+    /// <inheritdoc />
+    public static bool operator >=(Utf8RuneIndex x, Utf8RuneIndex y) => Compare(x, y) >= 0;
 }
 
 /// <summary>
