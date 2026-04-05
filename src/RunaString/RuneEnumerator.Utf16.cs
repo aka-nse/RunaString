@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace RunaString;
@@ -11,7 +12,7 @@ namespace RunaString;
 /// It is not valid for other sequences, even if they contain the same data.
 /// The behavior is undefined if used with a different source sequence.
 /// </remarks>
-public readonly struct Utf16RuneIndex : ISeekIndex
+public readonly struct Utf16RuneIndex : ISeekIndex<Utf16RuneIndex>
 {
     /// <summary></summary>
     public int CharIndex { get; }
@@ -33,6 +34,61 @@ public readonly struct Utf16RuneIndex : ISeekIndex
     /// <inheritdoc />
     public override string ToString() =>
         $"Utf16RuneIndex {{ CharIndex = {CharIndex}, RuneIndex = {RuneIndex} }}";
+
+    /// <inheritdoc />
+    public override int GetHashCode() =>
+        CharIndex.GetHashCode() ^ RuneIndex.GetHashCode();
+
+    /// <inheritdoc />
+    public override bool Equals([NotNullWhen(true)] object? obj) =>
+        obj is Utf16RuneIndex other && Equals(this, other);
+
+    /// <inheritdoc />
+    public bool Equals(Utf16RuneIndex other) => Equals(this, other);
+
+    /// <inheritdoc />
+    /// <exception cref="ArgumentException">
+    /// There is an inconsistency between the byte indices and the rune indices.
+    /// These instances may have been originated from different strings.
+    /// </exception>
+    public int CompareTo(Utf16RuneIndex other) => Compare(this, other);
+
+    /// <inheritdoc />
+    public static bool Equals(Utf16RuneIndex x, Utf16RuneIndex y) =>
+        x.CharIndex == y.CharIndex && x.RuneIndex == y.RuneIndex;
+
+    /// <inheritdoc />
+    public static int Compare(Utf16RuneIndex x, Utf16RuneIndex y)
+    {
+        if (x.CharIndex == y.CharIndex && x.RuneIndex == y.RuneIndex)
+        {
+            return 0;
+        }
+        return (x.CharIndex < y.CharIndex, x.RuneIndex < y.RuneIndex) switch
+        {
+            (true, true) => -1,
+            (false, false) => +1,
+            _ => throw new ArgumentException($"Inconsistent source hash codes: x and y may be from different source strings."),
+        };
+    }
+
+    /// <inheritdoc />
+    public static bool operator ==(Utf16RuneIndex x, Utf16RuneIndex y) => Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator !=(Utf16RuneIndex x, Utf16RuneIndex y) => !Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator <(Utf16RuneIndex x, Utf16RuneIndex y) => Compare(x, y) < 0;
+
+    /// <inheritdoc />
+    public static bool operator >(Utf16RuneIndex x, Utf16RuneIndex y) => Compare(x, y) > 0;
+
+    /// <inheritdoc />
+    public static bool operator <=(Utf16RuneIndex x, Utf16RuneIndex y) => Compare(x, y) <= 0;
+
+    /// <inheritdoc />
+    public static bool operator >=(Utf16RuneIndex x, Utf16RuneIndex y) => Compare(x, y) >= 0;
 }
 
 /// <summary>
