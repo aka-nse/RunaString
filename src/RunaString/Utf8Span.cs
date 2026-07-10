@@ -131,7 +131,7 @@ public readonly ref partial struct Utf8Span
         var newByteIndex = index.ByteIndex - 1;
         while (newByteIndex >= 0)
         {
-            if ((Buffer[newByteIndex] & 0xC0) != 0xC0)
+            if (Buffer[newByteIndex] < 0x80 || Buffer[newByteIndex] >= 0xC0)
             {
                 index = new(newByteIndex, index.RuneIndex - 1);
                 return true;

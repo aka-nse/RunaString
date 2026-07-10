@@ -141,7 +141,7 @@ public readonly partial struct Utf8String
         var newByteIndex = index.ByteIndex - 1;
         while(newByteIndex >= 0)
         {
-            if((_buffer[newByteIndex] & 0xC0) != 0xC0)
+            if (_buffer[newByteIndex] < 0x80 || _buffer[newByteIndex] >= 0xC0)
             {
                 index = new(newByteIndex, index.RuneIndex - 1);
                 return true;
