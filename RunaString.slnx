@@ -9,6 +9,7 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/RunaString.InternalGenerators/RunaString.InternalGenerators.csproj" Id="846a64f4-d560-440e-b999-a0bc7841ea56" />
     <Project Path="src/RunaString/RunaString.csproj" />
   </Folder>
   <Folder Name="/tests/">

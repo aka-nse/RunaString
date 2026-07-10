@@ -97,6 +97,53 @@ public interface IRuneEnumerable<TSelf, TEnumerator, TIndex>
     public TSelf Slice(TIndex start, TIndex end);
 
     /// <summary>
+    /// Attempts to get the rune located at the specified index in the collection.
+    /// </summary>
+    /// <param name="index">The index of the rune to retrieve.</param>
+    /// <param name="rune">When this method returns, contains the rune at the specified index, if the index is valid; otherwise, the default value.</param>
+    /// <returns>True if the rune was successfully retrieved; otherwise, false.</returns>
+    /// <remarks>
+    /// This method only validates code unit indices, not rune indices.
+    /// A valid code unit index must be within the bounds of the source buffer and must not point to the middle of a multi-code-unit sequence that forms a single rune.
+    /// </remarks>
+    public bool TryGetRune(TIndex index, out Rune rune);
+
+    /// <summary>
+    /// Attempts to get the rune located at the specified index in the collection.
+    /// </summary>
+    /// <param name="index">The index of the rune to retrieve.</param>
+    /// <param name="rune">When this method returns, contains the rune at the specified index, if the index is valid; otherwise, the default value.</param>
+    /// <param name="codeUnitConsumed">When this method returns, contains the number of code units consumed to decode the rune, if the index is valid; otherwise, zero.</param>
+    /// <returns>True if the rune was successfully retrieved; otherwise, false.</returns>
+    /// <remarks>
+    /// This method only validates code unit indices, not rune indices.
+    /// A valid code unit index must be within the bounds of the source buffer and must not point to the middle of a multi-code-unit sequence that forms a single rune.
+    /// </remarks>
+    public bool TryGetRune(TIndex index, out Rune rune, out int codeUnitConsumed);
+
+    /// <summary>
+    /// Attempts to increment the specified index to the next position in the source buffer.
+    /// </summary>
+    /// <param name="index">The index to increment.</param>
+    /// <returns>True if the index was successfully incremented; otherwise, false.</returns>
+    /// <remarks>
+    /// This method only validates code unit indices, not rune indices.
+    /// Refer to <seealso cref="TryGetRune(TIndex, out Rune)"/>.
+    /// </remarks>
+    public bool TryIncrement(ref TIndex index);
+
+    /// <summary>
+    /// Attempts to decrement the specified index to the previous position in the source buffer.
+    /// </summary>
+    /// <param name="index">The index to decrement.</param>
+    /// <returns>True if the index was successfully decremented; otherwise, false.</returns>
+    /// <remarks>
+    /// This method only validates code unit indices, not rune indices.
+    /// Refer to <seealso cref="TryGetRune(TIndex, out Rune)"/>.
+    /// </remarks>
+    public bool TryDecrement(ref TIndex index);
+
+    /// <summary>
     /// Returns an enumerator that iterates through the runes in the source buffer.
     /// </summary>
     /// <returns></returns>

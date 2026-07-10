@@ -9,11 +9,19 @@ namespace RunaString;
 /// <summary>
 /// Represents a read-only span of UTF-8 encoded bytes.
 /// </summary>
-public readonly ref struct Utf8Span
+[RuneEnumerable]
+public ref partial struct Utf8Span
     : IRuneEnumerable<Utf8Span, Utf8SpanEnumerator, Utf8RuneIndex>
     , IComparable<Utf8Span>
     , IEquatable<Utf8Span>
 {
+    #region source generated members
+
+    public partial Rune this[Utf8RuneIndex index] { get; }
+    public partial bool TryGetRune(Utf8RuneIndex index, out Rune rune);
+
+    #endregion
+
     private readonly ref readonly byte _reference;
 
     private readonly int _length;
@@ -21,27 +29,13 @@ public readonly ref struct Utf8Span
     /// <summary>
     /// Gets a read-only span of bytes representing the UTF-8 encoded string.
     /// </summary>
-    public readonly ReadOnlySpan<byte> Buffer =>
+    public ReadOnlySpan<byte> Buffer =>
         MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(in _reference), _length);
 
     /// <summary>
     /// Gets the length of the UTF-8 encoded string in bytes.
     /// </summary>
-    public readonly int BufferLength => _length;
-
-    /// <inheritdoc />
-    public readonly Rune this[Utf8RuneIndex index]
-    {
-        get
-        {
-            var result = Rune.DecodeFromUtf8(Buffer.Slice(index.ByteIndex), out var rune, out _);
-            if (result != OperationStatus.Done)
-            {
-                throw new ArgumentOutOfRangeException(nameof(index));
-            }
-            return rune;
-        }
-    }
+    public int BufferLength => _length;
 
     private Utf8Span(in byte reference, int length)
     {
@@ -109,6 +103,27 @@ public readonly ref struct Utf8Span
     internal Utf8Span DangerousSlice(int byteStart, int byteLength)
     {
         return new(in Unsafe.Add(ref Unsafe.AsRef(in _reference), byteStart), byteLength);
+    }
+
+    /// <inheritdoc />
+    public bool TryGetRune(Utf8RuneIndex index, out Rune rune, out int codeUnitConsumed)
+    {
+        var result = Rune.DecodeFromUtf8(Buffer.Slice(index.ByteIndex), out rune, out codeUnitConsumed);
+        return result == OperationStatus.Done;
+    }
+
+    /// <inheritdoc />
+    public bool TryIncrement(ref Utf8RuneIndex index)
+    {
+        #warning "not implemented"
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc />
+    public bool TryDecrement(ref Utf8RuneIndex index)
+    {
+        #warning "not implemented"
+        throw new NotImplementedException();
     }
 
     /// <summary>

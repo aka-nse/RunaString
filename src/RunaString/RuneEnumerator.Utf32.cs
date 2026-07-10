@@ -11,7 +11,7 @@ namespace RunaString;
 /// It is not valid for other sequences, even if they contain the same data.
 /// The behavior is undefined if used with a different source sequence.
 /// </remarks>
-public readonly struct Utf32RuneIndex : ISeekIndex<Utf32RuneIndex>
+public struct Utf32RuneIndex : ISeekIndex<Utf32RuneIndex>
 {
     /// <summary>
     /// A hash code that represents the source string from which this index was created.
@@ -101,19 +101,19 @@ public ref struct Utf32SpanEnumerator
     private Rune _current = default;
 
     /// <inheritdoc />
-    public readonly Utf32RuneIndex SeekIndex => new(_runeIndex);
+    public Utf32RuneIndex SeekIndex => new(_runeIndex);
 
     /// <inheritdoc />
-    public readonly Rune Current => _current;
+    public Rune Current => _current;
 
     /// <inheritdoc />
-    public readonly ReadOnlySpan<Rune> SourceBuffer => _buffer;
+    public ReadOnlySpan<Rune> SourceBuffer => _buffer;
 
     /// <inheritdoc />
-    public readonly ReadOnlySpan<Rune> ConsumedBuffer => _buffer.Slice(0, Math.Max(_runeIndex + 1, _buffer.Length));
+    public ReadOnlySpan<Rune> ConsumedBuffer => _buffer.Slice(0, Math.Max(_runeIndex + 1, _buffer.Length));
 
     /// <inheritdoc />
-    public readonly ReadOnlySpan<Rune> RemainingBuffer => _buffer.Slice(Math.Max(_runeIndex + 1, _buffer.Length));
+    public ReadOnlySpan<Rune> RemainingBuffer => _buffer.Slice(Math.Max(_runeIndex + 1, _buffer.Length));
 
     private Utf32SpanEnumerator(ReadOnlySpan<Rune> buffer)
     {
@@ -156,19 +156,19 @@ public struct Utf32MemoryEnumerator
     private Rune _current = default;
 
     /// <inheritdoc />
-    public readonly Utf32RuneIndex SeekIndex => new(_runeIndex);
+    public Utf32RuneIndex SeekIndex => new(_runeIndex);
 
     /// <inheritdoc />
-    public readonly Rune Current => _current;
+    public Rune Current => _current;
 
     /// <inheritdoc />
-    public readonly ReadOnlyMemory<Rune> SourceBuffer => _buffer;
+    public ReadOnlyMemory<Rune> SourceBuffer => _buffer;
 
     /// <inheritdoc />
-    public readonly ReadOnlyMemory<Rune> ConsumedBuffer => _buffer.Slice(0, Math.Max(_runeIndex + 1, _buffer.Length));
+    public ReadOnlyMemory<Rune> ConsumedBuffer => _buffer.Slice(0, Math.Max(_runeIndex + 1, _buffer.Length));
 
     /// <inheritdoc />
-    public readonly ReadOnlyMemory<Rune> RemainingBuffer => _buffer.Slice(Math.Max(_runeIndex + 1, _buffer.Length));
+    public ReadOnlyMemory<Rune> RemainingBuffer => _buffer.Slice(Math.Max(_runeIndex + 1, _buffer.Length));
 
     private Utf32MemoryEnumerator(ReadOnlyMemory<Rune> buffer)
     {

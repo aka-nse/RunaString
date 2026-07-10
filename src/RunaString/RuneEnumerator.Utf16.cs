@@ -12,7 +12,7 @@ namespace RunaString;
 /// It is not valid for other sequences, even if they contain the same data.
 /// The behavior is undefined if used with a different source sequence.
 /// </remarks>
-public readonly struct Utf16RuneIndex : ISeekIndex<Utf16RuneIndex>
+public struct Utf16RuneIndex : ISeekIndex<Utf16RuneIndex>
 {
     /// <summary></summary>
     public int CharIndex { get; }
@@ -109,19 +109,19 @@ public ref struct Utf16SpanEnumerator
     private readonly ReadOnlySpan<char> _buffer;
 
     /// <inheritdoc />
-    public readonly Utf16RuneIndex SeekIndex => new(_currCharIndex, _runePosition);
+    public Utf16RuneIndex SeekIndex => new(_currCharIndex, _runePosition);
 
     /// <inheritdoc />
-    public readonly Rune Current => _current;
+    public Rune Current => _current;
 
     /// <inheritdoc />
-    public readonly ReadOnlySpan<char> SourceBuffer => _buffer;
+    public ReadOnlySpan<char> SourceBuffer => _buffer;
 
     /// <inheritdoc />
-    public readonly ReadOnlySpan<char> ConsumedBuffer => _buffer.Slice(0, _nextCharIndex);
+    public ReadOnlySpan<char> ConsumedBuffer => _buffer.Slice(0, _nextCharIndex);
 
     /// <inheritdoc />
-    public readonly ReadOnlySpan<char> RemainingBuffer => _buffer.Slice(_nextCharIndex);
+    public ReadOnlySpan<char> RemainingBuffer => _buffer.Slice(_nextCharIndex);
 
     private Utf16SpanEnumerator(ReadOnlySpan<char> buffer)
     {
@@ -170,19 +170,19 @@ public struct Utf16MemoryEnumerator
     private readonly ReadOnlyMemory<char> _buffer;
 
     /// <inheritdoc />
-    public readonly Utf16RuneIndex SeekIndex => new(_currCharIndex, _runePosition);
+    public Utf16RuneIndex SeekIndex => new(_currCharIndex, _runePosition);
 
     /// <inheritdoc />
-    public readonly Rune Current => _current;
+    public Rune Current => _current;
 
     /// <inheritdoc />
-    public readonly ReadOnlyMemory<char> SourceBuffer => _buffer;
+    public ReadOnlyMemory<char> SourceBuffer => _buffer;
 
     /// <inheritdoc />
-    public readonly ReadOnlyMemory<char> ConsumedBuffer => _buffer.Slice(0, _nextCharIndex);
+    public ReadOnlyMemory<char> ConsumedBuffer => _buffer.Slice(0, _nextCharIndex);
 
     /// <inheritdoc />
-    public readonly ReadOnlyMemory<char> RemainingBuffer => _buffer.Slice(_nextCharIndex);
+    public ReadOnlyMemory<char> RemainingBuffer => _buffer.Slice(_nextCharIndex);
 
     private Utf16MemoryEnumerator(ReadOnlyMemory<char> buffer)
     {

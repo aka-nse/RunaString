@@ -12,7 +12,7 @@ namespace RunaString;
 /// It is not valid for other sequences, even if they contain the same data.
 /// The behavior is undefined if used with a different source sequence.
 /// </remarks>
-public readonly struct Utf8RuneIndex : ISeekIndex<Utf8RuneIndex>
+public struct Utf8RuneIndex : ISeekIndex<Utf8RuneIndex>
 {
     /// <summary></summary>
     public int ByteIndex { get; }
@@ -111,19 +111,19 @@ public ref struct Utf8SpanEnumerator
     internal readonly int NextByteIndex => _nextByteIndex;
 
     /// <inheritdoc />
-    public readonly Utf8RuneIndex SeekIndex => new(_currByteIndex, _runePosition);
+    public Utf8RuneIndex SeekIndex => new(_currByteIndex, _runePosition);
 
     /// <inheritdoc />
-    public readonly Rune Current => _current;
+    public Rune Current => _current;
 
     /// <inheritdoc />
-    public readonly ReadOnlySpan<byte> SourceBuffer => _utf8Buffer;
+    public ReadOnlySpan<byte> SourceBuffer => _utf8Buffer;
 
     /// <inheritdoc />
-    public readonly ReadOnlySpan<byte> ConsumedBuffer => _utf8Buffer.Slice(0, _nextByteIndex);
+    public ReadOnlySpan<byte> ConsumedBuffer => _utf8Buffer.Slice(0, _nextByteIndex);
 
     /// <inheritdoc />
-    public readonly ReadOnlySpan<byte> RemainingBuffer => _utf8Buffer.Slice(_nextByteIndex);
+    public ReadOnlySpan<byte> RemainingBuffer => _utf8Buffer.Slice(_nextByteIndex);
 
     private Utf8SpanEnumerator(ReadOnlySpan<byte> utf8Buffer)
     {
@@ -196,19 +196,19 @@ public struct Utf8MemoryEnumerator
     internal readonly int NextByteIndex => _nextByteIndex;
 
     /// <inheritdoc />
-    public readonly Utf8RuneIndex SeekIndex => new(_currByteIndex, _runePosition);
+    public Utf8RuneIndex SeekIndex => new(_currByteIndex, _runePosition);
 
     /// <inheritdoc />
-    public readonly Rune Current => _current;
+    public Rune Current => _current;
 
     /// <inheritdoc />
-    public readonly ReadOnlyMemory<byte> SourceBuffer => _utf8Buffer;
+    public ReadOnlyMemory<byte> SourceBuffer => _utf8Buffer;
 
     /// <inheritdoc />
-    public readonly ReadOnlyMemory<byte> ConsumedBuffer => _utf8Buffer.Slice(0, _nextByteIndex);
+    public ReadOnlyMemory<byte> ConsumedBuffer => _utf8Buffer.Slice(0, _nextByteIndex);
 
     /// <inheritdoc />
-    public readonly ReadOnlyMemory<byte> RemainingBuffer => _utf8Buffer.Slice(_nextByteIndex);
+    public ReadOnlyMemory<byte> RemainingBuffer => _utf8Buffer.Slice(_nextByteIndex);
 
     private Utf8MemoryEnumerator(ReadOnlyMemory<byte> utf8Buffer)
     {
