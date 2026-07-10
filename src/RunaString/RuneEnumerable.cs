@@ -94,15 +94,35 @@ public readonly ref partial struct Utf16SpanEnumerable(ReadOnlySpan<char> source
     /// <inheritdoc />
     public bool TryIncrement(ref Utf16RuneIndex index)
     {
-        #warning "not implemented"
-        throw new NotImplementedException();
+        var newRuneIndex = index.RuneIndex + 1;
+        var newCharIndex = index.CharIndex + 1;
+        if(Source.Length <= newCharIndex)
+        {
+            return false;
+        }
+        if(char.IsHighSurrogate(Source[newCharIndex]))
+        {
+            ++newCharIndex;
+        }
+        index = new(newCharIndex, newRuneIndex);
+        return true;
     }
 
     /// <inheritdoc />
     public bool TryDecrement(ref Utf16RuneIndex index)
     {
-        #warning "not implemented"
-        throw new NotImplementedException();
+        if(index.CharIndex == 0)
+        {
+            return false;
+        }
+        var newRuneIndex = index.RuneIndex - 1;
+        var newCharIndex = index.CharIndex - 1;
+        if (char.IsLowSurrogate(Source[newCharIndex]))
+        {
+            --newCharIndex;
+        }
+        index = new(newCharIndex, newRuneIndex);
+        return true;
     }
 
     /// <inheritdoc />
