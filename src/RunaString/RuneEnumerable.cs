@@ -94,15 +94,15 @@ public readonly ref partial struct Utf16SpanEnumerable(ReadOnlySpan<char> source
     /// <inheritdoc />
     public bool TryIncrement(ref Utf16RuneIndex index)
     {
-        var newRuneIndex = index.RuneIndex + 1;
-        var newCharIndex = index.CharIndex + 1;
-        if(Source.Length <= newCharIndex)
+        if (index.CharIndex >= Source.Length)
         {
             return false;
         }
-        if(char.IsHighSurrogate(Source[newCharIndex]))
+        var newRuneIndex = index.RuneIndex + 1;
+        var newCharIndex = index.CharIndex + (char.IsHighSurrogate(Source[index.CharIndex]) ? 2 : 1);
+        if (Source.Length <= newCharIndex)
         {
-            ++newCharIndex;
+            return false;
         }
         index = new(newCharIndex, newRuneIndex);
         return true;
@@ -169,15 +169,15 @@ public readonly partial struct Utf16MemoryEnumerable(ReadOnlyMemory<char> source
     /// <inheritdoc />
     public bool TryIncrement(ref Utf16RuneIndex index)
     {
-        var newRuneIndex = index.RuneIndex + 1;
-        var newCharIndex = index.CharIndex + 1;
-        if (Source.Length <= newCharIndex)
+        if(index.CharIndex >= Source.Length)
         {
             return false;
         }
-        if (char.IsHighSurrogate(Source.Span[newCharIndex]))
+        var newRuneIndex = index.RuneIndex + 1;
+        var newCharIndex = index.CharIndex + (char.IsHighSurrogate(Source.Span[index.CharIndex]) ? 2 : 1);
+        if (Source.Length <= newCharIndex)
         {
-            ++newCharIndex;
+            return false;
         }
         index = new(newCharIndex, newRuneIndex);
         return true;
