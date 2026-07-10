@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Collections.Immutable;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -9,7 +10,7 @@ namespace RunaString;
 /// Represents an immutable UTF-8 encoded string.
 /// </summary>
 [RuneEnumerable]
-public partial struct Utf8String
+public readonly partial struct Utf8String
     : IRuneEnumerable<Utf8String, Utf8MemoryEnumerator, Utf8RuneIndex>
     , IComparable<Utf8String>
     , IEquatable<Utf8String>
@@ -124,15 +125,30 @@ public partial struct Utf8String
     /// <inheritdoc />
     public bool TryIncrement(ref Utf8RuneIndex index)
     {
-        #warning "not implemented"
-        throw new NotImplementedException();
+        Rune.DecodeFromUtf8(Buffer.Span.Slice(index.ByteIndex), out _, out var codeUnitConsumed);
+        var newByteIndex = index.ByteIndex + codeUnitConsumed;
+        if(_buffer.Length <= newByteIndex)
+        {
+            return false;
+        }
+        index = new(newByteIndex, index.RuneIndex + 1);
+        return true;
     }
 
     /// <inheritdoc />
     public bool TryDecrement(ref Utf8RuneIndex index)
     {
-        #warning "not implemented"
-        throw new NotImplementedException();
+        var newByteIndex = index.ByteIndex - 1;
+        while(newByteIndex >= 0)
+        {
+            if((_buffer[newByteIndex] & 0xC0) != 0xC0)
+            {
+                index = new(newByteIndex, index.RuneIndex - 1);
+                return true;
+            }
+            --newByteIndex;
+        }
+        return false;
     }
 
     /// <summary>

@@ -10,7 +10,7 @@ namespace RunaString;
 /// Represents a read-only span of UTF-8 encoded bytes.
 /// </summary>
 [RuneEnumerable]
-public ref partial struct Utf8Span
+public readonly ref partial struct Utf8Span
     : IRuneEnumerable<Utf8Span, Utf8SpanEnumerator, Utf8RuneIndex>
     , IComparable<Utf8Span>
     , IEquatable<Utf8Span>
@@ -115,15 +115,30 @@ public ref partial struct Utf8Span
     /// <inheritdoc />
     public bool TryIncrement(ref Utf8RuneIndex index)
     {
-        #warning "not implemented"
-        throw new NotImplementedException();
+        Rune.DecodeFromUtf8(Buffer.Slice(index.ByteIndex), out _, out var codeUnitConsumed);
+        var newByteIndex = index.ByteIndex + codeUnitConsumed;
+        if (Buffer.Length <= newByteIndex)
+        {
+            return false;
+        }
+        index = new(newByteIndex, index.RuneIndex + 1);
+        return true;
     }
 
     /// <inheritdoc />
     public bool TryDecrement(ref Utf8RuneIndex index)
     {
-        #warning "not implemented"
-        throw new NotImplementedException();
+        var newByteIndex = index.ByteIndex - 1;
+        while (newByteIndex >= 0)
+        {
+            if ((Buffer[newByteIndex] & 0xC0) != 0xC0)
+            {
+                index = new(newByteIndex, index.RuneIndex - 1);
+                return true;
+            }
+            --newByteIndex;
+        }
+        return false;
     }
 
     /// <summary>
