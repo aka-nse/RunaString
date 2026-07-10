@@ -136,7 +136,7 @@ public readonly ref partial struct Utf16SpanEnumerable(ReadOnlySpan<char> source
 /// </summary>
 /// <param name="source"></param>
 [RuneEnumerable]
-public partial struct Utf16MemoryEnumerable(ReadOnlyMemory<char> source)
+public readonly partial struct Utf16MemoryEnumerable(ReadOnlyMemory<char> source)
     : IRuneEnumerable<Utf16MemoryEnumerable, Utf16MemoryEnumerator, Utf16RuneIndex>
 {
     #region source generated members
@@ -169,15 +169,35 @@ public partial struct Utf16MemoryEnumerable(ReadOnlyMemory<char> source)
     /// <inheritdoc />
     public bool TryIncrement(ref Utf16RuneIndex index)
     {
-        #warning "not implemented"
-        throw new NotImplementedException();
+        var newRuneIndex = index.RuneIndex + 1;
+        var newCharIndex = index.CharIndex + 1;
+        if (Source.Length <= newCharIndex)
+        {
+            return false;
+        }
+        if (char.IsHighSurrogate(Source.Span[newCharIndex]))
+        {
+            ++newCharIndex;
+        }
+        index = new(newCharIndex, newRuneIndex);
+        return true;
     }
 
     /// <inheritdoc />
     public bool TryDecrement(ref Utf16RuneIndex index)
     {
-        #warning "not implemented"
-        throw new NotImplementedException();
+        if (index.CharIndex == 0)
+        {
+            return false;
+        }
+        var newRuneIndex = index.RuneIndex - 1;
+        var newCharIndex = index.CharIndex - 1;
+        if (char.IsLowSurrogate(Source.Span[newCharIndex]))
+        {
+            --newCharIndex;
+        }
+        index = new(newCharIndex, newRuneIndex);
+        return true;
     }
 
     /// <inheritdoc />
@@ -231,15 +251,24 @@ public readonly ref partial struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source
     /// <inheritdoc />
     public bool TryIncrement(ref Utf32RuneIndex index)
     {
-        #warning "not implemented"
-        throw new NotImplementedException();
+        var newIndex = index.RuneIndex + 1;
+        if(Source.Length <= newIndex)
+        {
+            return false;
+        }
+        index = new(newIndex);
+        return true;
     }
 
     /// <inheritdoc />
     public bool TryDecrement(ref Utf32RuneIndex index)
     {
-        #warning "not implemented"
-        throw new NotImplementedException();
+        if(index.RuneIndex <= 0)
+        {
+            return false;
+        }
+        index = new(index.RuneIndex - 1);
+        return true;
     }
 
     /// <inheritdoc />
@@ -305,15 +334,24 @@ public readonly partial struct Utf32MemoryEnumerable(ReadOnlyMemory<Rune> source
     /// <inheritdoc />
     public bool TryIncrement(ref Utf32RuneIndex index)
     {
-        #warning "not implemented"
-        throw new NotImplementedException();
+        var newIndex = index.RuneIndex + 1;
+        if (Source.Length <= newIndex)
+        {
+            return false;
+        }
+        index = new(newIndex);
+        return true;
     }
 
     /// <inheritdoc />
     public bool TryDecrement(ref Utf32RuneIndex index)
     {
-        #warning "not implemented"
-        throw new NotImplementedException();
+        if (index.RuneIndex <= 0)
+        {
+            return false;
+        }
+        index = new(index.RuneIndex - 1);
+        return true;
     }
 
     /// <inheritdoc />
