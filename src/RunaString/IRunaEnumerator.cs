@@ -3,8 +3,8 @@ using System.Text;
 namespace RunaString;
 
 /// <inheritdoc cref="IRuneEnumerator{TSelf, TableIndex, TBuffer}" />
-public interface IRuneEnumerator<TSelf>
-    where TSelf : IRuneEnumerator<TSelf>, allows ref struct
+public interface IRunaEnumerator<TSelf>
+    where TSelf : IRunaEnumerator<TSelf>, allows ref struct
 {
     /// <summary>
     /// Gets an empty enumerator that has no source buffer and is positioned at the end of the buffer.
@@ -25,7 +25,7 @@ public interface IRuneEnumerator<TSelf>
 
 
 /// <inheritdoc cref="IRuneEnumerator{TSelf, TableIndex, TBuffer}" />
-public interface IRuneEnumerator<TSelf, TIndex> : IRuneEnumerator<TSelf>
+public interface IRuneEnumerator<TSelf, TIndex> : IRunaEnumerator<TSelf>
     where TSelf : IRuneEnumerator<TSelf, TIndex>, allows ref struct
     where TIndex : ISeekIndex
 {

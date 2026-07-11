@@ -11,9 +11,9 @@ namespace RunaString;
 /// <typeparam name="TEnumerator">
 /// The type of the enumerator that iterates over the runes in the source buffer, which must implement the IRuneEnumerable interface to support slicing and range operations.
 /// </typeparam>
-public interface IRuneEnumerable<TSelf, TEnumerator>
+public interface IRunaEnumerable<TSelf, TEnumerator>
     where TSelf : allows ref struct
-    where TEnumerator : IRuneEnumerator<TEnumerator>, allows ref struct
+    where TEnumerator : IRunaEnumerator<TEnumerator>, allows ref struct
 {
     /// <summary>
     /// Returns an enumerator that iterates through the runes in the source buffer.
@@ -23,9 +23,9 @@ public interface IRuneEnumerable<TSelf, TEnumerator>
 }
 
 
-/// <inheritdoc cref="IRuneString{TSelf, TEnumerator, TIndex}" />
-public interface IRuneString<TSelf, TIndex>
-    where TSelf : IRuneString<TSelf, TIndex>, allows ref struct
+/// <inheritdoc cref="IRunaString{TSelf, TEnumerator, TIndex}" />
+public interface IRunaString<TSelf, TIndex>
+    where TSelf : IRunaString<TSelf, TIndex>, allows ref struct
     where TIndex : ISeekIndex
 {
     /// <summary>
@@ -114,9 +114,9 @@ public interface IRuneString<TSelf, TIndex>
 /// <typeparam name="TIndex">
 /// The type used to index into the source data, which must implement the ISeekIndex interface to support seeking and range operations.
 /// </typeparam>
-public interface IRuneString<TSelf, TEnumerator, TIndex> : IRuneString<TSelf, TIndex>, IRuneEnumerable<TSelf, TEnumerator>
-    where TSelf : IRuneString<TSelf, TEnumerator, TIndex>, allows ref struct
-    where TEnumerator : IRuneEnumerator<TEnumerator>, allows ref struct
+public interface IRunaString<TSelf, TEnumerator, TIndex> : IRunaString<TSelf, TIndex>, IRunaEnumerable<TSelf, TEnumerator>
+    where TSelf : IRunaString<TSelf, TEnumerator, TIndex>, allows ref struct
+    where TEnumerator : IRunaEnumerator<TEnumerator>, allows ref struct
     where TIndex : ISeekIndex
 {
 }

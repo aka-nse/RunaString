@@ -9,9 +9,9 @@ namespace RunaString;
 /// <summary>
 /// Represents a read-only span of UTF-8 encoded bytes.
 /// </summary>
-[RuneString]
+[RunaString]
 public readonly ref partial struct Utf8Span
-    : IRuneString<Utf8Span, Utf8SpanEnumerator, Utf8Index>
+    : IRunaString<Utf8Span, Utf8SpanEnumerator, Utf8Index>
     , IComparable<Utf8Span>
     , IEquatable<Utf8Span>
 {

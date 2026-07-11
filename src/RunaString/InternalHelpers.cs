@@ -39,7 +39,7 @@ internal static class InternalHelpers
     }
 
     public static int GetRuneCount<TEnumerator>(TEnumerator enumerator)
-        where TEnumerator : IRuneEnumerator<TEnumerator>, allows ref struct
+        where TEnumerator : IRunaEnumerator<TEnumerator>, allows ref struct
     {
         int count = 0;
         while (enumerator.MoveNext())

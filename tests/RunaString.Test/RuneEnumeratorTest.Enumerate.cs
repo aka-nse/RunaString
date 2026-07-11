@@ -20,7 +20,7 @@ public partial class RuneEnumeratorTest
         ];
 
     private static void EnumerateTestCore<TEnumerator>(string expected, TEnumerator actualEnumerator)
-        where TEnumerator : IRuneEnumerator<TEnumerator>, allows ref struct
+        where TEnumerator : IRunaEnumerator<TEnumerator>, allows ref struct
     {
         var expectedEnumerator = expected.EnumerateRunes();
         while (true)

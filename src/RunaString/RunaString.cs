@@ -60,9 +60,9 @@ public static class RunaString
 /// Represents an enumerable collection of Unicode runes backed by a read-only span of <see cref="char"/>.
 /// </summary>
 /// <param name="source"></param>
-[RuneString]
+[RunaString]
 public readonly ref partial struct CharsSpanString(ReadOnlySpan<char> source)
-    : IRuneString<CharsSpanString, CharsSpanEnumerator, CharsIndex>
+    : IRunaString<CharsSpanString, CharsSpanEnumerator, CharsIndex>
 {
     #region source generated members
 
@@ -135,9 +135,9 @@ public readonly ref partial struct CharsSpanString(ReadOnlySpan<char> source)
 /// Represents an enumerable collection of Unicode runes backed by a read-only memory of <see cref="char"/>.
 /// </summary>
 /// <param name="source"></param>
-[RuneString]
+[RunaString]
 public readonly partial struct CharsMemoryString(ReadOnlyMemory<char> source)
-    : IRuneString<CharsMemoryString, CharsMemoryEnumerator, CharsIndex>
+    : IRunaString<CharsMemoryString, CharsMemoryEnumerator, CharsIndex>
 {
     #region source generated members
 
@@ -210,9 +210,9 @@ public readonly partial struct CharsMemoryString(ReadOnlyMemory<char> source)
 /// Represents an enumerable collection of Unicode runes backed by a read-only span of <see cref="Rune"/>.
 /// </summary>
 /// <param name="source"></param>
-[RuneString]
+[RunaString]
 public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
-    : IRuneString<RunesSpanString, RunesSpanEnumerator, RunesIndex>
+    : IRunaString<RunesSpanString, RunesSpanEnumerator, RunesIndex>
 {
     #region source generated members
 
@@ -294,9 +294,9 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
 /// Represents an enumerable collection of Unicode runes backed by a read-only memory of <see cref="Rune"/>.
 /// </summary>
 /// <param name="source"></param>
-[RuneString]
+[RunaString]
 public readonly partial struct RunesMemoryString(ReadOnlyMemory<Rune> source)
-    : IRuneString<RunesMemoryString, RunesMemoryEnumerator, RunesIndex>
+    : IRunaString<RunesMemoryString, RunesMemoryEnumerator, RunesIndex>
 {
     #region source generated members
 

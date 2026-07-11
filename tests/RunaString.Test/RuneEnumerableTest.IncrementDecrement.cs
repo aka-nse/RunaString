@@ -158,7 +158,7 @@ public partial class RuneEnumerableTest
     }
 
     private static void IncrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
-        where TStr : IRuneString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaString<TStr, TIndex>, allows ref struct
         where TIndex : struct, ISeekIndex
     {
         Assert.True(input.TryIncrement(ref index));
@@ -166,7 +166,7 @@ public partial class RuneEnumerableTest
     }
 
     private static void IncrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
-        where TStr : IRuneString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaString<TStr, TIndex>, allows ref struct
         where TIndex : struct, ISeekIndex
     {
         Assert.False(input.TryIncrement(ref index));
@@ -245,7 +245,7 @@ public partial class RuneEnumerableTest
     }
 
     private static void DecrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
-        where TStr : IRuneString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaString<TStr, TIndex>, allows ref struct
         where TIndex : struct, ISeekIndex
     {
         Assert.True(input.TryDecrement(ref index));
@@ -253,7 +253,7 @@ public partial class RuneEnumerableTest
     }
 
     private static void DecrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
-        where TStr : IRuneString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaString<TStr, TIndex>, allows ref struct
         where TIndex : struct, ISeekIndex
     {
         Assert.False(input.TryDecrement(ref index));

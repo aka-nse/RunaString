@@ -8,9 +8,9 @@ namespace RunaString;
 /// <summary>
 /// Represents an immutable UTF-8 encoded string.
 /// </summary>
-[RuneString]
+[RunaString]
 public readonly partial struct Utf8String
-    : IRuneString<Utf8String, Utf8MemoryEnumerator, Utf8Index>
+    : IRunaString<Utf8String, Utf8MemoryEnumerator, Utf8Index>
     , IComparable<Utf8String>
     , IEquatable<Utf8String>
 {
