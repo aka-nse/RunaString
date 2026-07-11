@@ -4,7 +4,7 @@ using System.Text;
 namespace RunaString;
 
 /// <summary>
-/// An enumerator that iterates over Unicode scalar values (runes) in a UTF-16 encoded buffer.
+/// An enumerator that iterates over Unicode scalar values (runes) in a <see cref="char"/> buffer.
 /// </summary>
 public ref struct CharsSpanEnumerator
     : IRuneEnumerator<CharsSpanEnumerator, CharsRuneIndex, ReadOnlySpan<char>>
@@ -41,7 +41,7 @@ public ref struct CharsSpanEnumerator
     }
 
     /// <summary>
-    /// Creates a <see cref="CharsSpanEnumerator"/> for the specified UTF-16 buffer.
+    /// Creates a <see cref="CharsSpanEnumerator"/> for the specified <see cref="char"/> buffer.
     /// </summary>
     /// <param name="buffer"></param>
     /// <returns></returns>
@@ -66,7 +66,7 @@ public ref struct CharsSpanEnumerator
 
 
 /// <summary>
-/// An enumerator that iterates over Unicode scalar values (runes) in a UTF-16 encoded buffer.
+/// An enumerator that iterates over Unicode scalar values (runes) in a <see cref="char"/> buffer.
 /// </summary>
 public struct CharsMemoryEnumerator
     : IRuneEnumerator<CharsMemoryEnumerator, CharsRuneIndex, ReadOnlyMemory<char>>
@@ -102,7 +102,7 @@ public struct CharsMemoryEnumerator
     }
 
     /// <summary>
-    /// Creates a <see cref="CharsMemoryEnumerator"/> for the specified UTF-16 buffer.
+    /// Creates a <see cref="CharsMemoryEnumerator"/> for the specified <see cref="char"/> buffer.
     /// </summary>
     /// <param name="buffer"></param>
     /// <returns></returns>
@@ -137,7 +137,7 @@ file static class Helpers
         var status = Rune.DecodeFromUtf16(buffer.Slice(charIndex), out _, out var charsConsumed);
         if (status != OperationStatus.Done)
         {
-            throw new InvalidOperationException($"Invalid UTF-16 sequence at char index {charIndex}");
+            throw new InvalidOperationException($"Invalid char sequence at char index {charIndex}");
         }
         return charIndex + charsConsumed;
     }
@@ -156,7 +156,7 @@ file static class Helpers
         var status = Rune.DecodeFromUtf16(buffer.Slice(nextCharIndex), out current, out var charsConsumed);
         if (status != OperationStatus.Done)
         {
-            throw new InvalidOperationException($"Invalid UTF-16 sequence at char index {nextCharIndex}");
+            throw new InvalidOperationException($"Invalid char sequence at char index {nextCharIndex}");
         }
         nextCharIndex += charsConsumed;
         ++runePosition;

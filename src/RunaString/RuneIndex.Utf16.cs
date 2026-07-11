@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace RunaString;
 
 /// <summary>
-/// A struct that represents a seekable index into a UTF-16 encoded buffer for an <see cref="CharsSpanEnumerator"/> or <see cref="CharsMemoryEnumerator"/>.
+/// A struct that represents a seekable index into a <see cref="char"/> buffer for an <see cref="CharsSpanEnumerator"/> or <see cref="CharsMemoryEnumerator"/>.
 /// </summary>
 /// <remarks>
 /// This instance is only for the source sequence which the instance was created from.

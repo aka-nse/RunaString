@@ -12,7 +12,7 @@ public static class RuneEnumerable
     extension(ReadOnlySpan<char> source)
     {
         /// <summary>
-        /// Creates a <see cref="CharsSpanEnumerable"/> from the given read-only span of UTF-16 characters.
+        /// Creates a <see cref="CharsSpanEnumerable"/> from the given read-only span of <see cref="char"/>.
         /// </summary>
         /// <returns></returns>
         public CharsSpanEnumerable AsRuneEnumerable() => new(source);
@@ -30,7 +30,7 @@ public static class RuneEnumerable
     extension(ReadOnlyMemory<char> source)
     {
         /// <summary>
-        /// Creates a <see cref="CharsMemoryEnumerable"/> from the given read-only span of UTF-16 characters.
+        /// Creates a <see cref="CharsMemoryEnumerable"/> from the given read-only span of <see cref="char"/>.
         /// </summary>
         /// <returns></returns>
         public CharsMemoryEnumerable AsRuneEnumerable() => new(source);
@@ -57,7 +57,7 @@ public static class RuneEnumerable
 
 
 /// <summary>
-/// Represents an enumerable collection of Unicode runes backed by a read-only span of UTF-16 characters.
+/// Represents an enumerable collection of Unicode runes backed by a read-only span of <see cref="char"/>.
 /// </summary>
 /// <param name="source"></param>
 [RuneEnumerable]
@@ -132,7 +132,7 @@ public readonly ref partial struct CharsSpanEnumerable(ReadOnlySpan<char> source
 
 
 /// <summary>
-/// Represents an enumerable collection of Unicode runes backed by a read-only memory of UTF-16 characters.
+/// Represents an enumerable collection of Unicode runes backed by a read-only memory of <see cref="char"/>.
 /// </summary>
 /// <param name="source"></param>
 [RuneEnumerable]
