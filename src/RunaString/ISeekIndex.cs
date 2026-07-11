@@ -12,7 +12,7 @@ public interface ISeekIndex
 
 /// <summary>
 /// Defines a type that represents a seekable index into a source buffer for an
-/// <see cref="IRuneEnumerable{TSelf, TEnumerator, TIndex}"/> and <see cref="IRuneEnumerator{TSelf, TIndex, TBuffer}"/>.
+/// <see cref="IRuneString{TSelf, TEnumerator, TIndex}"/> and <see cref="IRuneEnumerator{TSelf, TIndex, TBuffer}"/>.
 /// </summary>
 /// <typeparam name="TSelf">The type that implements this interface.</typeparam>
 public interface ISeekIndex<TSelf> : ISeekIndex, IEquatable<TSelf>, IComparable<TSelf>

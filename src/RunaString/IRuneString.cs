@@ -2,9 +2,29 @@ using System.Text;
 
 namespace RunaString;
 
-/// <inheritdoc cref="IRuneEnumerable{TSelf, TEnumerator, TIndex}" />
-public interface IRuneEnumerable<TSelf, TIndex>
-    where TSelf : IRuneEnumerable<TSelf, TIndex>, allows ref struct
+/// <summary>
+/// Defines a contract for enumerating Unicode runes.
+/// </summary>
+/// <typeparam name="TSelf">
+/// The type that implements this interface, enabling fluent method chaining and type safety for operations that return a new enumerator.
+/// </typeparam>
+/// <typeparam name="TEnumerator">
+/// The type of the enumerator that iterates over the runes in the source buffer, which must implement the IRuneEnumerable interface to support slicing and range operations.
+/// </typeparam>
+public interface IRuneEnumerable<TSelf, TEnumerator>
+    where TSelf : allows ref struct
+    where TEnumerator : IRuneEnumerator<TEnumerator>, allows ref struct
+{
+    /// <summary>
+    /// Returns an enumerator that iterates through the runes in the source buffer.
+    /// </summary>
+    /// <returns></returns>
+    public TEnumerator GetEnumerator();
+}
+
+/// <inheritdoc cref="IRuneString{TSelf, TEnumerator, TIndex}" />
+public interface IRuneString<TSelf, TIndex>
+    where TSelf : IRuneString<TSelf, TIndex>, allows ref struct
     where TIndex : ISeekIndex
 {
     /// <summary>
@@ -82,7 +102,7 @@ public interface IRuneEnumerable<TSelf, TIndex>
 
 
 /// <summary>
-/// Defines a contract for enumerating Unicode runes with support for creating slices over a specified range of the source data.
+/// Defines a contract for Unicode runes string with support for creating slices over a specified range of the source data.
 /// </summary>
 /// <typeparam name="TSelf">
 /// The type that implements this interface, enabling fluent method chaining and type safety for operations that return a new enumerator.
@@ -93,14 +113,9 @@ public interface IRuneEnumerable<TSelf, TIndex>
 /// <typeparam name="TIndex">
 /// The type used to index into the source data, which must implement the ISeekIndex interface to support seeking and range operations.
 /// </typeparam>
-public interface IRuneEnumerable<TSelf, TEnumerator, TIndex> : IRuneEnumerable<TSelf, TIndex>
-    where TSelf : IRuneEnumerable<TSelf, TEnumerator, TIndex>, allows ref struct
+public interface IRuneString<TSelf, TEnumerator, TIndex> : IRuneString<TSelf, TIndex>, IRuneEnumerable<TSelf, TEnumerator>
+    where TSelf : IRuneString<TSelf, TEnumerator, TIndex>, allows ref struct
     where TEnumerator : IRuneEnumerator<TEnumerator>, allows ref struct
     where TIndex : ISeekIndex
 {
-    /// <summary>
-    /// Returns an enumerator that iterates through the runes in the source buffer.
-    /// </summary>
-    /// <returns></returns>
-    public TEnumerator GetEnumerator();
 }

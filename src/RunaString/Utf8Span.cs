@@ -11,7 +11,7 @@ namespace RunaString;
 /// </summary>
 [RuneEnumerable]
 public readonly ref partial struct Utf8Span
-    : IRuneEnumerable<Utf8Span, Utf8SpanEnumerator, Utf8RuneIndex>
+    : IRuneString<Utf8Span, Utf8SpanEnumerator, Utf8RuneIndex>
     , IComparable<Utf8Span>
     , IEquatable<Utf8Span>
 {
