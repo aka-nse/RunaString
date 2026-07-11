@@ -118,8 +118,8 @@ public partial class RuneEnumerableTest
         var runeLength = input.EnumerateRunes().Count();
         var nextRuneIndex = runeIndex + 1;
         var index = CreateCharsIndex(charIndex, runeIndex);
-        var memory = new CharsMemoryEnumerable(input.AsMemory());
-        var span = new CharsSpanEnumerable(input.AsSpan());
+        var memory = new CharsMemoryString(input.AsMemory());
+        var span = new CharsSpanString(input.AsSpan());
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
             var nextCharIndex = GetCharsCodeUnitCount(input, 0, nextRuneIndex);
@@ -142,8 +142,8 @@ public partial class RuneEnumerableTest
         var runeLength = input.EnumerateRunes().Count();
         var nextRuneIndex = runeIndex + 1;
         var index = CreateRunesIndex(runeIndex);
-        var memory = new RunesMemoryEnumerable(runes);
-        var span = new RunesSpanEnumerable(runes);
+        var memory = new RunesMemoryString(runes);
+        var span = new RunesSpanString(runes);
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
             var nextIndex = CreateRunesIndex(nextRuneIndex);
@@ -205,8 +205,8 @@ public partial class RuneEnumerableTest
         var runeLength = input.EnumerateRunes().Count();
         var nextRuneIndex = runeIndex - 1;
         var index = CreateCharsIndex(charIndex, runeIndex);
-        var memory = new CharsMemoryEnumerable(input.AsMemory());
-        var span = new CharsSpanEnumerable(input.AsSpan());
+        var memory = new CharsMemoryString(input.AsMemory());
+        var span = new CharsSpanString(input.AsSpan());
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
             var nextCharIndex = GetCharsCodeUnitCount(input, 0, nextRuneIndex);
@@ -229,8 +229,8 @@ public partial class RuneEnumerableTest
         var runeLength = input.EnumerateRunes().Count();
         var nextRuneIndex = runeIndex - 1;
         var index = CreateRunesIndex(runeIndex);
-        var memory = new RunesMemoryEnumerable(runes);
-        var span = new RunesSpanEnumerable(runes);
+        var memory = new RunesMemoryString(runes);
+        var span = new RunesSpanString(runes);
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
             var nextIndex = CreateRunesIndex(nextRuneIndex);

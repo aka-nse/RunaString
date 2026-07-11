@@ -65,28 +65,28 @@ public partial class RuneEnumeratorTest
     [Theory, MemberData(nameof(SliceTestCases))]
     public void SliceCharsSpan(string value, int startIndex, int endIndex, string expected)
     {
-        SliceTestCore<CharsSpanEnumerable, CharsSpanEnumerator, CharsIndex, ReadOnlySpan<char>>(value.AsSpan().AsRuneEnumerable(), startIndex, endIndex, expected);
+        SliceTestCore<CharsSpanString, CharsSpanEnumerator, CharsIndex, ReadOnlySpan<char>>(value.AsSpan().AsRunaString(), startIndex, endIndex, expected);
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
     public void SliceCharsMemory(string value, int startIndex, int endIndex, string expected)
     {
-        SliceTestCore<CharsMemoryEnumerable, CharsMemoryEnumerator, CharsIndex, ReadOnlyMemory<char>>(value.AsRuneEnumerable(), startIndex, endIndex, expected);
+        SliceTestCore<CharsMemoryString, CharsMemoryEnumerator, CharsIndex, ReadOnlyMemory<char>>(value.AsRunaString(), startIndex, endIndex, expected);
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
     public void SliceRunesSpan(string value, int startIndex, int endIndex, string expected)
     {
         var runes = value.EnumerateRunes().ToImmutableArray();
-        var span = runes.AsSpan().AsRuneEnumerable();
-        SliceTestCore<RunesSpanEnumerable, RunesSpanEnumerator, RunesIndex, ReadOnlySpan<Rune>>(span, startIndex, endIndex, expected);
+        var span = runes.AsSpan().AsRunaString();
+        SliceTestCore<RunesSpanString, RunesSpanEnumerator, RunesIndex, ReadOnlySpan<Rune>>(span, startIndex, endIndex, expected);
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
     public void SliceRunesMemory(string value, int startIndex, int endIndex, string expected)
     {
         var runes = value.EnumerateRunes().ToImmutableArray();
-        var memory = runes.AsMemory().AsRuneEnumerable();
-        SliceTestCore<RunesMemoryEnumerable, RunesMemoryEnumerator, RunesIndex, ReadOnlyMemory<Rune>>(memory, startIndex, endIndex, expected);
+        var memory = runes.AsMemory().AsRunaString();
+        SliceTestCore<RunesMemoryString, RunesMemoryEnumerator, RunesIndex, ReadOnlyMemory<Rune>>(memory, startIndex, endIndex, expected);
     }
 }

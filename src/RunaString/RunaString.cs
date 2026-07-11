@@ -7,51 +7,51 @@ namespace RunaString;
 /// Extensions for <see cref="ReadOnlySpan{Char}"/>, <see cref="ReadOnlyMemory{Char}"/>,
 /// <see cref="ReadOnlySpan{Rune}"/>, and <see cref="ReadOnlyMemory{Rune}"/>.
 /// </summary>
-public static class RuneEnumerable
+public static class RunaString
 {
     extension(ReadOnlySpan<char> source)
     {
         /// <summary>
-        /// Creates a <see cref="CharsSpanEnumerable"/> from the given read-only span of <see cref="char"/>.
+        /// Creates a <see cref="CharsSpanString"/> from the given read-only span of <see cref="char"/>.
         /// </summary>
         /// <returns></returns>
-        public CharsSpanEnumerable AsRuneEnumerable() => new(source);
+        public CharsSpanString AsRunaString() => new(source);
     }
 
     extension(string source)
     {
         /// <summary>
-        /// Creates a <see cref="CharsMemoryEnumerable"/> from the given read-only span of string.
+        /// Creates a <see cref="CharsMemoryString"/> from the given read-only span of string.
         /// </summary>
         /// <returns></returns>
-        public CharsMemoryEnumerable AsRuneEnumerable() => source.AsMemory().AsRuneEnumerable();
+        public CharsMemoryString AsRunaString() => source.AsMemory().AsRunaString();
     }
 
     extension(ReadOnlyMemory<char> source)
     {
         /// <summary>
-        /// Creates a <see cref="CharsMemoryEnumerable"/> from the given read-only span of <see cref="char"/>.
+        /// Creates a <see cref="CharsMemoryString"/> from the given read-only span of <see cref="char"/>.
         /// </summary>
         /// <returns></returns>
-        public CharsMemoryEnumerable AsRuneEnumerable() => new(source);
+        public CharsMemoryString AsRunaString() => new(source);
     }
 
     extension(ReadOnlySpan<Rune> source)
     {
         /// <summary>
-        /// Creates a <see cref="RunesSpanEnumerable"/> from the given read-only span of <see cref="Rune"/>.
+        /// Creates a <see cref="RunesSpanString"/> from the given read-only span of <see cref="Rune"/>.
         /// </summary>
         /// <returns></returns>
-        public RunesSpanEnumerable AsRuneEnumerable() => new(source);
+        public RunesSpanString AsRunaString() => new(source);
     }
 
     extension(ReadOnlyMemory<Rune> source)
     {
         /// <summary>
-        /// Creates a <see cref="RunesMemoryEnumerable"/> from the given read-only span of <see cref="Rune"/>.
+        /// Creates a <see cref="RunesMemoryString"/> from the given read-only span of <see cref="Rune"/>.
         /// </summary>
         /// <returns></returns>
-        public RunesMemoryEnumerable AsRuneEnumerable() => new(source);
+        public RunesMemoryString AsRunaString() => new(source);
     }
 }
 
@@ -60,9 +60,9 @@ public static class RuneEnumerable
 /// Represents an enumerable collection of Unicode runes backed by a read-only span of <see cref="char"/>.
 /// </summary>
 /// <param name="source"></param>
-[RuneEnumerable]
-public readonly ref partial struct CharsSpanEnumerable(ReadOnlySpan<char> source)
-    : IRuneString<CharsSpanEnumerable, CharsSpanEnumerator, CharsIndex>
+[RuneString]
+public readonly ref partial struct CharsSpanString(ReadOnlySpan<char> source)
+    : IRuneString<CharsSpanString, CharsSpanEnumerator, CharsIndex>
 {
     #region source generated members
 
@@ -81,7 +81,7 @@ public readonly ref partial struct CharsSpanEnumerable(ReadOnlySpan<char> source
         CharsSpanEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public CharsSpanEnumerable Slice(CharsIndex start, CharsIndex end) =>
+    public CharsSpanString Slice(CharsIndex start, CharsIndex end) =>
         new (Source.Slice(start.CharIndex, end.CharIndex - start.CharIndex));
 
     /// <inheritdoc />
@@ -135,9 +135,9 @@ public readonly ref partial struct CharsSpanEnumerable(ReadOnlySpan<char> source
 /// Represents an enumerable collection of Unicode runes backed by a read-only memory of <see cref="char"/>.
 /// </summary>
 /// <param name="source"></param>
-[RuneEnumerable]
-public readonly partial struct CharsMemoryEnumerable(ReadOnlyMemory<char> source)
-    : IRuneString<CharsMemoryEnumerable, CharsMemoryEnumerator, CharsIndex>
+[RuneString]
+public readonly partial struct CharsMemoryString(ReadOnlyMemory<char> source)
+    : IRuneString<CharsMemoryString, CharsMemoryEnumerator, CharsIndex>
 {
     #region source generated members
 
@@ -156,7 +156,7 @@ public readonly partial struct CharsMemoryEnumerable(ReadOnlyMemory<char> source
         CharsMemoryEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public CharsMemoryEnumerable Slice(CharsIndex start, CharsIndex end) =>
+    public CharsMemoryString Slice(CharsIndex start, CharsIndex end) =>
         new(Source.Slice(start.CharIndex, end.CharIndex - start.CharIndex));
 
     /// <inheritdoc />
@@ -210,9 +210,9 @@ public readonly partial struct CharsMemoryEnumerable(ReadOnlyMemory<char> source
 /// Represents an enumerable collection of Unicode runes backed by a read-only span of <see cref="Rune"/>.
 /// </summary>
 /// <param name="source"></param>
-[RuneEnumerable]
-public readonly ref partial struct RunesSpanEnumerable(ReadOnlySpan<Rune> source)
-    : IRuneString<RunesSpanEnumerable, RunesSpanEnumerator, RunesIndex>
+[RuneString]
+public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
+    : IRuneString<RunesSpanString, RunesSpanEnumerator, RunesIndex>
 {
     #region source generated members
 
@@ -231,7 +231,7 @@ public readonly ref partial struct RunesSpanEnumerable(ReadOnlySpan<Rune> source
         RunesSpanEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public RunesSpanEnumerable Slice(RunesIndex start, RunesIndex end) =>
+    public RunesSpanString Slice(RunesIndex start, RunesIndex end) =>
         new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
 
     /// <inheritdoc />
@@ -294,9 +294,9 @@ public readonly ref partial struct RunesSpanEnumerable(ReadOnlySpan<Rune> source
 /// Represents an enumerable collection of Unicode runes backed by a read-only memory of <see cref="Rune"/>.
 /// </summary>
 /// <param name="source"></param>
-[RuneEnumerable]
-public readonly partial struct RunesMemoryEnumerable(ReadOnlyMemory<Rune> source)
-    : IRuneString<RunesMemoryEnumerable, RunesMemoryEnumerator, RunesIndex>
+[RuneString]
+public readonly partial struct RunesMemoryString(ReadOnlyMemory<Rune> source)
+    : IRuneString<RunesMemoryString, RunesMemoryEnumerator, RunesIndex>
 {
     #region source generated members
 
@@ -314,7 +314,7 @@ public readonly partial struct RunesMemoryEnumerable(ReadOnlyMemory<Rune> source
         RunesMemoryEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public RunesMemoryEnumerable Slice(RunesIndex start, RunesIndex end) =>
+    public RunesMemoryString Slice(RunesIndex start, RunesIndex end) =>
         new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
 
     /// <inheritdoc />
