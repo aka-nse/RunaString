@@ -1,8 +1,9 @@
 using System.Text;
 
 namespace RunaString.Test;
+using static TestHelpers;
 
-public partial class RuneEnumerableTest
+public partial class RunaStringTest
 {
     /// <summary>
     /// Provides test cases covering a variety of Unicode inputs (multiple languages, diacritics, combining marks, and emoji sequences)
@@ -17,60 +18,14 @@ public partial class RuneEnumerableTest
             retval.Add(input, runeIndex);
         }
 
-        // Well-known pangrams and English test strings
-        core("The quick brown fox jumps over the lazy dog", 0);
-        core("The quick brown fox jumps over the lazy dog", 10);
-        core("The quick brown fox jumps over the lazy dog", 43);
-
-        core("Sphinx of black quartz, judge my vow", 0);
-        core("Sphinx of black quartz, judge my vow", 7);
-        core("Sphinx of black quartz, judge my vow", 30);
-
-        // Accented and combining characters
-        core("Ångström façade Noël", 0);
-        core("Ångström façade Noël", 3);
-        core("Noe\u0308l — combining diaeresis", 2); // "Noël" using combining diaeresis
-
-        // Cyrillic, Arabic, Devanagari, CJK, Korean, Hebrew
-        core("Привет, мир!", 0);
-        core("Привет, мир!", 3);
-
-        core("مرحبا بالعالم", 0);
-        core("مرحبا بالعالم", 5);
-
-        core("नमस्ते दुनिया", 0);
-        core("नमस्ते दुनिया", 4);
-
-        core("汉字テスト", 0);
-        core("汉字テスト", 2);
-
-        core("안녕하세요 세계", 0);
-        core("안녕하세요 세계", 5);
-
-        core("שָׁלוֹם עוֹלָם", 0);
-        core("שָׁלוֹם עוֹלָם", 3);
-
-        // Emoji: single, modifier, ZWJ sequences, flags, keycap sequences
-        core("😀", 0);
-        core("😀", 1);
-
-        core("👍🏽", 0);
-        core("👍🏽", 1);
-
-        core("👩‍⚕️", 0);
-        core("👩‍⚕️", 2);
-
-        core("👨‍👩‍👧‍👦", 0);
-        core("👨‍👩‍👧‍👦", 1);
-
-        core("🇯🇵", 0);
-        core("🇯🇵", 2);
-
-        core("1️⃣2️⃣3️⃣", 0);
-        core("1️⃣2️⃣3️⃣", 2);
-
-        core("🧑‍🚀🚀", 0);
-        core("🧑‍🚀🚀", 2);
+        foreach(var str in TestHelpers.CommonTestStrings)
+        {
+            var runeCount = str.EnumerateRunes().Count();
+            for (int i = 0; i <= runeCount; i++)
+            {
+                core(str, i);
+            }
+        }
 
         return retval;
     }
