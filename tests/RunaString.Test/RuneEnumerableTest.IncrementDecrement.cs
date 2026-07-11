@@ -112,7 +112,7 @@ public partial class RuneEnumerableTest
 
     [Theory]
     [MemberData(nameof(IncrementDecrementTestCases))]
-    public void TestIncrementUtf16LE(string input, int runeIndex)
+    public void TestIncrementUtf16(string input, int runeIndex)
     {
         var charIndex = GetUtf16CodeUnitCount(input, 0, runeIndex);
         var runeLength = input.EnumerateRunes().Count();
@@ -146,7 +146,7 @@ public partial class RuneEnumerableTest
 
     [Theory]
     [MemberData(nameof(IncrementDecrementTestCases))]
-    public void TestIncrementUtf32LE(string input, int runeIndex)
+    public void TestIncrementUtf32(string input, int runeIndex)
     {
         var runes = input.EnumerateRunes().ToArray();
         var runeLength = input.EnumerateRunes().Count();
@@ -229,7 +229,72 @@ public partial class RuneEnumerableTest
         }
     }
 
+    [Theory]
+    [MemberData(nameof(IncrementDecrementTestCases))]
+    public void TestDecrementUtf16(string input, int runeIndex)
+    {
+        var charIndex = GetUtf16CodeUnitCount(input, 0, runeIndex);
+        var runeLength = input.EnumerateRunes().Count();
+        var nextRuneIndex = runeIndex - 1;
+        var index = CreateUtf16RuneIndex(charIndex, runeIndex);
+        var memory = new Utf16MemoryEnumerable(input.AsMemory());
+        var span = new Utf16SpanEnumerable(input.AsSpan());
+        if ((uint)nextRuneIndex < (uint)runeLength)
+        {
+            var nextCharIndex = GetUtf16CodeUnitCount(input, 0, nextRuneIndex);
+            var nextIndex = CreateUtf16RuneIndex(nextCharIndex, nextRuneIndex);
+            DecrementTestCore_True<Utf16MemoryEnumerable, Utf16MemoryEnumerator, Utf16RuneIndex>(
+                memory,
+                index,
+                nextIndex);
+            DecrementTestCore_True<Utf16SpanEnumerable, Utf16SpanEnumerator, Utf16RuneIndex>(
+                span,
+                index,
+                nextIndex);
+        }
+        else
+        {
+            DecrementTestCore_False<Utf16MemoryEnumerable, Utf16MemoryEnumerator, Utf16RuneIndex>(
+                memory,
+                index);
+            DecrementTestCore_False<Utf16SpanEnumerable, Utf16SpanEnumerator, Utf16RuneIndex>(
+                span,
+                index);
+        }
+    }
 
+    [Theory]
+    [MemberData(nameof(IncrementDecrementTestCases))]
+    public void TestDecrementUtf32(string input, int runeIndex)
+    {
+        var runes = input.EnumerateRunes().ToArray();
+        var runeLength = input.EnumerateRunes().Count();
+        var nextRuneIndex = runeIndex - 1;
+        var index = CreateUtf32RuneIndex(runeIndex);
+        var memory = new Utf32MemoryEnumerable(runes);
+        var span = new Utf32SpanEnumerable(runes);
+        if ((uint)nextRuneIndex < (uint)runeLength)
+        {
+            var nextIndex = CreateUtf32RuneIndex(nextRuneIndex);
+            DecrementTestCore_True<Utf32MemoryEnumerable, Utf32MemoryEnumerator, Utf32RuneIndex>(
+                memory,
+                index,
+                nextIndex);
+            DecrementTestCore_True<Utf32SpanEnumerable, Utf32SpanEnumerator, Utf32RuneIndex>(
+                span,
+                index,
+                nextIndex);
+        }
+        else
+        {
+            DecrementTestCore_False<Utf32MemoryEnumerable, Utf32MemoryEnumerator, Utf32RuneIndex>(
+                memory,
+                index);
+            DecrementTestCore_False<Utf32SpanEnumerable, Utf32SpanEnumerator, Utf32RuneIndex>(
+                span,
+                index);
+        }
+    }
 
     private static void DecrementTestCore_True<TStr, TEnumerator, TIndex>(TStr input, TIndex index, TIndex expected)
         where TStr : IRuneEnumerable<TStr, TEnumerator, TIndex>, allows ref struct
