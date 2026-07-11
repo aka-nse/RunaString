@@ -22,6 +22,7 @@ public interface IRuneEnumerable<TSelf, TEnumerator>
     public TEnumerator GetEnumerator();
 }
 
+
 /// <inheritdoc cref="IRuneString{TSelf, TEnumerator, TIndex}" />
 public interface IRuneString<TSelf, TIndex>
     where TSelf : IRuneString<TSelf, TIndex>, allows ref struct
