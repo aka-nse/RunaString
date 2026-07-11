@@ -10,7 +10,7 @@ namespace RunaString;
 /// It is not valid for other sequences, even if they contain the same data.
 /// The behavior is undefined if used with a different source sequence.
 /// </remarks>
-public readonly struct CharsRuneIndex : ISeekIndex<CharsRuneIndex>
+public readonly struct CharsIndex : ISeekIndex<CharsIndex>
 {
     /// <summary></summary>
     public int CharIndex { get; }
@@ -19,11 +19,11 @@ public readonly struct CharsRuneIndex : ISeekIndex<CharsRuneIndex>
     public int RuneIndex { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CharsRuneIndex"/> struct with the specified byte index and rune position.
+    /// Initializes a new instance of the <see cref="CharsIndex"/> struct with the specified byte index and rune position.
     /// </summary>
     /// <param name="charIndex"></param>
     /// <param name="runePosition"></param>
-    internal CharsRuneIndex(int charIndex, int runePosition)
+    internal CharsIndex(int charIndex, int runePosition)
     {
         CharIndex = charIndex;
         RuneIndex = runePosition;
@@ -39,24 +39,24 @@ public readonly struct CharsRuneIndex : ISeekIndex<CharsRuneIndex>
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) =>
-        obj is CharsRuneIndex other && Equals(this, other);
+        obj is CharsIndex other && Equals(this, other);
 
     /// <inheritdoc />
-    public bool Equals(CharsRuneIndex other) => Equals(this, other);
+    public bool Equals(CharsIndex other) => Equals(this, other);
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">
     /// There is an inconsistency between the byte indices and the rune indices.
     /// These instances may have been originated from different strings.
     /// </exception>
-    public int CompareTo(CharsRuneIndex other) => Compare(this, other);
+    public int CompareTo(CharsIndex other) => Compare(this, other);
 
     /// <inheritdoc />
-    public static bool Equals(CharsRuneIndex x, CharsRuneIndex y) =>
+    public static bool Equals(CharsIndex x, CharsIndex y) =>
         x.CharIndex == y.CharIndex && x.RuneIndex == y.RuneIndex;
 
     /// <inheritdoc />
-    public static int Compare(CharsRuneIndex x, CharsRuneIndex y)
+    public static int Compare(CharsIndex x, CharsIndex y)
     {
         if (Equals(x, y))
         {
@@ -71,20 +71,20 @@ public readonly struct CharsRuneIndex : ISeekIndex<CharsRuneIndex>
     }
 
     /// <inheritdoc />
-    public static bool operator ==(CharsRuneIndex x, CharsRuneIndex y) => Equals(x, y);
+    public static bool operator ==(CharsIndex x, CharsIndex y) => Equals(x, y);
 
     /// <inheritdoc />
-    public static bool operator !=(CharsRuneIndex x, CharsRuneIndex y) => !Equals(x, y);
+    public static bool operator !=(CharsIndex x, CharsIndex y) => !Equals(x, y);
 
     /// <inheritdoc />
-    public static bool operator <(CharsRuneIndex x, CharsRuneIndex y) => Compare(x, y) < 0;
+    public static bool operator <(CharsIndex x, CharsIndex y) => Compare(x, y) < 0;
 
     /// <inheritdoc />
-    public static bool operator >(CharsRuneIndex x, CharsRuneIndex y) => Compare(x, y) > 0;
+    public static bool operator >(CharsIndex x, CharsIndex y) => Compare(x, y) > 0;
 
     /// <inheritdoc />
-    public static bool operator <=(CharsRuneIndex x, CharsRuneIndex y) => Compare(x, y) <= 0;
+    public static bool operator <=(CharsIndex x, CharsIndex y) => Compare(x, y) <= 0;
 
     /// <inheritdoc />
-    public static bool operator >=(CharsRuneIndex x, CharsRuneIndex y) => Compare(x, y) >= 0;
+    public static bool operator >=(CharsIndex x, CharsIndex y) => Compare(x, y) >= 0;
 }

@@ -6,7 +6,7 @@ namespace RunaString;
 /// An enumerator that iterates over Unicode scalar values (runes) in a UTF-32 encoded buffer.
 /// </summary>
 public ref struct Utf32SpanEnumerator
-    : IRuneEnumerator<Utf32SpanEnumerator, Utf32RuneIndex, ReadOnlySpan<Rune>>
+    : IRuneEnumerator<Utf32SpanEnumerator, RunesIndex, ReadOnlySpan<Rune>>
 {
     /// <inheritdoc />
     public static Utf32SpanEnumerator Empty =>
@@ -18,7 +18,7 @@ public ref struct Utf32SpanEnumerator
     private Rune _current = default;
 
     /// <inheritdoc />
-    public Utf32RuneIndex SeekIndex => new(_runeIndex);
+    public RunesIndex SeekIndex => new(_runeIndex);
 
     /// <inheritdoc />
     public Rune Current => _current;
@@ -50,7 +50,7 @@ public ref struct Utf32SpanEnumerator
         Helpers.MoveNext(_buffer, ref _runeIndex, out _current);
 
     /// <inheritdoc />
-    public Utf32SpanEnumerator Seek(Utf32RuneIndex index) =>
+    public Utf32SpanEnumerator Seek(RunesIndex index) =>
         new (_buffer)
         {
             _runeIndex = index.RuneIndex,
@@ -62,7 +62,7 @@ public ref struct Utf32SpanEnumerator
 /// An enumerator that iterates over Unicode scalar values (runes) in a UTF-32 encoded buffer.
 /// </summary>
 public struct Utf32MemoryEnumerator
-    : IRuneEnumerator<Utf32MemoryEnumerator, Utf32RuneIndex, ReadOnlyMemory<Rune>>
+    : IRuneEnumerator<Utf32MemoryEnumerator, RunesIndex, ReadOnlyMemory<Rune>>
 {
     /// <inheritdoc />
     public static Utf32MemoryEnumerator Empty { get; } =
@@ -73,7 +73,7 @@ public struct Utf32MemoryEnumerator
     private Rune _current = default;
 
     /// <inheritdoc />
-    public Utf32RuneIndex SeekIndex => new(_runeIndex);
+    public RunesIndex SeekIndex => new(_runeIndex);
 
     /// <inheritdoc />
     public Rune Current => _current;
@@ -105,7 +105,7 @@ public struct Utf32MemoryEnumerator
         Helpers.MoveNext(_buffer.Span, ref _runeIndex, out _current);
 
     /// <inheritdoc />
-    public Utf32MemoryEnumerator Seek(Utf32RuneIndex index) =>
+    public Utf32MemoryEnumerator Seek(RunesIndex index) =>
         new(_buffer)
         {
             _runeIndex = index.RuneIndex,

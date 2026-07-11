@@ -7,7 +7,7 @@ namespace RunaString;
 /// An enumerator that iterates over Unicode scalar values (runes) in a <see cref="char"/> buffer.
 /// </summary>
 public ref struct CharsSpanEnumerator
-    : IRuneEnumerator<CharsSpanEnumerator, CharsRuneIndex, ReadOnlySpan<char>>
+    : IRuneEnumerator<CharsSpanEnumerator, CharsIndex, ReadOnlySpan<char>>
 {
     /// <inheritdoc />
     public static CharsSpanEnumerator Empty =>
@@ -21,7 +21,7 @@ public ref struct CharsSpanEnumerator
     private readonly ReadOnlySpan<char> _buffer;
 
     /// <inheritdoc />
-    public CharsRuneIndex SeekIndex => new(_currCharIndex, _runePosition);
+    public CharsIndex SeekIndex => new(_currCharIndex, _runePosition);
 
     /// <inheritdoc />
     public Rune Current => _current;
@@ -55,7 +55,7 @@ public ref struct CharsSpanEnumerator
     }
 
     /// <inheritdoc />
-    public CharsSpanEnumerator Seek(CharsRuneIndex index) =>
+    public CharsSpanEnumerator Seek(CharsIndex index) =>
         new(_buffer)
         {
             _currCharIndex = index.CharIndex,
@@ -69,7 +69,7 @@ public ref struct CharsSpanEnumerator
 /// An enumerator that iterates over Unicode scalar values (runes) in a <see cref="char"/> buffer.
 /// </summary>
 public struct CharsMemoryEnumerator
-    : IRuneEnumerator<CharsMemoryEnumerator, CharsRuneIndex, ReadOnlyMemory<char>>
+    : IRuneEnumerator<CharsMemoryEnumerator, CharsIndex, ReadOnlyMemory<char>>
 {
     /// <inheritdoc />
     public static CharsMemoryEnumerator Empty { get; } =
@@ -82,7 +82,7 @@ public struct CharsMemoryEnumerator
     private readonly ReadOnlyMemory<char> _buffer;
 
     /// <inheritdoc />
-    public CharsRuneIndex SeekIndex => new(_currCharIndex, _runePosition);
+    public CharsIndex SeekIndex => new(_currCharIndex, _runePosition);
 
     /// <inheritdoc />
     public Rune Current => _current;
@@ -116,7 +116,7 @@ public struct CharsMemoryEnumerator
     }
 
     /// <inheritdoc />
-    public CharsMemoryEnumerator Seek(CharsRuneIndex index) =>
+    public CharsMemoryEnumerator Seek(CharsIndex index) =>
         new(_buffer)
         {
             _currCharIndex = index.CharIndex,

@@ -14,19 +14,19 @@ public partial class RuneIndexTest
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = ".ctor")]
-    private static extern void ctor_CharsIndex(ref CharsRuneIndex index, int charIndex, int runePosition);
-    private static CharsRuneIndex CreateCharsIndex(int charIndex, int runePosition)
+    private static extern void ctor_CharsIndex(ref CharsIndex index, int charIndex, int runePosition);
+    private static CharsIndex CreateCharsIndex(int charIndex, int runePosition)
     {
-        CharsRuneIndex index = default;
+        CharsIndex index = default;
         ctor_CharsIndex(ref index, charIndex, runePosition);
         return index;
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = ".ctor")]
-    private static extern void ctor_Utf32Index(ref Utf32RuneIndex index, int runePosition);
-    private static Utf32RuneIndex CreateUtf32Index(int runePosition)
+    private static extern void ctor_Utf32Index(ref RunesIndex index, int runePosition);
+    private static RunesIndex CreateUtf32Index(int runePosition)
     {
-        Utf32RuneIndex index = default;
+        RunesIndex index = default;
         ctor_Utf32Index(ref index, runePosition);
         return index;
     }

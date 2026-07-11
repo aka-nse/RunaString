@@ -62,12 +62,12 @@ public static class RuneEnumerable
 /// <param name="source"></param>
 [RuneEnumerable]
 public readonly ref partial struct CharsSpanEnumerable(ReadOnlySpan<char> source)
-    : IRuneString<CharsSpanEnumerable, CharsSpanEnumerator, CharsRuneIndex>
+    : IRuneString<CharsSpanEnumerable, CharsSpanEnumerator, CharsIndex>
 {
     #region source generated members
 
-    public partial Rune this[CharsRuneIndex index] { get; }
-    public partial bool TryGetRune(CharsRuneIndex index, out Rune rune);
+    public partial Rune this[CharsIndex index] { get; }
+    public partial bool TryGetRune(CharsIndex index, out Rune rune);
 
     #endregion
 
@@ -81,18 +81,18 @@ public readonly ref partial struct CharsSpanEnumerable(ReadOnlySpan<char> source
         CharsSpanEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public CharsSpanEnumerable Slice(CharsRuneIndex start, CharsRuneIndex end) =>
+    public CharsSpanEnumerable Slice(CharsIndex start, CharsIndex end) =>
         new (Source.Slice(start.CharIndex, end.CharIndex - start.CharIndex));
 
     /// <inheritdoc />
-    public bool TryGetRune(CharsRuneIndex index, out Rune rune, out int codeUnitConsumed)
+    public bool TryGetRune(CharsIndex index, out Rune rune, out int codeUnitConsumed)
     {
         var result = Rune.DecodeFromUtf16(Source.Slice(index.CharIndex), out rune, out codeUnitConsumed);
         return result == OperationStatus.Done;
     }
 
     /// <inheritdoc />
-    public bool TryIncrement(ref CharsRuneIndex index)
+    public bool TryIncrement(ref CharsIndex index)
     {
         if (index.CharIndex >= Source.Length)
         {
@@ -109,7 +109,7 @@ public readonly ref partial struct CharsSpanEnumerable(ReadOnlySpan<char> source
     }
 
     /// <inheritdoc />
-    public bool TryDecrement(ref CharsRuneIndex index)
+    public bool TryDecrement(ref CharsIndex index)
     {
         if(index.CharIndex == 0)
         {
@@ -137,12 +137,12 @@ public readonly ref partial struct CharsSpanEnumerable(ReadOnlySpan<char> source
 /// <param name="source"></param>
 [RuneEnumerable]
 public readonly partial struct CharsMemoryEnumerable(ReadOnlyMemory<char> source)
-    : IRuneString<CharsMemoryEnumerable, CharsMemoryEnumerator, CharsRuneIndex>
+    : IRuneString<CharsMemoryEnumerable, CharsMemoryEnumerator, CharsIndex>
 {
     #region source generated members
 
-    public partial Rune this[CharsRuneIndex index] { get; }
-    public partial bool TryGetRune(CharsRuneIndex index, out Rune rune);
+    public partial Rune this[CharsIndex index] { get; }
+    public partial bool TryGetRune(CharsIndex index, out Rune rune);
 
     #endregion
 
@@ -156,18 +156,18 @@ public readonly partial struct CharsMemoryEnumerable(ReadOnlyMemory<char> source
         CharsMemoryEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public CharsMemoryEnumerable Slice(CharsRuneIndex start, CharsRuneIndex end) =>
+    public CharsMemoryEnumerable Slice(CharsIndex start, CharsIndex end) =>
         new(Source.Slice(start.CharIndex, end.CharIndex - start.CharIndex));
 
     /// <inheritdoc />
-    public bool TryGetRune(CharsRuneIndex index, out Rune rune, out int codeUnitConsumed)
+    public bool TryGetRune(CharsIndex index, out Rune rune, out int codeUnitConsumed)
     {
         var result = Rune.DecodeFromUtf16(Source.Span.Slice(index.CharIndex), out rune, out codeUnitConsumed);
         return result == OperationStatus.Done;
     }
 
     /// <inheritdoc />
-    public bool TryIncrement(ref CharsRuneIndex index)
+    public bool TryIncrement(ref CharsIndex index)
     {
         if(index.CharIndex >= Source.Length)
         {
@@ -184,7 +184,7 @@ public readonly partial struct CharsMemoryEnumerable(ReadOnlyMemory<char> source
     }
 
     /// <inheritdoc />
-    public bool TryDecrement(ref CharsRuneIndex index)
+    public bool TryDecrement(ref CharsIndex index)
     {
         if (index.CharIndex == 0)
         {
@@ -212,12 +212,12 @@ public readonly partial struct CharsMemoryEnumerable(ReadOnlyMemory<char> source
 /// <param name="source"></param>
 [RuneEnumerable]
 public readonly ref partial struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source)
-    : IRuneString<Utf32SpanEnumerable, Utf32SpanEnumerator, Utf32RuneIndex>
+    : IRuneString<Utf32SpanEnumerable, Utf32SpanEnumerator, RunesIndex>
 {
     #region source generated members
 
-    public partial Rune this[Utf32RuneIndex index] { get; }
-    public partial bool TryGetRune(Utf32RuneIndex index, out Rune rune);
+    public partial Rune this[RunesIndex index] { get; }
+    public partial bool TryGetRune(RunesIndex index, out Rune rune);
 
     #endregion
 
@@ -231,11 +231,11 @@ public readonly ref partial struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source
         Utf32SpanEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public Utf32SpanEnumerable Slice(Utf32RuneIndex start, Utf32RuneIndex end) =>
+    public Utf32SpanEnumerable Slice(RunesIndex start, RunesIndex end) =>
         new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
 
     /// <inheritdoc />
-    public bool TryGetRune(Utf32RuneIndex index, out Rune rune, out int codeUnitConsumed)
+    public bool TryGetRune(RunesIndex index, out Rune rune, out int codeUnitConsumed)
     {
         if((uint)index.RuneIndex >= (uint)Source.Length)
         {
@@ -249,7 +249,7 @@ public readonly ref partial struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source
     }
 
     /// <inheritdoc />
-    public bool TryIncrement(ref Utf32RuneIndex index)
+    public bool TryIncrement(ref RunesIndex index)
     {
         var newIndex = index.RuneIndex + 1;
         if(Source.Length <= newIndex)
@@ -261,7 +261,7 @@ public readonly ref partial struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source
     }
 
     /// <inheritdoc />
-    public bool TryDecrement(ref Utf32RuneIndex index)
+    public bool TryDecrement(ref RunesIndex index)
     {
         if(index.RuneIndex <= 0)
         {
@@ -296,12 +296,12 @@ public readonly ref partial struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source
 /// <param name="source"></param>
 [RuneEnumerable]
 public readonly partial struct Utf32MemoryEnumerable(ReadOnlyMemory<Rune> source)
-    : IRuneString<Utf32MemoryEnumerable, Utf32MemoryEnumerator, Utf32RuneIndex>
+    : IRuneString<Utf32MemoryEnumerable, Utf32MemoryEnumerator, RunesIndex>
 {
     #region source generated members
 
-    public partial Rune this[Utf32RuneIndex index] { get; }
-    public partial bool TryGetRune(Utf32RuneIndex index, out Rune rune);
+    public partial Rune this[RunesIndex index] { get; }
+    public partial bool TryGetRune(RunesIndex index, out Rune rune);
 
     #endregion
     /// <summary>
@@ -314,11 +314,11 @@ public readonly partial struct Utf32MemoryEnumerable(ReadOnlyMemory<Rune> source
         Utf32MemoryEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public Utf32MemoryEnumerable Slice(Utf32RuneIndex start, Utf32RuneIndex end) =>
+    public Utf32MemoryEnumerable Slice(RunesIndex start, RunesIndex end) =>
         new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
 
     /// <inheritdoc />
-    public bool TryGetRune(Utf32RuneIndex index, out Rune rune, out int codeUnitConsumed)
+    public bool TryGetRune(RunesIndex index, out Rune rune, out int codeUnitConsumed)
     {
         if ((uint)index.RuneIndex >= (uint)Source.Length)
         {
@@ -332,7 +332,7 @@ public readonly partial struct Utf32MemoryEnumerable(ReadOnlyMemory<Rune> source
     }
 
     /// <inheritdoc />
-    public bool TryIncrement(ref Utf32RuneIndex index)
+    public bool TryIncrement(ref RunesIndex index)
     {
         var newIndex = index.RuneIndex + 1;
         if (Source.Length <= newIndex)
@@ -344,7 +344,7 @@ public readonly partial struct Utf32MemoryEnumerable(ReadOnlyMemory<Rune> source
     }
 
     /// <inheritdoc />
-    public bool TryDecrement(ref Utf32RuneIndex index)
+    public bool TryDecrement(ref RunesIndex index)
     {
         if (index.RuneIndex <= 0)
         {

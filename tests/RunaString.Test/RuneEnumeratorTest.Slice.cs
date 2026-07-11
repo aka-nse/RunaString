@@ -65,13 +65,13 @@ public partial class RuneEnumeratorTest
     [Theory, MemberData(nameof(SliceTestCases))]
     public void SliceCharsSpan(string value, int startIndex, int endIndex, string expected)
     {
-        SliceTestCore<CharsSpanEnumerable, CharsSpanEnumerator, CharsRuneIndex, ReadOnlySpan<char>>(value.AsSpan().AsRuneEnumerable(), startIndex, endIndex, expected);
+        SliceTestCore<CharsSpanEnumerable, CharsSpanEnumerator, CharsIndex, ReadOnlySpan<char>>(value.AsSpan().AsRuneEnumerable(), startIndex, endIndex, expected);
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
     public void SliceCharsMemory(string value, int startIndex, int endIndex, string expected)
     {
-        SliceTestCore<CharsMemoryEnumerable, CharsMemoryEnumerator, CharsRuneIndex, ReadOnlyMemory<char>>(value.AsRuneEnumerable(), startIndex, endIndex, expected);
+        SliceTestCore<CharsMemoryEnumerable, CharsMemoryEnumerator, CharsIndex, ReadOnlyMemory<char>>(value.AsRuneEnumerable(), startIndex, endIndex, expected);
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
@@ -79,7 +79,7 @@ public partial class RuneEnumeratorTest
     {
         var utf32 = value.EnumerateRunes().ToImmutableArray();
         var span = utf32.AsSpan().AsRuneEnumerable();
-        SliceTestCore<Utf32SpanEnumerable, Utf32SpanEnumerator, Utf32RuneIndex, ReadOnlySpan<Rune>>(span, startIndex, endIndex, expected);
+        SliceTestCore<Utf32SpanEnumerable, Utf32SpanEnumerator, RunesIndex, ReadOnlySpan<Rune>>(span, startIndex, endIndex, expected);
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
@@ -87,6 +87,6 @@ public partial class RuneEnumeratorTest
     {
         var utf32 = value.EnumerateRunes().ToImmutableArray();
         var memory = utf32.AsMemory().AsRuneEnumerable();
-        SliceTestCore<Utf32MemoryEnumerable, Utf32MemoryEnumerator, Utf32RuneIndex, ReadOnlyMemory<Rune>>(memory, startIndex, endIndex, expected);
+        SliceTestCore<Utf32MemoryEnumerable, Utf32MemoryEnumerator, RunesIndex, ReadOnlyMemory<Rune>>(memory, startIndex, endIndex, expected);
     }
 }
