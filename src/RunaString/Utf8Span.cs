@@ -11,14 +11,14 @@ namespace RunaString;
 /// </summary>
 [RuneEnumerable]
 public readonly ref partial struct Utf8Span
-    : IRuneString<Utf8Span, Utf8SpanEnumerator, Utf8RuneIndex>
+    : IRuneString<Utf8Span, Utf8SpanEnumerator, Utf8Index>
     , IComparable<Utf8Span>
     , IEquatable<Utf8Span>
 {
     #region source generated members
 
-    public partial Rune this[Utf8RuneIndex index] { get; }
-    public partial bool TryGetRune(Utf8RuneIndex index, out Rune rune);
+    public partial Rune this[Utf8Index index] { get; }
+    public partial bool TryGetRune(Utf8Index index, out Rune rune);
 
     #endregion
 
@@ -89,7 +89,7 @@ public readonly ref partial struct Utf8Span
     }
 
     /// <inheritdoc />
-    public Utf8Span Slice(Utf8RuneIndex start, Utf8RuneIndex end)
+    public Utf8Span Slice(Utf8Index start, Utf8Index end)
     {
         var byteStart = start.ByteIndex;
         var byteLength = end.ByteIndex - start.ByteIndex;
@@ -106,14 +106,14 @@ public readonly ref partial struct Utf8Span
     }
 
     /// <inheritdoc />
-    public bool TryGetRune(Utf8RuneIndex index, out Rune rune, out int codeUnitConsumed)
+    public bool TryGetRune(Utf8Index index, out Rune rune, out int codeUnitConsumed)
     {
         var result = Rune.DecodeFromUtf8(Buffer.Slice(index.ByteIndex), out rune, out codeUnitConsumed);
         return result == OperationStatus.Done;
     }
 
     /// <inheritdoc />
-    public bool TryIncrement(ref Utf8RuneIndex index)
+    public bool TryIncrement(ref Utf8Index index)
     {
         Rune.DecodeFromUtf8(Buffer.Slice(index.ByteIndex), out _, out var codeUnitConsumed);
         var newByteIndex = index.ByteIndex + codeUnitConsumed;
@@ -126,7 +126,7 @@ public readonly ref partial struct Utf8Span
     }
 
     /// <inheritdoc />
-    public bool TryDecrement(ref Utf8RuneIndex index)
+    public bool TryDecrement(ref Utf8Index index)
     {
         var newByteIndex = index.ByteIndex - 1;
         while (newByteIndex >= 0)

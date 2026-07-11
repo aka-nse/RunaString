@@ -5,10 +5,10 @@ namespace RunaString.Test;
 public partial class RuneIndexTest
 {
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = ".ctor")]
-    private static extern void ctor_Utf8Index(ref Utf8RuneIndex index, int byteIndex, int runePosition);
-    private static Utf8RuneIndex CreateUtf8Index(int byteIndex, int runePosition)
+    private static extern void ctor_Utf8Index(ref Utf8Index index, int byteIndex, int runePosition);
+    private static Utf8Index CreateUtf8Index(int byteIndex, int runePosition)
     {
-        Utf8RuneIndex index = default;
+        Utf8Index index = default;
         ctor_Utf8Index(ref index, byteIndex, runePosition);
         return index;
     }

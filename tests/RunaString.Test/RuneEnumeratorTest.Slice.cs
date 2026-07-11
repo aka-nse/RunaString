@@ -51,7 +51,7 @@ public partial class RuneEnumeratorTest
     {
         var utf8 = Encoding.UTF8.GetBytes(value);
         var span = Utf8Span.DangerousFromSpan(utf8);
-        SliceTestCore<Utf8Span, Utf8SpanEnumerator, Utf8RuneIndex, ReadOnlySpan<byte>>(span, startIndex, endIndex, expected);
+        SliceTestCore<Utf8Span, Utf8SpanEnumerator, Utf8Index, ReadOnlySpan<byte>>(span, startIndex, endIndex, expected);
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
@@ -59,7 +59,7 @@ public partial class RuneEnumeratorTest
     {
         var utf8 = Encoding.UTF8.GetBytes(value);
         var text = Utf8String.FromUtf8([.. utf8], 0, utf8.Length);
-        SliceTestCore<Utf8String, Utf8MemoryEnumerator, Utf8RuneIndex, ReadOnlyMemory<byte>>(text, startIndex, endIndex, expected);
+        SliceTestCore<Utf8String, Utf8MemoryEnumerator, Utf8Index, ReadOnlyMemory<byte>>(text, startIndex, endIndex, expected);
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
