@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Collections.Immutable;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -8,11 +9,19 @@ namespace RunaString;
 /// <summary>
 /// Represents an immutable UTF-8 encoded string.
 /// </summary>
-public readonly struct Utf8String
+[RuneEnumerable]
+public readonly partial struct Utf8String
     : IRuneEnumerable<Utf8String, Utf8MemoryEnumerator, Utf8RuneIndex>
     , IComparable<Utf8String>
     , IEquatable<Utf8String>
 {
+    #region source generated members
+
+    public partial Rune this[Utf8RuneIndex index] { get; }
+    public partial bool TryGetRune(Utf8RuneIndex index, out Rune rune);
+
+    #endregion
+
     private readonly int _byteStart;
 
     private readonly int _byteLength;
@@ -22,26 +31,12 @@ public readonly struct Utf8String
     /// <summary>
     /// Gets a read-only memory of bytes representing the UTF-8 encoded string.
     /// </summary>
-    public readonly ReadOnlyMemory<byte> Buffer => _buffer.AsMemory().Slice(_byteStart, _byteLength);
+    public ReadOnlyMemory<byte> Buffer => _buffer.AsMemory().Slice(_byteStart, _byteLength);
 
     /// <summary>
     /// Gets the length of the UTF-8 encoded string in bytes.
     /// </summary>
-    public readonly int BufferLength => _byteLength;
-
-    /// <inheritdoc />
-    public readonly Rune this[Utf8RuneIndex index]
-    {
-        get
-        {
-            var result = Rune.DecodeFromUtf8(Buffer.Span.Slice(index.ByteIndex), out var rune, out _);
-            if(result != OperationStatus.Done)
-            {
-                throw new ArgumentOutOfRangeException(nameof(index));
-            }
-            return rune;
-        }
-    }
+    public int BufferLength => _byteLength;
 
     private Utf8String(ImmutableArray<byte> buffer, int start, int length)
     {
@@ -115,9 +110,45 @@ public readonly struct Utf8String
         return new(_buffer, byteStart, byteLength);
     }
 
-    internal Utf8String DangerousSlice(int byteStart, int byteLength)
+    internal readonly Utf8String DangerousSlice(int byteStart, int byteLength)
     {
         return new(_buffer, _byteStart + byteStart, byteLength);
+    }
+
+    /// <inheritdoc />
+    public bool TryGetRune(Utf8RuneIndex index, out Rune rune, out int codeUnitConsumed)
+    {
+        var result = Rune.DecodeFromUtf8(Buffer.Span.Slice(index.ByteIndex), out rune, out codeUnitConsumed);
+        return result == OperationStatus.Done;
+    }
+
+    /// <inheritdoc />
+    public bool TryIncrement(ref Utf8RuneIndex index)
+    {
+        Rune.DecodeFromUtf8(Buffer.Span.Slice(index.ByteIndex), out _, out var codeUnitConsumed);
+        var newByteIndex = index.ByteIndex + codeUnitConsumed;
+        if(_buffer.Length <= newByteIndex)
+        {
+            return false;
+        }
+        index = new(newByteIndex, index.RuneIndex + 1);
+        return true;
+    }
+
+    /// <inheritdoc />
+    public bool TryDecrement(ref Utf8RuneIndex index)
+    {
+        var newByteIndex = index.ByteIndex - 1;
+        while(newByteIndex >= 0)
+        {
+            if (_buffer[newByteIndex] < 0x80 || _buffer[newByteIndex] >= 0xC0)
+            {
+                index = new(newByteIndex, index.RuneIndex - 1);
+                return true;
+            }
+            --newByteIndex;
+        }
+        return false;
     }
 
     /// <summary>

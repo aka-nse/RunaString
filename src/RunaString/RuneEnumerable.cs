@@ -60,27 +60,21 @@ public static class RuneEnumerable
 /// Represents an enumerable collection of Unicode runes backed by a read-only span of UTF-16 characters.
 /// </summary>
 /// <param name="source"></param>
-public readonly ref struct Utf16SpanEnumerable(ReadOnlySpan<char> source)
+[RuneEnumerable]
+public readonly ref partial struct Utf16SpanEnumerable(ReadOnlySpan<char> source)
     : IRuneEnumerable<Utf16SpanEnumerable, Utf16SpanEnumerator, Utf16RuneIndex>
 {
+    #region source generated members
+
+    public partial Rune this[Utf16RuneIndex index] { get; }
+    public partial bool TryGetRune(Utf16RuneIndex index, out Rune rune);
+
+    #endregion
+
     /// <summary>
     /// Gets the source data as a read-only span of characters, which serves as the underlying buffer for enumerating Unicode runes in this enumerable.
     /// </summary>
     public ReadOnlySpan<char> Source { get; } = source;
-
-    /// <inheritdoc />
-    public Rune this[Utf16RuneIndex index]
-    {
-        get
-        {
-            var result = Rune.DecodeFromUtf16(Source.Slice(index.CharIndex), out var rune, out _);
-            if (result != OperationStatus.Done)
-            {
-                throw new ArgumentOutOfRangeException(nameof(index));
-            }
-            return rune;
-        }
-    }
 
     /// <inheritdoc />
     public Utf16SpanEnumerator GetEnumerator() =>
@@ -89,6 +83,47 @@ public readonly ref struct Utf16SpanEnumerable(ReadOnlySpan<char> source)
     /// <inheritdoc />
     public Utf16SpanEnumerable Slice(Utf16RuneIndex start, Utf16RuneIndex end) =>
         new (Source.Slice(start.CharIndex, end.CharIndex - start.CharIndex));
+
+    /// <inheritdoc />
+    public bool TryGetRune(Utf16RuneIndex index, out Rune rune, out int codeUnitConsumed)
+    {
+        var result = Rune.DecodeFromUtf16(Source.Slice(index.CharIndex), out rune, out codeUnitConsumed);
+        return result == OperationStatus.Done;
+    }
+
+    /// <inheritdoc />
+    public bool TryIncrement(ref Utf16RuneIndex index)
+    {
+        if (index.CharIndex >= Source.Length)
+        {
+            return false;
+        }
+        var newRuneIndex = index.RuneIndex + 1;
+        var newCharIndex = index.CharIndex + (char.IsHighSurrogate(Source[index.CharIndex]) ? 2 : 1);
+        if (Source.Length <= newCharIndex)
+        {
+            return false;
+        }
+        index = new(newCharIndex, newRuneIndex);
+        return true;
+    }
+
+    /// <inheritdoc />
+    public bool TryDecrement(ref Utf16RuneIndex index)
+    {
+        if(index.CharIndex == 0)
+        {
+            return false;
+        }
+        var newRuneIndex = index.RuneIndex - 1;
+        var newCharIndex = index.CharIndex - 1;
+        if (char.IsLowSurrogate(Source[newCharIndex]))
+        {
+            --newCharIndex;
+        }
+        index = new(newCharIndex, newRuneIndex);
+        return true;
+    }
 
     /// <inheritdoc />
     public override string ToString() =>
@@ -100,27 +135,21 @@ public readonly ref struct Utf16SpanEnumerable(ReadOnlySpan<char> source)
 /// Represents an enumerable collection of Unicode runes backed by a read-only memory of UTF-16 characters.
 /// </summary>
 /// <param name="source"></param>
-public readonly struct Utf16MemoryEnumerable(ReadOnlyMemory<char> source)
+[RuneEnumerable]
+public readonly partial struct Utf16MemoryEnumerable(ReadOnlyMemory<char> source)
     : IRuneEnumerable<Utf16MemoryEnumerable, Utf16MemoryEnumerator, Utf16RuneIndex>
 {
+    #region source generated members
+
+    public partial Rune this[Utf16RuneIndex index] { get; }
+    public partial bool TryGetRune(Utf16RuneIndex index, out Rune rune);
+
+    #endregion
+
     /// <summary>
     /// Gets the source data as a read-only span of characters, which serves as the underlying buffer for enumerating Unicode runes in this enumerable.
     /// </summary>
     public ReadOnlyMemory<char> Source { get; } = source;
-
-    /// <inheritdoc />
-    public Rune this[Utf16RuneIndex index]
-    {
-        get
-        {
-            var result = Rune.DecodeFromUtf16(Source.Span.Slice(index.CharIndex), out var rune, out _);
-            if (result != OperationStatus.Done)
-            {
-                throw new ArgumentOutOfRangeException(nameof(index));
-            }
-            return rune;
-        }
-    }
 
     /// <inheritdoc />
     public Utf16MemoryEnumerator GetEnumerator() =>
@@ -129,6 +158,47 @@ public readonly struct Utf16MemoryEnumerable(ReadOnlyMemory<char> source)
     /// <inheritdoc />
     public Utf16MemoryEnumerable Slice(Utf16RuneIndex start, Utf16RuneIndex end) =>
         new(Source.Slice(start.CharIndex, end.CharIndex - start.CharIndex));
+
+    /// <inheritdoc />
+    public bool TryGetRune(Utf16RuneIndex index, out Rune rune, out int codeUnitConsumed)
+    {
+        var result = Rune.DecodeFromUtf16(Source.Span.Slice(index.CharIndex), out rune, out codeUnitConsumed);
+        return result == OperationStatus.Done;
+    }
+
+    /// <inheritdoc />
+    public bool TryIncrement(ref Utf16RuneIndex index)
+    {
+        if(index.CharIndex >= Source.Length)
+        {
+            return false;
+        }
+        var newRuneIndex = index.RuneIndex + 1;
+        var newCharIndex = index.CharIndex + (char.IsHighSurrogate(Source.Span[index.CharIndex]) ? 2 : 1);
+        if (Source.Length <= newCharIndex)
+        {
+            return false;
+        }
+        index = new(newCharIndex, newRuneIndex);
+        return true;
+    }
+
+    /// <inheritdoc />
+    public bool TryDecrement(ref Utf16RuneIndex index)
+    {
+        if (index.CharIndex == 0)
+        {
+            return false;
+        }
+        var newRuneIndex = index.RuneIndex - 1;
+        var newCharIndex = index.CharIndex - 1;
+        if (char.IsLowSurrogate(Source.Span[newCharIndex]))
+        {
+            --newCharIndex;
+        }
+        index = new(newCharIndex, newRuneIndex);
+        return true;
+    }
 
     /// <inheritdoc />
     public override string ToString() =>
@@ -140,16 +210,21 @@ public readonly struct Utf16MemoryEnumerable(ReadOnlyMemory<char> source)
 /// Represents an enumerable collection of Unicode runes backed by a read-only span of UTF-32 characters.
 /// </summary>
 /// <param name="source"></param>
-public readonly ref struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source)
+[RuneEnumerable]
+public readonly ref partial struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source)
     : IRuneEnumerable<Utf32SpanEnumerable, Utf32SpanEnumerator, Utf32RuneIndex>
 {
+    #region source generated members
+
+    public partial Rune this[Utf32RuneIndex index] { get; }
+    public partial bool TryGetRune(Utf32RuneIndex index, out Rune rune);
+
+    #endregion
+
     /// <summary>
     /// Gets the source data as a read-only span of characters, which serves as the underlying buffer for enumerating Unicode runes in this enumerable.
     /// </summary>
     public ReadOnlySpan<Rune> Source { get; } = source;
-
-    /// <inheritdoc />
-    public Rune this[Utf32RuneIndex index] => Source[index.RuneIndex];
 
     /// <inheritdoc />
     public Utf32SpanEnumerator GetEnumerator() =>
@@ -158,6 +233,43 @@ public readonly ref struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source)
     /// <inheritdoc />
     public Utf32SpanEnumerable Slice(Utf32RuneIndex start, Utf32RuneIndex end) =>
         new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
+
+    /// <inheritdoc />
+    public bool TryGetRune(Utf32RuneIndex index, out Rune rune, out int codeUnitConsumed)
+    {
+        if((uint)index.RuneIndex >= (uint)Source.Length)
+        {
+            rune = default;
+            codeUnitConsumed = 0;
+            return false;
+        }
+        rune = Source[index.RuneIndex];
+        codeUnitConsumed = 1;
+        return true;
+    }
+
+    /// <inheritdoc />
+    public bool TryIncrement(ref Utf32RuneIndex index)
+    {
+        var newIndex = index.RuneIndex + 1;
+        if(Source.Length <= newIndex)
+        {
+            return false;
+        }
+        index = new(newIndex);
+        return true;
+    }
+
+    /// <inheritdoc />
+    public bool TryDecrement(ref Utf32RuneIndex index)
+    {
+        if(index.RuneIndex <= 0)
+        {
+            return false;
+        }
+        index = new(index.RuneIndex - 1);
+        return true;
+    }
 
     /// <inheritdoc />
     public override string ToString()
@@ -182,16 +294,20 @@ public readonly ref struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source)
 /// Represents an enumerable collection of Unicode runes backed by a read-only memory of UTF-32 characters.
 /// </summary>
 /// <param name="source"></param>
-public readonly struct Utf32MemoryEnumerable(ReadOnlyMemory<Rune> source)
+[RuneEnumerable]
+public readonly partial struct Utf32MemoryEnumerable(ReadOnlyMemory<Rune> source)
     : IRuneEnumerable<Utf32MemoryEnumerable, Utf32MemoryEnumerator, Utf32RuneIndex>
 {
+    #region source generated members
+
+    public partial Rune this[Utf32RuneIndex index] { get; }
+    public partial bool TryGetRune(Utf32RuneIndex index, out Rune rune);
+
+    #endregion
     /// <summary>
     /// Gets the source data as a read-only span of characters, which serves as the underlying buffer for enumerating Unicode runes in this enumerable.
     /// </summary>
     public ReadOnlyMemory<Rune> Source { get; } = source;
-
-    /// <inheritdoc />
-    public Rune this[Utf32RuneIndex index] => Source.Span[index.RuneIndex];
 
     /// <inheritdoc />
     public Utf32MemoryEnumerator GetEnumerator() =>
@@ -200,6 +316,43 @@ public readonly struct Utf32MemoryEnumerable(ReadOnlyMemory<Rune> source)
     /// <inheritdoc />
     public Utf32MemoryEnumerable Slice(Utf32RuneIndex start, Utf32RuneIndex end) =>
         new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
+
+    /// <inheritdoc />
+    public bool TryGetRune(Utf32RuneIndex index, out Rune rune, out int codeUnitConsumed)
+    {
+        if ((uint)index.RuneIndex >= (uint)Source.Length)
+        {
+            rune = default;
+            codeUnitConsumed = 0;
+            return false;
+        }
+        rune = Source.Span[index.RuneIndex];
+        codeUnitConsumed = 1;
+        return true;
+    }
+
+    /// <inheritdoc />
+    public bool TryIncrement(ref Utf32RuneIndex index)
+    {
+        var newIndex = index.RuneIndex + 1;
+        if (Source.Length <= newIndex)
+        {
+            return false;
+        }
+        index = new(newIndex);
+        return true;
+    }
+
+    /// <inheritdoc />
+    public bool TryDecrement(ref Utf32RuneIndex index)
+    {
+        if (index.RuneIndex <= 0)
+        {
+            return false;
+        }
+        index = new(index.RuneIndex - 1);
+        return true;
+    }
 
     /// <inheritdoc />
     public override string ToString()
