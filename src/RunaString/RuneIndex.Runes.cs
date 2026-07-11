@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace RunaString;
 
 /// <summary>
-/// A struct that represents a seekable index into a UTF-32 encoded buffer for an <see cref="Utf32SpanEnumerator"/> or <see cref="Utf32MemoryEnumerator"/>.
+/// A struct that represents a seekable index into a <see cref="System.Text.Rune"/> buffer for an <see cref="RunesSpanEnumerator"/> or <see cref="RunesMemoryEnumerator"/>.
 /// </summary>
 /// <remarks>
 /// This instance is only for the source sequence which the instance was created from.
@@ -31,7 +31,7 @@ public readonly struct RunesIndex : ISeekIndex<RunesIndex>
 
     /// <inheritdoc />
     public override string ToString() =>
-        $"Utf32RuneIndex {{ RuneIndex = {RuneIndex} }}";
+        $"RunesIndex {{ RuneIndex = {RuneIndex} }}";
 
     /// <inheritdoc />
     public override int GetHashCode() =>

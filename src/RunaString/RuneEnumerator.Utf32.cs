@@ -3,13 +3,13 @@ using System.Text;
 namespace RunaString;
 
 /// <summary>
-/// An enumerator that iterates over Unicode scalar values (runes) in a UTF-32 encoded buffer.
+/// An enumerator that iterates over Unicode scalar values (runes) in a <see cref="Rune"/> buffer.
 /// </summary>
-public ref struct Utf32SpanEnumerator
-    : IRuneEnumerator<Utf32SpanEnumerator, RunesIndex, ReadOnlySpan<Rune>>
+public ref struct RunesSpanEnumerator
+    : IRuneEnumerator<RunesSpanEnumerator, RunesIndex, ReadOnlySpan<Rune>>
 {
     /// <inheritdoc />
-    public static Utf32SpanEnumerator Empty =>
+    public static RunesSpanEnumerator Empty =>
         new([]);
 
     // NOTE: keep order to save size
@@ -32,17 +32,17 @@ public ref struct Utf32SpanEnumerator
     /// <inheritdoc />
     public ReadOnlySpan<Rune> RemainingBuffer => _buffer.Slice(Math.Max(_runeIndex + 1, _buffer.Length));
 
-    private Utf32SpanEnumerator(ReadOnlySpan<Rune> buffer)
+    private RunesSpanEnumerator(ReadOnlySpan<Rune> buffer)
     {
         _buffer = buffer;
     }
 
     /// <summary>
-    /// Creates a new <see cref="Utf32SpanEnumerator"/> for the specified UTF-32 encoded buffer.
+    /// Creates a new <see cref="RunesSpanEnumerator"/> for the specified <see cref="Rune"/> buffer.
     /// </summary>
     /// <param name="buffer"></param>
     /// <returns></returns>
-    public static Utf32SpanEnumerator Create(ReadOnlySpan<Rune> buffer) =>
+    public static RunesSpanEnumerator Create(ReadOnlySpan<Rune> buffer) =>
         new(buffer);
 
     /// <inheritdoc />
@@ -50,7 +50,7 @@ public ref struct Utf32SpanEnumerator
         Helpers.MoveNext(_buffer, ref _runeIndex, out _current);
 
     /// <inheritdoc />
-    public Utf32SpanEnumerator Seek(RunesIndex index) =>
+    public RunesSpanEnumerator Seek(RunesIndex index) =>
         new (_buffer)
         {
             _runeIndex = index.RuneIndex,
@@ -59,13 +59,13 @@ public ref struct Utf32SpanEnumerator
 
 
 /// <summary>
-/// An enumerator that iterates over Unicode scalar values (runes) in a UTF-32 encoded buffer.
+/// An enumerator that iterates over Unicode scalar values (runes) in a <see cref="Rune"/> buffer.
 /// </summary>
-public struct Utf32MemoryEnumerator
-    : IRuneEnumerator<Utf32MemoryEnumerator, RunesIndex, ReadOnlyMemory<Rune>>
+public struct RunesMemoryEnumerator
+    : IRuneEnumerator<RunesMemoryEnumerator, RunesIndex, ReadOnlyMemory<Rune>>
 {
     /// <inheritdoc />
-    public static Utf32MemoryEnumerator Empty { get; } =
+    public static RunesMemoryEnumerator Empty { get; } =
         new(ReadOnlyMemory<Rune>.Empty);
 
     private readonly ReadOnlyMemory<Rune> _buffer;
@@ -87,17 +87,17 @@ public struct Utf32MemoryEnumerator
     /// <inheritdoc />
     public ReadOnlyMemory<Rune> RemainingBuffer => _buffer.Slice(Math.Max(_runeIndex + 1, _buffer.Length));
 
-    private Utf32MemoryEnumerator(ReadOnlyMemory<Rune> buffer)
+    private RunesMemoryEnumerator(ReadOnlyMemory<Rune> buffer)
     {
         _buffer = buffer;
     }
 
     /// <summary>
-    /// Creates a new <see cref="Utf32MemoryEnumerator"/> for the specified UTF-32 encoded buffer.
+    /// Creates a new <see cref="RunesMemoryEnumerator"/> for the specified <see cref="Rune"/> buffer.
     /// </summary>
     /// <param name="buffer"></param>
     /// <returns></returns>
-    public static Utf32MemoryEnumerator Create(ReadOnlyMemory<Rune> buffer) =>
+    public static RunesMemoryEnumerator Create(ReadOnlyMemory<Rune> buffer) =>
         new(buffer);
 
     /// <inheritdoc />
@@ -105,7 +105,7 @@ public struct Utf32MemoryEnumerator
         Helpers.MoveNext(_buffer.Span, ref _runeIndex, out _current);
 
     /// <inheritdoc />
-    public Utf32MemoryEnumerator Seek(RunesIndex index) =>
+    public RunesMemoryEnumerator Seek(RunesIndex index) =>
         new(_buffer)
         {
             _runeIndex = index.RuneIndex,

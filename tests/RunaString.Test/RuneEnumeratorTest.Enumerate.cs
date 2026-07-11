@@ -63,15 +63,15 @@ public partial class RuneEnumeratorTest
     }
 
     [Theory, MemberData(nameof(EnumerateTestCases))]
-    public void EnumerateUtf32Span(string value)
+    public void EnumerateRunesSpan(string value)
     {
         var utf32 = value.EnumerateRunes().ToArray();
-        EnumerateTestCore(value, Utf32SpanEnumerator.Create(utf32));
+        EnumerateTestCore(value, RunesSpanEnumerator.Create(utf32));
     }
     [Theory, MemberData(nameof(EnumerateTestCases))]
-    public void EnumerateUtf32Memory(string value)
+    public void EnumerateRunesMemory(string value)
     {
         var utf32 = value.EnumerateRunes().ToArray();
-        EnumerateTestCore(value, Utf32MemoryEnumerator.Create(utf32));
+        EnumerateTestCore(value, RunesMemoryEnumerator.Create(utf32));
     }
 }

@@ -31,7 +31,7 @@ public readonly struct Utf8Index : ISeekIndex<Utf8Index>
 
     /// <inheritdoc />
     public override string ToString() =>
-        $"Utf8RuneIndex {{ ByteIndex = {ByteIndex}, RuneIndex = {RuneIndex} }}";
+        $"Utf8Index {{ ByteIndex = {ByteIndex}, RuneIndex = {RuneIndex} }}";
 
     /// <inheritdoc />
     public override int GetHashCode() =>

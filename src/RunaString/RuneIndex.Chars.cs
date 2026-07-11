@@ -31,7 +31,7 @@ public readonly struct CharsIndex : ISeekIndex<CharsIndex>
 
     /// <inheritdoc />
     public override string ToString() =>
-        $"CharsRuneIndex {{ CharIndex = {CharIndex}, RuneIndex = {RuneIndex} }}";
+        $"CharsIndex {{ CharIndex = {CharIndex}, RuneIndex = {RuneIndex} }}";
 
     /// <inheritdoc />
     public override int GetHashCode() =>

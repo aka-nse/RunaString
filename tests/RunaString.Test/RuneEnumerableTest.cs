@@ -19,18 +19,18 @@ public partial class RuneEnumerableTest
         .Select(static x => x.Utf16SequenceLength)
         .Sum();
 
-    private static int GetUtf32CodeUnitCount(string s, int start, int count) =>
+    private static int GetRunesCodeUnitCount(string s, int start, int count) =>
         s.EnumerateRunes()
         .Skip(start)
         .Take(count)
         .Count();
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern Utf8Index CreateUtf8RuneIndex(int byteIndex, int runePosition);
+    private static extern Utf8Index CreateUtf8Index(int byteIndex, int runePosition);
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern CharsIndex CreateCharsRuneIndex(int charIndex, int runePosition);
+    private static extern CharsIndex CreateCharsIndex(int charIndex, int runePosition);
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern RunesIndex CreateUtf32RuneIndex(int runePosition);
+    private static extern RunesIndex CreateRunesIndex(int runePosition);
 }

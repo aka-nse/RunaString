@@ -75,18 +75,18 @@ public partial class RuneEnumeratorTest
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
-    public void SliceUtf32Span(string value, int startIndex, int endIndex, string expected)
+    public void SliceRunesSpan(string value, int startIndex, int endIndex, string expected)
     {
-        var utf32 = value.EnumerateRunes().ToImmutableArray();
-        var span = utf32.AsSpan().AsRuneEnumerable();
-        SliceTestCore<Utf32SpanEnumerable, Utf32SpanEnumerator, RunesIndex, ReadOnlySpan<Rune>>(span, startIndex, endIndex, expected);
+        var runes = value.EnumerateRunes().ToImmutableArray();
+        var span = runes.AsSpan().AsRuneEnumerable();
+        SliceTestCore<RunesSpanEnumerable, RunesSpanEnumerator, RunesIndex, ReadOnlySpan<Rune>>(span, startIndex, endIndex, expected);
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
-    public void SliceUtf32Memory(string value, int startIndex, int endIndex, string expected)
+    public void SliceRunesMemory(string value, int startIndex, int endIndex, string expected)
     {
-        var utf32 = value.EnumerateRunes().ToImmutableArray();
-        var memory = utf32.AsMemory().AsRuneEnumerable();
-        SliceTestCore<Utf32MemoryEnumerable, Utf32MemoryEnumerator, RunesIndex, ReadOnlyMemory<Rune>>(memory, startIndex, endIndex, expected);
+        var runes = value.EnumerateRunes().ToImmutableArray();
+        var memory = runes.AsMemory().AsRuneEnumerable();
+        SliceTestCore<RunesMemoryEnumerable, RunesMemoryEnumerator, RunesIndex, ReadOnlyMemory<Rune>>(memory, startIndex, endIndex, expected);
     }
 }

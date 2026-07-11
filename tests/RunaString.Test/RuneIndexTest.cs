@@ -23,11 +23,11 @@ public partial class RuneIndexTest
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = ".ctor")]
-    private static extern void ctor_Utf32Index(ref RunesIndex index, int runePosition);
-    private static RunesIndex CreateUtf32Index(int runePosition)
+    private static extern void ctor_RunesIndex(ref RunesIndex index, int runePosition);
+    private static RunesIndex CreateRunesIndex(int runePosition)
     {
         RunesIndex index = default;
-        ctor_Utf32Index(ref index, runePosition);
+        ctor_RunesIndex(ref index, runePosition);
         return index;
     }
 
@@ -46,11 +46,11 @@ public partial class RuneIndexTest
             { CreateCharsIndex(6, 5), CreateCharsIndex(60, 50), -1 },
             { CreateCharsIndex(60, 50), CreateCharsIndex(6, 5), 1 },
 
-            { CreateUtf32Index(0), CreateUtf32Index(0), 0 },
-            { CreateUtf32Index(1), CreateUtf32Index(1), 0 },
-            { CreateUtf32Index(50), CreateUtf32Index(50), 0 },
-            { CreateUtf32Index(5), CreateUtf32Index(50), -1 },
-            { CreateUtf32Index(50), CreateUtf32Index(5), 1 },
+            { CreateRunesIndex(0), CreateRunesIndex(0), 0 },
+            { CreateRunesIndex(1), CreateRunesIndex(1), 0 },
+            { CreateRunesIndex(50), CreateRunesIndex(50), 0 },
+            { CreateRunesIndex(5), CreateRunesIndex(50), -1 },
+            { CreateRunesIndex(50), CreateRunesIndex(5), 1 },
         };
 
 

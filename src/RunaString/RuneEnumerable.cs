@@ -39,19 +39,19 @@ public static class RuneEnumerable
     extension(ReadOnlySpan<Rune> source)
     {
         /// <summary>
-        /// Creates a <see cref="Utf32SpanEnumerable"/> from the given read-only span of UTF-32 characters.
+        /// Creates a <see cref="RunesSpanEnumerable"/> from the given read-only span of <see cref="Rune"/>.
         /// </summary>
         /// <returns></returns>
-        public Utf32SpanEnumerable AsRuneEnumerable() => new(source);
+        public RunesSpanEnumerable AsRuneEnumerable() => new(source);
     }
 
     extension(ReadOnlyMemory<Rune> source)
     {
         /// <summary>
-        /// Creates a <see cref="Utf32MemoryEnumerable"/> from the given read-only span of UTF-32 characters.
+        /// Creates a <see cref="RunesMemoryEnumerable"/> from the given read-only span of <see cref="Rune"/>.
         /// </summary>
         /// <returns></returns>
-        public Utf32MemoryEnumerable AsRuneEnumerable() => new(source);
+        public RunesMemoryEnumerable AsRuneEnumerable() => new(source);
     }
 }
 
@@ -207,12 +207,12 @@ public readonly partial struct CharsMemoryEnumerable(ReadOnlyMemory<char> source
 
 
 /// <summary>
-/// Represents an enumerable collection of Unicode runes backed by a read-only span of UTF-32 characters.
+/// Represents an enumerable collection of Unicode runes backed by a read-only span of <see cref="Rune"/>.
 /// </summary>
 /// <param name="source"></param>
 [RuneEnumerable]
-public readonly ref partial struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source)
-    : IRuneString<Utf32SpanEnumerable, Utf32SpanEnumerator, RunesIndex>
+public readonly ref partial struct RunesSpanEnumerable(ReadOnlySpan<Rune> source)
+    : IRuneString<RunesSpanEnumerable, RunesSpanEnumerator, RunesIndex>
 {
     #region source generated members
 
@@ -227,11 +227,11 @@ public readonly ref partial struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source
     public ReadOnlySpan<Rune> Source { get; } = source;
 
     /// <inheritdoc />
-    public Utf32SpanEnumerator GetEnumerator() =>
-        Utf32SpanEnumerator.Create(Source);
+    public RunesSpanEnumerator GetEnumerator() =>
+        RunesSpanEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public Utf32SpanEnumerable Slice(RunesIndex start, RunesIndex end) =>
+    public RunesSpanEnumerable Slice(RunesIndex start, RunesIndex end) =>
         new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
 
     /// <inheritdoc />
@@ -291,12 +291,12 @@ public readonly ref partial struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source
 
 
 /// <summary>
-/// Represents an enumerable collection of Unicode runes backed by a read-only memory of UTF-32 characters.
+/// Represents an enumerable collection of Unicode runes backed by a read-only memory of <see cref="Rune"/>.
 /// </summary>
 /// <param name="source"></param>
 [RuneEnumerable]
-public readonly partial struct Utf32MemoryEnumerable(ReadOnlyMemory<Rune> source)
-    : IRuneString<Utf32MemoryEnumerable, Utf32MemoryEnumerator, RunesIndex>
+public readonly partial struct RunesMemoryEnumerable(ReadOnlyMemory<Rune> source)
+    : IRuneString<RunesMemoryEnumerable, RunesMemoryEnumerator, RunesIndex>
 {
     #region source generated members
 
@@ -310,11 +310,11 @@ public readonly partial struct Utf32MemoryEnumerable(ReadOnlyMemory<Rune> source
     public ReadOnlyMemory<Rune> Source { get; } = source;
 
     /// <inheritdoc />
-    public Utf32MemoryEnumerator GetEnumerator() =>
-        Utf32MemoryEnumerator.Create(Source);
+    public RunesMemoryEnumerator GetEnumerator() =>
+        RunesMemoryEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public Utf32MemoryEnumerable Slice(RunesIndex start, RunesIndex end) =>
+    public RunesMemoryEnumerable Slice(RunesIndex start, RunesIndex end) =>
         new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
 
     /// <inheritdoc />
