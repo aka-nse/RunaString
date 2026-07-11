@@ -12,28 +12,28 @@ public static class RuneEnumerable
     extension(ReadOnlySpan<char> source)
     {
         /// <summary>
-        /// Creates a <see cref="Utf16SpanEnumerable"/> from the given read-only span of UTF-16 characters.
+        /// Creates a <see cref="CharsSpanEnumerable"/> from the given read-only span of UTF-16 characters.
         /// </summary>
         /// <returns></returns>
-        public Utf16SpanEnumerable AsRuneEnumerable() => new(source);
+        public CharsSpanEnumerable AsRuneEnumerable() => new(source);
     }
 
     extension(string source)
     {
         /// <summary>
-        /// Creates a <see cref="Utf16MemoryEnumerable"/> from the given read-only span of string.
+        /// Creates a <see cref="CharsMemoryEnumerable"/> from the given read-only span of string.
         /// </summary>
         /// <returns></returns>
-        public Utf16MemoryEnumerable AsRuneEnumerable() => source.AsMemory().AsRuneEnumerable();
+        public CharsMemoryEnumerable AsRuneEnumerable() => source.AsMemory().AsRuneEnumerable();
     }
 
     extension(ReadOnlyMemory<char> source)
     {
         /// <summary>
-        /// Creates a <see cref="Utf16MemoryEnumerable"/> from the given read-only span of UTF-16 characters.
+        /// Creates a <see cref="CharsMemoryEnumerable"/> from the given read-only span of UTF-16 characters.
         /// </summary>
         /// <returns></returns>
-        public Utf16MemoryEnumerable AsRuneEnumerable() => new(source);
+        public CharsMemoryEnumerable AsRuneEnumerable() => new(source);
     }
 
     extension(ReadOnlySpan<Rune> source)
@@ -61,13 +61,13 @@ public static class RuneEnumerable
 /// </summary>
 /// <param name="source"></param>
 [RuneEnumerable]
-public readonly ref partial struct Utf16SpanEnumerable(ReadOnlySpan<char> source)
-    : IRuneString<Utf16SpanEnumerable, Utf16SpanEnumerator, Utf16RuneIndex>
+public readonly ref partial struct CharsSpanEnumerable(ReadOnlySpan<char> source)
+    : IRuneString<CharsSpanEnumerable, CharsSpanEnumerator, CharsRuneIndex>
 {
     #region source generated members
 
-    public partial Rune this[Utf16RuneIndex index] { get; }
-    public partial bool TryGetRune(Utf16RuneIndex index, out Rune rune);
+    public partial Rune this[CharsRuneIndex index] { get; }
+    public partial bool TryGetRune(CharsRuneIndex index, out Rune rune);
 
     #endregion
 
@@ -77,22 +77,22 @@ public readonly ref partial struct Utf16SpanEnumerable(ReadOnlySpan<char> source
     public ReadOnlySpan<char> Source { get; } = source;
 
     /// <inheritdoc />
-    public Utf16SpanEnumerator GetEnumerator() =>
-        Utf16SpanEnumerator.Create(Source);
+    public CharsSpanEnumerator GetEnumerator() =>
+        CharsSpanEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public Utf16SpanEnumerable Slice(Utf16RuneIndex start, Utf16RuneIndex end) =>
+    public CharsSpanEnumerable Slice(CharsRuneIndex start, CharsRuneIndex end) =>
         new (Source.Slice(start.CharIndex, end.CharIndex - start.CharIndex));
 
     /// <inheritdoc />
-    public bool TryGetRune(Utf16RuneIndex index, out Rune rune, out int codeUnitConsumed)
+    public bool TryGetRune(CharsRuneIndex index, out Rune rune, out int codeUnitConsumed)
     {
         var result = Rune.DecodeFromUtf16(Source.Slice(index.CharIndex), out rune, out codeUnitConsumed);
         return result == OperationStatus.Done;
     }
 
     /// <inheritdoc />
-    public bool TryIncrement(ref Utf16RuneIndex index)
+    public bool TryIncrement(ref CharsRuneIndex index)
     {
         if (index.CharIndex >= Source.Length)
         {
@@ -109,7 +109,7 @@ public readonly ref partial struct Utf16SpanEnumerable(ReadOnlySpan<char> source
     }
 
     /// <inheritdoc />
-    public bool TryDecrement(ref Utf16RuneIndex index)
+    public bool TryDecrement(ref CharsRuneIndex index)
     {
         if(index.CharIndex == 0)
         {
@@ -136,13 +136,13 @@ public readonly ref partial struct Utf16SpanEnumerable(ReadOnlySpan<char> source
 /// </summary>
 /// <param name="source"></param>
 [RuneEnumerable]
-public readonly partial struct Utf16MemoryEnumerable(ReadOnlyMemory<char> source)
-    : IRuneString<Utf16MemoryEnumerable, Utf16MemoryEnumerator, Utf16RuneIndex>
+public readonly partial struct CharsMemoryEnumerable(ReadOnlyMemory<char> source)
+    : IRuneString<CharsMemoryEnumerable, CharsMemoryEnumerator, CharsRuneIndex>
 {
     #region source generated members
 
-    public partial Rune this[Utf16RuneIndex index] { get; }
-    public partial bool TryGetRune(Utf16RuneIndex index, out Rune rune);
+    public partial Rune this[CharsRuneIndex index] { get; }
+    public partial bool TryGetRune(CharsRuneIndex index, out Rune rune);
 
     #endregion
 
@@ -152,22 +152,22 @@ public readonly partial struct Utf16MemoryEnumerable(ReadOnlyMemory<char> source
     public ReadOnlyMemory<char> Source { get; } = source;
 
     /// <inheritdoc />
-    public Utf16MemoryEnumerator GetEnumerator() =>
-        Utf16MemoryEnumerator.Create(Source);
+    public CharsMemoryEnumerator GetEnumerator() =>
+        CharsMemoryEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public Utf16MemoryEnumerable Slice(Utf16RuneIndex start, Utf16RuneIndex end) =>
+    public CharsMemoryEnumerable Slice(CharsRuneIndex start, CharsRuneIndex end) =>
         new(Source.Slice(start.CharIndex, end.CharIndex - start.CharIndex));
 
     /// <inheritdoc />
-    public bool TryGetRune(Utf16RuneIndex index, out Rune rune, out int codeUnitConsumed)
+    public bool TryGetRune(CharsRuneIndex index, out Rune rune, out int codeUnitConsumed)
     {
         var result = Rune.DecodeFromUtf16(Source.Span.Slice(index.CharIndex), out rune, out codeUnitConsumed);
         return result == OperationStatus.Done;
     }
 
     /// <inheritdoc />
-    public bool TryIncrement(ref Utf16RuneIndex index)
+    public bool TryIncrement(ref CharsRuneIndex index)
     {
         if(index.CharIndex >= Source.Length)
         {
@@ -184,7 +184,7 @@ public readonly partial struct Utf16MemoryEnumerable(ReadOnlyMemory<char> source
     }
 
     /// <inheritdoc />
-    public bool TryDecrement(ref Utf16RuneIndex index)
+    public bool TryDecrement(ref CharsRuneIndex index)
     {
         if (index.CharIndex == 0)
         {

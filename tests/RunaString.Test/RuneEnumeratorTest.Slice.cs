@@ -63,15 +63,15 @@ public partial class RuneEnumeratorTest
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
-    public void SliceUtf16Span(string value, int startIndex, int endIndex, string expected)
+    public void SliceCharsSpan(string value, int startIndex, int endIndex, string expected)
     {
-        SliceTestCore<Utf16SpanEnumerable, Utf16SpanEnumerator, Utf16RuneIndex, ReadOnlySpan<char>>(value.AsSpan().AsRuneEnumerable(), startIndex, endIndex, expected);
+        SliceTestCore<CharsSpanEnumerable, CharsSpanEnumerator, CharsRuneIndex, ReadOnlySpan<char>>(value.AsSpan().AsRuneEnumerable(), startIndex, endIndex, expected);
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
-    public void SliceUtf16Memory(string value, int startIndex, int endIndex, string expected)
+    public void SliceCharsMemory(string value, int startIndex, int endIndex, string expected)
     {
-        SliceTestCore<Utf16MemoryEnumerable, Utf16MemoryEnumerator, Utf16RuneIndex, ReadOnlyMemory<char>>(value.AsRuneEnumerable(), startIndex, endIndex, expected);
+        SliceTestCore<CharsMemoryEnumerable, CharsMemoryEnumerator, CharsRuneIndex, ReadOnlyMemory<char>>(value.AsRuneEnumerable(), startIndex, endIndex, expected);
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]

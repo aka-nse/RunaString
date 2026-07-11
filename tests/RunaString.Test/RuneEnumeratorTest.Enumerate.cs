@@ -51,15 +51,15 @@ public partial class RuneEnumeratorTest
     }
 
     [Theory, MemberData(nameof(EnumerateTestCases))]
-    public void EnumerateUtf16Span(string value)
+    public void EnumerateCharsSpan(string value)
     {
-        EnumerateTestCore(value, Utf16SpanEnumerator.Create(value.AsSpan()));
+        EnumerateTestCore(value, CharsSpanEnumerator.Create(value.AsSpan()));
     }
 
     [Theory, MemberData(nameof(EnumerateTestCases))]
-    public void EnumerateUtf16Memory(string value)
+    public void EnumerateCharsMemory(string value)
     {
-        EnumerateTestCore(value, Utf16MemoryEnumerator.Create(value.AsMemory()));
+        EnumerateTestCore(value, CharsMemoryEnumerator.Create(value.AsMemory()));
     }
 
     [Theory, MemberData(nameof(EnumerateTestCases))]

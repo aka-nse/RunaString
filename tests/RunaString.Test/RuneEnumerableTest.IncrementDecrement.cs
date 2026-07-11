@@ -112,18 +112,18 @@ public partial class RuneEnumerableTest
 
     [Theory]
     [MemberData(nameof(IncrementDecrementTestCases))]
-    public void TestIncrementUtf16(string input, int runeIndex)
+    public void TestIncrementChars(string input, int runeIndex)
     {
-        var charIndex = GetUtf16CodeUnitCount(input, 0, runeIndex);
+        var charIndex = GetCharsCodeUnitCount(input, 0, runeIndex);
         var runeLength = input.EnumerateRunes().Count();
         var nextRuneIndex = runeIndex + 1;
-        var index = CreateUtf16RuneIndex(charIndex, runeIndex);
-        var memory = new Utf16MemoryEnumerable(input.AsMemory());
-        var span = new Utf16SpanEnumerable(input.AsSpan());
+        var index = CreateCharsRuneIndex(charIndex, runeIndex);
+        var memory = new CharsMemoryEnumerable(input.AsMemory());
+        var span = new CharsSpanEnumerable(input.AsSpan());
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
-            var nextCharIndex = GetUtf16CodeUnitCount(input, 0, nextRuneIndex);
-            var nextIndex = CreateUtf16RuneIndex(nextCharIndex, nextRuneIndex);
+            var nextCharIndex = GetCharsCodeUnitCount(input, 0, nextRuneIndex);
+            var nextIndex = CreateCharsRuneIndex(nextCharIndex, nextRuneIndex);
             IncrementTestCore_True(memory, index, nextIndex);
             IncrementTestCore_True(span, index, nextIndex);
         }
@@ -201,16 +201,16 @@ public partial class RuneEnumerableTest
     [MemberData(nameof(IncrementDecrementTestCases))]
     public void TestDecrementUtf16(string input, int runeIndex)
     {
-        var charIndex = GetUtf16CodeUnitCount(input, 0, runeIndex);
+        var charIndex = GetCharsCodeUnitCount(input, 0, runeIndex);
         var runeLength = input.EnumerateRunes().Count();
         var nextRuneIndex = runeIndex - 1;
-        var index = CreateUtf16RuneIndex(charIndex, runeIndex);
-        var memory = new Utf16MemoryEnumerable(input.AsMemory());
-        var span = new Utf16SpanEnumerable(input.AsSpan());
+        var index = CreateCharsRuneIndex(charIndex, runeIndex);
+        var memory = new CharsMemoryEnumerable(input.AsMemory());
+        var span = new CharsSpanEnumerable(input.AsSpan());
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
-            var nextCharIndex = GetUtf16CodeUnitCount(input, 0, nextRuneIndex);
-            var nextIndex = CreateUtf16RuneIndex(nextCharIndex, nextRuneIndex);
+            var nextCharIndex = GetCharsCodeUnitCount(input, 0, nextRuneIndex);
+            var nextIndex = CreateCharsRuneIndex(nextCharIndex, nextRuneIndex);
             DecrementTestCore_True(memory, index, nextIndex);
             DecrementTestCore_True(span, index, nextIndex);
         }

@@ -6,11 +6,11 @@ namespace RunaString;
 /// <summary>
 /// An enumerator that iterates over Unicode scalar values (runes) in a UTF-16 encoded buffer.
 /// </summary>
-public ref struct Utf16SpanEnumerator
-    : IRuneEnumerator<Utf16SpanEnumerator, Utf16RuneIndex, ReadOnlySpan<char>>
+public ref struct CharsSpanEnumerator
+    : IRuneEnumerator<CharsSpanEnumerator, CharsRuneIndex, ReadOnlySpan<char>>
 {
     /// <inheritdoc />
-    public static Utf16SpanEnumerator Empty =>
+    public static CharsSpanEnumerator Empty =>
         new([]);
 
     // NOTE: keep order to save size
@@ -21,7 +21,7 @@ public ref struct Utf16SpanEnumerator
     private readonly ReadOnlySpan<char> _buffer;
 
     /// <inheritdoc />
-    public Utf16RuneIndex SeekIndex => new(_currCharIndex, _runePosition);
+    public CharsRuneIndex SeekIndex => new(_currCharIndex, _runePosition);
 
     /// <inheritdoc />
     public Rune Current => _current;
@@ -35,17 +35,17 @@ public ref struct Utf16SpanEnumerator
     /// <inheritdoc />
     public ReadOnlySpan<char> RemainingBuffer => _buffer.Slice(_nextCharIndex);
 
-    private Utf16SpanEnumerator(ReadOnlySpan<char> buffer)
+    private CharsSpanEnumerator(ReadOnlySpan<char> buffer)
     {
         _buffer = buffer;
     }
 
     /// <summary>
-    /// Creates a <see cref="Utf16SpanEnumerator"/> for the specified UTF-16 buffer.
+    /// Creates a <see cref="CharsSpanEnumerator"/> for the specified UTF-16 buffer.
     /// </summary>
     /// <param name="buffer"></param>
     /// <returns></returns>
-    public static Utf16SpanEnumerator Create(ReadOnlySpan<char> buffer) => new(buffer);
+    public static CharsSpanEnumerator Create(ReadOnlySpan<char> buffer) => new(buffer);
 
     /// <inheritdoc />
     public bool MoveNext()
@@ -55,7 +55,7 @@ public ref struct Utf16SpanEnumerator
     }
 
     /// <inheritdoc />
-    public Utf16SpanEnumerator Seek(Utf16RuneIndex index) =>
+    public CharsSpanEnumerator Seek(CharsRuneIndex index) =>
         new(_buffer)
         {
             _currCharIndex = index.CharIndex,
@@ -68,11 +68,11 @@ public ref struct Utf16SpanEnumerator
 /// <summary>
 /// An enumerator that iterates over Unicode scalar values (runes) in a UTF-16 encoded buffer.
 /// </summary>
-public struct Utf16MemoryEnumerator
-    : IRuneEnumerator<Utf16MemoryEnumerator, Utf16RuneIndex, ReadOnlyMemory<char>>
+public struct CharsMemoryEnumerator
+    : IRuneEnumerator<CharsMemoryEnumerator, CharsRuneIndex, ReadOnlyMemory<char>>
 {
     /// <inheritdoc />
-    public static Utf16MemoryEnumerator Empty { get; } =
+    public static CharsMemoryEnumerator Empty { get; } =
         new(ReadOnlyMemory<char>.Empty);
 
     private int _currCharIndex = -1;
@@ -82,7 +82,7 @@ public struct Utf16MemoryEnumerator
     private readonly ReadOnlyMemory<char> _buffer;
 
     /// <inheritdoc />
-    public Utf16RuneIndex SeekIndex => new(_currCharIndex, _runePosition);
+    public CharsRuneIndex SeekIndex => new(_currCharIndex, _runePosition);
 
     /// <inheritdoc />
     public Rune Current => _current;
@@ -96,17 +96,17 @@ public struct Utf16MemoryEnumerator
     /// <inheritdoc />
     public ReadOnlyMemory<char> RemainingBuffer => _buffer.Slice(_nextCharIndex);
 
-    private Utf16MemoryEnumerator(ReadOnlyMemory<char> buffer)
+    private CharsMemoryEnumerator(ReadOnlyMemory<char> buffer)
     {
         _buffer = buffer;
     }
 
     /// <summary>
-    /// Creates a <see cref="Utf16MemoryEnumerator"/> for the specified UTF-16 buffer.
+    /// Creates a <see cref="CharsMemoryEnumerator"/> for the specified UTF-16 buffer.
     /// </summary>
     /// <param name="buffer"></param>
     /// <returns></returns>
-    public static Utf16MemoryEnumerator Create(ReadOnlyMemory<char> buffer) => new(buffer);
+    public static CharsMemoryEnumerator Create(ReadOnlyMemory<char> buffer) => new(buffer);
 
     /// <inheritdoc />
     public bool MoveNext()
@@ -116,7 +116,7 @@ public struct Utf16MemoryEnumerator
     }
 
     /// <inheritdoc />
-    public Utf16MemoryEnumerator Seek(Utf16RuneIndex index) =>
+    public CharsMemoryEnumerator Seek(CharsRuneIndex index) =>
         new(_buffer)
         {
             _currCharIndex = index.CharIndex,

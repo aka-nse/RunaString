@@ -12,7 +12,7 @@ public partial class RuneEnumerableTest
         .Sum();
 
 
-    private static int GetUtf16CodeUnitCount(string s, int start, int count) =>
+    private static int GetCharsCodeUnitCount(string s, int start, int count) =>
         s.EnumerateRunes()
         .Skip(start)
         .Take(count)
@@ -29,7 +29,7 @@ public partial class RuneEnumerableTest
     private static extern Utf8RuneIndex CreateUtf8RuneIndex(int byteIndex, int runePosition);
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern Utf16RuneIndex CreateUtf16RuneIndex(int charIndex, int runePosition);
+    private static extern CharsRuneIndex CreateCharsRuneIndex(int charIndex, int runePosition);
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     private static extern Utf32RuneIndex CreateUtf32RuneIndex(int runePosition);
