@@ -7,7 +7,7 @@ namespace RunaString;
 /// An enumerator that iterates over Unicode scalar values (runes) in a UTF-8 encoded buffer.
 /// </summary>
 public ref struct Utf8SpanEnumerator
-    : IRuneEnumerator<Utf8SpanEnumerator, Utf8RuneIndex, ReadOnlySpan<byte>>
+    : IRuneEnumerator<Utf8SpanEnumerator, Utf8Index, ReadOnlySpan<byte>>
 {
     /// <inheritdoc />
     public static Utf8SpanEnumerator Empty =>
@@ -23,7 +23,7 @@ public ref struct Utf8SpanEnumerator
     internal readonly int NextByteIndex => _nextByteIndex;
 
     /// <inheritdoc />
-    public Utf8RuneIndex SeekIndex => new(_currByteIndex, _runePosition);
+    public Utf8Index SeekIndex => new(_currByteIndex, _runePosition);
 
     /// <inheritdoc />
     public Rune Current => _current;
@@ -78,7 +78,7 @@ public ref struct Utf8SpanEnumerator
     }
 
     /// <inheritdoc />
-    public Utf8SpanEnumerator Seek(Utf8RuneIndex index) =>
+    public Utf8SpanEnumerator Seek(Utf8Index index) =>
         new(_utf8Buffer)
     {
         _currByteIndex = index.ByteIndex,
@@ -92,7 +92,7 @@ public ref struct Utf8SpanEnumerator
 /// An enumerator that iterates over Unicode scalar values (runes) in a UTF-8 encoded buffer.
 /// </summary>
 public struct Utf8MemoryEnumerator
-    : IRuneEnumerator<Utf8MemoryEnumerator, Utf8RuneIndex, ReadOnlyMemory<byte>>
+    : IRuneEnumerator<Utf8MemoryEnumerator, Utf8Index, ReadOnlyMemory<byte>>
 {
     /// <inheritdoc />
     public static Utf8MemoryEnumerator Empty { get; } =
@@ -108,7 +108,7 @@ public struct Utf8MemoryEnumerator
     internal readonly int NextByteIndex => _nextByteIndex;
 
     /// <inheritdoc />
-    public Utf8RuneIndex SeekIndex => new(_currByteIndex, _runePosition);
+    public Utf8Index SeekIndex => new(_currByteIndex, _runePosition);
 
     /// <inheritdoc />
     public Rune Current => _current;
@@ -163,7 +163,7 @@ public struct Utf8MemoryEnumerator
     }
 
     /// <inheritdoc />
-    public Utf8MemoryEnumerator Seek(Utf8RuneIndex index) =>
+    public Utf8MemoryEnumerator Seek(Utf8Index index) =>
         new(_utf8Buffer)
         {
             _currByteIndex = index.ByteIndex,

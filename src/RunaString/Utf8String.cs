@@ -8,16 +8,16 @@ namespace RunaString;
 /// <summary>
 /// Represents an immutable UTF-8 encoded string.
 /// </summary>
-[RuneEnumerable]
+[RunaString]
 public readonly partial struct Utf8String
-    : IRuneString<Utf8String, Utf8MemoryEnumerator, Utf8RuneIndex>
+    : IRunaString<Utf8String, Utf8MemoryEnumerator, Utf8Index>
     , IComparable<Utf8String>
     , IEquatable<Utf8String>
 {
     #region source generated members
 
-    public partial Rune this[Utf8RuneIndex index] { get; }
-    public partial bool TryGetRune(Utf8RuneIndex index, out Rune rune);
+    public partial Rune this[Utf8Index index] { get; }
+    public partial bool TryGetRune(Utf8Index index, out Rune rune);
 
     #endregion
 
@@ -98,7 +98,7 @@ public readonly partial struct Utf8String
     }
 
     /// <inheritdoc />
-    public Utf8String Slice(Utf8RuneIndex start, Utf8RuneIndex end)
+    public Utf8String Slice(Utf8Index start, Utf8Index end)
     {
         var byteStart = _byteStart + start.ByteIndex;
         var byteLength = end.ByteIndex - start.ByteIndex;
@@ -115,14 +115,14 @@ public readonly partial struct Utf8String
     }
 
     /// <inheritdoc />
-    public bool TryGetRune(Utf8RuneIndex index, out Rune rune, out int codeUnitConsumed)
+    public bool TryGetRune(Utf8Index index, out Rune rune, out int codeUnitConsumed)
     {
         var result = Rune.DecodeFromUtf8(Buffer.Span.Slice(index.ByteIndex), out rune, out codeUnitConsumed);
         return result == OperationStatus.Done;
     }
 
     /// <inheritdoc />
-    public bool TryIncrement(ref Utf8RuneIndex index)
+    public bool TryIncrement(ref Utf8Index index)
     {
         Rune.DecodeFromUtf8(Buffer.Span.Slice(index.ByteIndex), out _, out var codeUnitConsumed);
         var newByteIndex = index.ByteIndex + codeUnitConsumed;
@@ -135,7 +135,7 @@ public readonly partial struct Utf8String
     }
 
     /// <inheritdoc />
-    public bool TryDecrement(ref Utf8RuneIndex index)
+    public bool TryDecrement(ref Utf8Index index)
     {
         var newByteIndex = index.ByteIndex - 1;
         while(newByteIndex >= 0)

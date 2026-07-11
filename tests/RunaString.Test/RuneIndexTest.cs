@@ -5,29 +5,29 @@ namespace RunaString.Test;
 public partial class RuneIndexTest
 {
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = ".ctor")]
-    private static extern void ctor_Utf8Index(ref Utf8RuneIndex index, int byteIndex, int runePosition);
-    private static Utf8RuneIndex CreateUtf8Index(int byteIndex, int runePosition)
+    private static extern void ctor_Utf8Index(ref Utf8Index index, int byteIndex, int runePosition);
+    private static Utf8Index CreateUtf8Index(int byteIndex, int runePosition)
     {
-        Utf8RuneIndex index = default;
+        Utf8Index index = default;
         ctor_Utf8Index(ref index, byteIndex, runePosition);
         return index;
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = ".ctor")]
-    private static extern void ctor_Utf16Index(ref Utf16RuneIndex index, int charIndex, int runePosition);
-    private static Utf16RuneIndex CreateUtf16Index(int charIndex, int runePosition)
+    private static extern void ctor_CharsIndex(ref CharsIndex index, int charIndex, int runePosition);
+    private static CharsIndex CreateCharsIndex(int charIndex, int runePosition)
     {
-        Utf16RuneIndex index = default;
-        ctor_Utf16Index(ref index, charIndex, runePosition);
+        CharsIndex index = default;
+        ctor_CharsIndex(ref index, charIndex, runePosition);
         return index;
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = ".ctor")]
-    private static extern void ctor_Utf32Index(ref Utf32RuneIndex index, int runePosition);
-    private static Utf32RuneIndex CreateUtf32Index(int runePosition)
+    private static extern void ctor_RunesIndex(ref RunesIndex index, int runePosition);
+    private static RunesIndex CreateRunesIndex(int runePosition)
     {
-        Utf32RuneIndex index = default;
-        ctor_Utf32Index(ref index, runePosition);
+        RunesIndex index = default;
+        ctor_RunesIndex(ref index, runePosition);
         return index;
     }
 
@@ -40,17 +40,17 @@ public partial class RuneIndexTest
             { CreateUtf8Index(10, 5), CreateUtf8Index(100, 50), -1 },
             { CreateUtf8Index(100, 50), CreateUtf8Index(10, 5), 1 },
 
-            { CreateUtf16Index(0, 0), CreateUtf16Index(0, 0), 0 },
-            { CreateUtf16Index(1, 1), CreateUtf16Index(1, 1), 0 },
-            { CreateUtf16Index(60, 50), CreateUtf16Index(60, 50), 0 },
-            { CreateUtf16Index(6, 5), CreateUtf16Index(60, 50), -1 },
-            { CreateUtf16Index(60, 50), CreateUtf16Index(6, 5), 1 },
+            { CreateCharsIndex(0, 0), CreateCharsIndex(0, 0), 0 },
+            { CreateCharsIndex(1, 1), CreateCharsIndex(1, 1), 0 },
+            { CreateCharsIndex(60, 50), CreateCharsIndex(60, 50), 0 },
+            { CreateCharsIndex(6, 5), CreateCharsIndex(60, 50), -1 },
+            { CreateCharsIndex(60, 50), CreateCharsIndex(6, 5), 1 },
 
-            { CreateUtf32Index(0), CreateUtf32Index(0), 0 },
-            { CreateUtf32Index(1), CreateUtf32Index(1), 0 },
-            { CreateUtf32Index(50), CreateUtf32Index(50), 0 },
-            { CreateUtf32Index(5), CreateUtf32Index(50), -1 },
-            { CreateUtf32Index(50), CreateUtf32Index(5), 1 },
+            { CreateRunesIndex(0), CreateRunesIndex(0), 0 },
+            { CreateRunesIndex(1), CreateRunesIndex(1), 0 },
+            { CreateRunesIndex(50), CreateRunesIndex(50), 0 },
+            { CreateRunesIndex(5), CreateRunesIndex(50), -1 },
+            { CreateRunesIndex(50), CreateRunesIndex(5), 1 },
         };
 
 

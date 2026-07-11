@@ -4,45 +4,45 @@ using SourceGeneratorToolkit;
 namespace RunaString.InternalGenerators;
 
 [Generator(LanguageNames.CSharp)]
-public class RuneEnumerableBoilerplateGenerator : IIncrementalGenerator
+public class RunaStringBoilerplateGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         context.RegisterPostInitializationOutput(static cxt =>
         {
             cxt.AddSource(
-                $"RuneEnumerable.Attribute.g.cs",
+                $"RunaString.Attribute.g.cs",
                 """
                 using System;
                 namespace RunaString;
 
                 [AttributeUsage(AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
-                internal sealed class RuneEnumerableAttribute : Attribute
+                internal sealed class RunaStringAttribute : Attribute
                 {
                 }
                 """);
         });
         var source = context.SyntaxProvider.ForAttributeWithMetadataName(
-            "RunaString.RuneEnumerableAttribute",
+            "RunaString.RunaStringAttribute",
             static (node, token) => true,
             Transform);
         context.RegisterSourceOutput(source, Emit);
     }
 
-    private static RuneEnumerableInfo Transform(GeneratorAttributeSyntaxContext context, CancellationToken token)
+    private static RunaStringInfo Transform(GeneratorAttributeSyntaxContext context, CancellationToken token)
     {
-        var enumerableSymbol = (INamedTypeSymbol)context.TargetSymbol;
-        var interfaceSymbol = enumerableSymbol.Interfaces.Single(static i => i.Name == "IRuneString");
+        var stringSymbol = (INamedTypeSymbol)context.TargetSymbol;
+        var interfaceSymbol = stringSymbol.Interfaces.Single(static i => i.Name == "IRunaString");
         var enumeratorSymbol = (INamedTypeSymbol)interfaceSymbol.TypeArguments[1];
         var indexSymbol = (INamedTypeSymbol)interfaceSymbol.TypeArguments[2];
         return new(
-            enumerableSymbol.IsRefLikeType,
-            enumerableSymbol.Name,
+            stringSymbol.IsRefLikeType,
+            stringSymbol.Name,
             interfaceSymbol.Name,
             indexSymbol.Name);
     }
 
-    private static void Emit(SourceProductionContext context, RuneEnumerableInfo source)
+    private static void Emit(SourceProductionContext context, RunaStringInfo source)
     {
         var sb = new SourceBuilderSlim();
         sb.AppendLine("""
@@ -54,11 +54,11 @@ public class RuneEnumerableBoilerplateGenerator : IIncrementalGenerator
         sb.AppendLine();
         if (source.IsRefStruct)
         {
-            sb.AppendLine($"ref partial struct {source.EnumerableTypeName}");
+            sb.AppendLine($"ref partial struct {source.StringTypeName}");
         }
         else
         {
-            sb.AppendLine($"partial struct {source.EnumerableTypeName}");
+            sb.AppendLine($"partial struct {source.StringTypeName}");
         }
         sb.AppendLine($$"""
             {
@@ -76,14 +76,14 @@ public class RuneEnumerableBoilerplateGenerator : IIncrementalGenerator
 
         var code = sb.Build();
         context.AddSource(
-            $"{source.EnumerableTypeName}.g.cs",
+            $"{source.StringTypeName}.g.cs",
             code);
     }
 
 
-    private record RuneEnumerableInfo(
+    private record RunaStringInfo(
         bool IsRefStruct,
-        string EnumerableTypeName,
+        string StringTypeName,
         string EnumeratorTypeName,
         string IndexTypeName);
 }

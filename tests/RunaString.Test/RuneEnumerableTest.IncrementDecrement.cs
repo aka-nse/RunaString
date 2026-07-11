@@ -83,13 +83,13 @@ public partial class RuneEnumerableTest
         var charIndex = GetUtf8CodeUnitCount(input, 0, runeIndex);
         var runeLength = input.EnumerateRunes().Count();
         var nextRuneIndex = runeIndex + 1;
-        var index = CreateUtf8RuneIndex(charIndex, runeIndex);
+        var index = CreateUtf8Index(charIndex, runeIndex);
         var memory = Utf8String.DangerousFromUtf8([.. bytes], 0, bytes.Length);
         var span = Utf8Span.DangerousFromSpan(bytes);
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
             var nextCharIndex = GetUtf8CodeUnitCount(input, 0, nextRuneIndex);
-            var nextIndex = CreateUtf8RuneIndex(nextCharIndex, nextRuneIndex);
+            var nextIndex = CreateUtf8Index(nextCharIndex, nextRuneIndex);
             IncrementTestCore_True(
                 memory,
                 index,
@@ -112,18 +112,18 @@ public partial class RuneEnumerableTest
 
     [Theory]
     [MemberData(nameof(IncrementDecrementTestCases))]
-    public void TestIncrementUtf16(string input, int runeIndex)
+    public void TestIncrementChars(string input, int runeIndex)
     {
-        var charIndex = GetUtf16CodeUnitCount(input, 0, runeIndex);
+        var charIndex = GetCharsCodeUnitCount(input, 0, runeIndex);
         var runeLength = input.EnumerateRunes().Count();
         var nextRuneIndex = runeIndex + 1;
-        var index = CreateUtf16RuneIndex(charIndex, runeIndex);
-        var memory = new Utf16MemoryEnumerable(input.AsMemory());
-        var span = new Utf16SpanEnumerable(input.AsSpan());
+        var index = CreateCharsIndex(charIndex, runeIndex);
+        var memory = new CharsMemoryString(input.AsMemory());
+        var span = new CharsSpanString(input.AsSpan());
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
-            var nextCharIndex = GetUtf16CodeUnitCount(input, 0, nextRuneIndex);
-            var nextIndex = CreateUtf16RuneIndex(nextCharIndex, nextRuneIndex);
+            var nextCharIndex = GetCharsCodeUnitCount(input, 0, nextRuneIndex);
+            var nextIndex = CreateCharsIndex(nextCharIndex, nextRuneIndex);
             IncrementTestCore_True(memory, index, nextIndex);
             IncrementTestCore_True(span, index, nextIndex);
         }
@@ -136,17 +136,17 @@ public partial class RuneEnumerableTest
 
     [Theory]
     [MemberData(nameof(IncrementDecrementTestCases))]
-    public void TestIncrementUtf32(string input, int runeIndex)
+    public void TestIncrementRunes(string input, int runeIndex)
     {
         var runes = input.EnumerateRunes().ToArray();
         var runeLength = input.EnumerateRunes().Count();
         var nextRuneIndex = runeIndex + 1;
-        var index = CreateUtf32RuneIndex(runeIndex);
-        var memory = new Utf32MemoryEnumerable(runes);
-        var span = new Utf32SpanEnumerable(runes);
+        var index = CreateRunesIndex(runeIndex);
+        var memory = new RunesMemoryString(runes);
+        var span = new RunesSpanString(runes);
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
-            var nextIndex = CreateUtf32RuneIndex(nextRuneIndex);
+            var nextIndex = CreateRunesIndex(nextRuneIndex);
             IncrementTestCore_True(memory, index, nextIndex);
             IncrementTestCore_True(span, index, nextIndex);
         }
@@ -158,7 +158,7 @@ public partial class RuneEnumerableTest
     }
 
     private static void IncrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
-        where TStr : IRuneString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaString<TStr, TIndex>, allows ref struct
         where TIndex : struct, ISeekIndex
     {
         Assert.True(input.TryIncrement(ref index));
@@ -166,7 +166,7 @@ public partial class RuneEnumerableTest
     }
 
     private static void IncrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
-        where TStr : IRuneString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaString<TStr, TIndex>, allows ref struct
         where TIndex : struct, ISeekIndex
     {
         Assert.False(input.TryIncrement(ref index));
@@ -180,13 +180,13 @@ public partial class RuneEnumerableTest
         var charIndex = GetUtf8CodeUnitCount(input, 0, runeIndex);
         var runeLength = input.EnumerateRunes().Count();
         var nextRuneIndex = runeIndex - 1;
-        var index = CreateUtf8RuneIndex(charIndex, runeIndex);
+        var index = CreateUtf8Index(charIndex, runeIndex);
         var memory = Utf8String.DangerousFromUtf8([.. bytes], 0, bytes.Length);
         var span = Utf8Span.DangerousFromSpan(bytes);
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
             var nextCharIndex = GetUtf8CodeUnitCount(input, 0, nextRuneIndex);
-            var nextIndex = CreateUtf8RuneIndex(nextCharIndex, nextRuneIndex);
+            var nextIndex = CreateUtf8Index(nextCharIndex, nextRuneIndex);
             DecrementTestCore_True(memory, index, nextIndex);
             DecrementTestCore_True(span, index, nextIndex);
         }
@@ -201,16 +201,16 @@ public partial class RuneEnumerableTest
     [MemberData(nameof(IncrementDecrementTestCases))]
     public void TestDecrementUtf16(string input, int runeIndex)
     {
-        var charIndex = GetUtf16CodeUnitCount(input, 0, runeIndex);
+        var charIndex = GetCharsCodeUnitCount(input, 0, runeIndex);
         var runeLength = input.EnumerateRunes().Count();
         var nextRuneIndex = runeIndex - 1;
-        var index = CreateUtf16RuneIndex(charIndex, runeIndex);
-        var memory = new Utf16MemoryEnumerable(input.AsMemory());
-        var span = new Utf16SpanEnumerable(input.AsSpan());
+        var index = CreateCharsIndex(charIndex, runeIndex);
+        var memory = new CharsMemoryString(input.AsMemory());
+        var span = new CharsSpanString(input.AsSpan());
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
-            var nextCharIndex = GetUtf16CodeUnitCount(input, 0, nextRuneIndex);
-            var nextIndex = CreateUtf16RuneIndex(nextCharIndex, nextRuneIndex);
+            var nextCharIndex = GetCharsCodeUnitCount(input, 0, nextRuneIndex);
+            var nextIndex = CreateCharsIndex(nextCharIndex, nextRuneIndex);
             DecrementTestCore_True(memory, index, nextIndex);
             DecrementTestCore_True(span, index, nextIndex);
         }
@@ -223,17 +223,17 @@ public partial class RuneEnumerableTest
 
     [Theory]
     [MemberData(nameof(IncrementDecrementTestCases))]
-    public void TestDecrementUtf32(string input, int runeIndex)
+    public void TestDecrementRunes(string input, int runeIndex)
     {
         var runes = input.EnumerateRunes().ToArray();
         var runeLength = input.EnumerateRunes().Count();
         var nextRuneIndex = runeIndex - 1;
-        var index = CreateUtf32RuneIndex(runeIndex);
-        var memory = new Utf32MemoryEnumerable(runes);
-        var span = new Utf32SpanEnumerable(runes);
+        var index = CreateRunesIndex(runeIndex);
+        var memory = new RunesMemoryString(runes);
+        var span = new RunesSpanString(runes);
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
-            var nextIndex = CreateUtf32RuneIndex(nextRuneIndex);
+            var nextIndex = CreateRunesIndex(nextRuneIndex);
             DecrementTestCore_True(memory, index, nextIndex);
             DecrementTestCore_True(span, index, nextIndex);
         }
@@ -245,7 +245,7 @@ public partial class RuneEnumerableTest
     }
 
     private static void DecrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
-        where TStr : IRuneString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaString<TStr, TIndex>, allows ref struct
         where TIndex : struct, ISeekIndex
     {
         Assert.True(input.TryDecrement(ref index));
@@ -253,7 +253,7 @@ public partial class RuneEnumerableTest
     }
 
     private static void DecrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
-        where TStr : IRuneString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaString<TStr, TIndex>, allows ref struct
         where TIndex : struct, ISeekIndex
     {
         Assert.False(input.TryDecrement(ref index));
