@@ -62,7 +62,7 @@ public static class RuneEnumerable
 /// <param name="source"></param>
 [RuneEnumerable]
 public readonly ref partial struct Utf16SpanEnumerable(ReadOnlySpan<char> source)
-    : IRuneEnumerable<Utf16SpanEnumerable, Utf16SpanEnumerator, Utf16RuneIndex>
+    : IRuneString<Utf16SpanEnumerable, Utf16SpanEnumerator, Utf16RuneIndex>
 {
     #region source generated members
 
@@ -137,7 +137,7 @@ public readonly ref partial struct Utf16SpanEnumerable(ReadOnlySpan<char> source
 /// <param name="source"></param>
 [RuneEnumerable]
 public readonly partial struct Utf16MemoryEnumerable(ReadOnlyMemory<char> source)
-    : IRuneEnumerable<Utf16MemoryEnumerable, Utf16MemoryEnumerator, Utf16RuneIndex>
+    : IRuneString<Utf16MemoryEnumerable, Utf16MemoryEnumerator, Utf16RuneIndex>
 {
     #region source generated members
 
@@ -212,7 +212,7 @@ public readonly partial struct Utf16MemoryEnumerable(ReadOnlyMemory<char> source
 /// <param name="source"></param>
 [RuneEnumerable]
 public readonly ref partial struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source)
-    : IRuneEnumerable<Utf32SpanEnumerable, Utf32SpanEnumerator, Utf32RuneIndex>
+    : IRuneString<Utf32SpanEnumerable, Utf32SpanEnumerator, Utf32RuneIndex>
 {
     #region source generated members
 
@@ -296,7 +296,7 @@ public readonly ref partial struct Utf32SpanEnumerable(ReadOnlySpan<Rune> source
 /// <param name="source"></param>
 [RuneEnumerable]
 public readonly partial struct Utf32MemoryEnumerable(ReadOnlyMemory<Rune> source)
-    : IRuneEnumerable<Utf32MemoryEnumerable, Utf32MemoryEnumerator, Utf32RuneIndex>
+    : IRuneString<Utf32MemoryEnumerable, Utf32MemoryEnumerator, Utf32RuneIndex>
 {
     #region source generated members
 

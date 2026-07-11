@@ -32,7 +32,7 @@ public class RuneEnumerableBoilerplateGenerator : IIncrementalGenerator
     private static RuneEnumerableInfo Transform(GeneratorAttributeSyntaxContext context, CancellationToken token)
     {
         var enumerableSymbol = (INamedTypeSymbol)context.TargetSymbol;
-        var interfaceSymbol = enumerableSymbol.Interfaces.Single(static i => i.Name == "IRuneEnumerable");
+        var interfaceSymbol = enumerableSymbol.Interfaces.Single(static i => i.Name == "IRuneString");
         var enumeratorSymbol = (INamedTypeSymbol)interfaceSymbol.TypeArguments[1];
         var indexSymbol = (INamedTypeSymbol)interfaceSymbol.TypeArguments[2];
         return new(

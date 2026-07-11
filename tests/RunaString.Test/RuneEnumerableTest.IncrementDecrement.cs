@@ -90,21 +90,21 @@ public partial class RuneEnumerableTest
         {
             var nextCharIndex = GetUtf8CodeUnitCount(input, 0, nextRuneIndex);
             var nextIndex = CreateUtf8RuneIndex(nextCharIndex, nextRuneIndex);
-            IncrementTestCore_True<Utf8String, Utf8MemoryEnumerator, Utf8RuneIndex>(
+            IncrementTestCore_True(
                 memory,
                 index,
                 nextIndex);
-            IncrementTestCore_True<Utf8Span, Utf8SpanEnumerator, Utf8RuneIndex>(
+            IncrementTestCore_True(
                 span,
                 index,
                 nextIndex);
         }
         else
         {
-            IncrementTestCore_False<Utf8String, Utf8MemoryEnumerator, Utf8RuneIndex>(
+            IncrementTestCore_False(
                 memory,
                 index);
-            IncrementTestCore_False<Utf8Span, Utf8SpanEnumerator, Utf8RuneIndex>(
+            IncrementTestCore_False(
                 span,
                 index);
         }
@@ -124,23 +124,13 @@ public partial class RuneEnumerableTest
         {
             var nextCharIndex = GetUtf16CodeUnitCount(input, 0, nextRuneIndex);
             var nextIndex = CreateUtf16RuneIndex(nextCharIndex, nextRuneIndex);
-            IncrementTestCore_True<Utf16MemoryEnumerable, Utf16MemoryEnumerator, Utf16RuneIndex>(
-                memory,
-                index,
-                nextIndex);
-            IncrementTestCore_True<Utf16SpanEnumerable, Utf16SpanEnumerator, Utf16RuneIndex>(
-                span,
-                index,
-                nextIndex);
+            IncrementTestCore_True(memory, index, nextIndex);
+            IncrementTestCore_True(span, index, nextIndex);
         }
         else
         {
-            IncrementTestCore_False<Utf16MemoryEnumerable, Utf16MemoryEnumerator, Utf16RuneIndex>(
-                memory,
-                index);
-            IncrementTestCore_False<Utf16SpanEnumerable, Utf16SpanEnumerator, Utf16RuneIndex>(
-                span,
-                index);
+            IncrementTestCore_False(memory, index);
+            IncrementTestCore_False(span, index);
         }
     }
 
@@ -157,38 +147,26 @@ public partial class RuneEnumerableTest
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
             var nextIndex = CreateUtf32RuneIndex(nextRuneIndex);
-            IncrementTestCore_True<Utf32MemoryEnumerable, Utf32MemoryEnumerator, Utf32RuneIndex>(
-                memory,
-                index,
-                nextIndex);
-            IncrementTestCore_True<Utf32SpanEnumerable, Utf32SpanEnumerator, Utf32RuneIndex>(
-                span,
-                index,
-                nextIndex);
+            IncrementTestCore_True(memory, index, nextIndex);
+            IncrementTestCore_True(span, index, nextIndex);
         }
         else
         {
-            IncrementTestCore_False<Utf32MemoryEnumerable, Utf32MemoryEnumerator, Utf32RuneIndex>(
-                memory,
-                index);
-            IncrementTestCore_False<Utf32SpanEnumerable, Utf32SpanEnumerator, Utf32RuneIndex>(
-                span,
-                index);
+            IncrementTestCore_False(memory, index);
+            IncrementTestCore_False(span, index);
         }
     }
 
-    private static void IncrementTestCore_True<TStr, TEnumerator, TIndex>(TStr input, TIndex index, TIndex expected)
-        where TStr : IRuneEnumerable<TStr, TEnumerator, TIndex>, allows ref struct
-        where TEnumerator : IRuneEnumerator<TEnumerator>, allows ref struct
+    private static void IncrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
+        where TStr : IRuneString<TStr, TIndex>, allows ref struct
         where TIndex : struct, ISeekIndex
     {
         Assert.True(input.TryIncrement(ref index));
         Assert.Equal(expected, index);
     }
 
-    private static void IncrementTestCore_False<TStr, TEnumerator, TIndex>(TStr input, TIndex index)
-        where TStr : IRuneEnumerable<TStr, TEnumerator, TIndex>, allows ref struct
-        where TEnumerator : IRuneEnumerator<TEnumerator>, allows ref struct
+    private static void IncrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
+        where TStr : IRuneString<TStr, TIndex>, allows ref struct
         where TIndex : struct, ISeekIndex
     {
         Assert.False(input.TryIncrement(ref index));
@@ -209,23 +187,13 @@ public partial class RuneEnumerableTest
         {
             var nextCharIndex = GetUtf8CodeUnitCount(input, 0, nextRuneIndex);
             var nextIndex = CreateUtf8RuneIndex(nextCharIndex, nextRuneIndex);
-            DecrementTestCore_True<Utf8String, Utf8MemoryEnumerator, Utf8RuneIndex>(
-                memory,
-                index,
-                nextIndex);
-            DecrementTestCore_True<Utf8Span, Utf8SpanEnumerator, Utf8RuneIndex>(
-                span,
-                index,
-                nextIndex);
+            DecrementTestCore_True(memory, index, nextIndex);
+            DecrementTestCore_True(span, index, nextIndex);
         }
         else
         {
-            DecrementTestCore_False<Utf8String, Utf8MemoryEnumerator, Utf8RuneIndex>(
-                memory,
-                index);
-            DecrementTestCore_False<Utf8Span, Utf8SpanEnumerator, Utf8RuneIndex>(
-                span,
-                index);
+            DecrementTestCore_False(memory, index);
+            DecrementTestCore_False(span, index);
         }
     }
 
@@ -243,23 +211,13 @@ public partial class RuneEnumerableTest
         {
             var nextCharIndex = GetUtf16CodeUnitCount(input, 0, nextRuneIndex);
             var nextIndex = CreateUtf16RuneIndex(nextCharIndex, nextRuneIndex);
-            DecrementTestCore_True<Utf16MemoryEnumerable, Utf16MemoryEnumerator, Utf16RuneIndex>(
-                memory,
-                index,
-                nextIndex);
-            DecrementTestCore_True<Utf16SpanEnumerable, Utf16SpanEnumerator, Utf16RuneIndex>(
-                span,
-                index,
-                nextIndex);
+            DecrementTestCore_True(memory, index, nextIndex);
+            DecrementTestCore_True(span, index, nextIndex);
         }
         else
         {
-            DecrementTestCore_False<Utf16MemoryEnumerable, Utf16MemoryEnumerator, Utf16RuneIndex>(
-                memory,
-                index);
-            DecrementTestCore_False<Utf16SpanEnumerable, Utf16SpanEnumerator, Utf16RuneIndex>(
-                span,
-                index);
+            DecrementTestCore_False(memory, index);
+            DecrementTestCore_False(span, index);
         }
     }
 
@@ -276,38 +234,26 @@ public partial class RuneEnumerableTest
         if ((uint)nextRuneIndex < (uint)runeLength)
         {
             var nextIndex = CreateUtf32RuneIndex(nextRuneIndex);
-            DecrementTestCore_True<Utf32MemoryEnumerable, Utf32MemoryEnumerator, Utf32RuneIndex>(
-                memory,
-                index,
-                nextIndex);
-            DecrementTestCore_True<Utf32SpanEnumerable, Utf32SpanEnumerator, Utf32RuneIndex>(
-                span,
-                index,
-                nextIndex);
+            DecrementTestCore_True(memory, index, nextIndex);
+            DecrementTestCore_True(span, index, nextIndex);
         }
         else
         {
-            DecrementTestCore_False<Utf32MemoryEnumerable, Utf32MemoryEnumerator, Utf32RuneIndex>(
-                memory,
-                index);
-            DecrementTestCore_False<Utf32SpanEnumerable, Utf32SpanEnumerator, Utf32RuneIndex>(
-                span,
-                index);
+            DecrementTestCore_False(memory, index);
+            DecrementTestCore_False(span, index);
         }
     }
 
-    private static void DecrementTestCore_True<TStr, TEnumerator, TIndex>(TStr input, TIndex index, TIndex expected)
-        where TStr : IRuneEnumerable<TStr, TEnumerator, TIndex>, allows ref struct
-        where TEnumerator : IRuneEnumerator<TEnumerator>, allows ref struct
+    private static void DecrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
+        where TStr : IRuneString<TStr, TIndex>, allows ref struct
         where TIndex : struct, ISeekIndex
     {
         Assert.True(input.TryDecrement(ref index));
         Assert.Equal(expected, index);
     }
 
-    private static void DecrementTestCore_False<TStr, TEnumerator, TIndex>(TStr input, TIndex index)
-        where TStr : IRuneEnumerable<TStr, TEnumerator, TIndex>, allows ref struct
-        where TEnumerator : IRuneEnumerator<TEnumerator>, allows ref struct
+    private static void DecrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
+        where TStr : IRuneString<TStr, TIndex>, allows ref struct
         where TIndex : struct, ISeekIndex
     {
         Assert.False(input.TryDecrement(ref index));

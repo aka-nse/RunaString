@@ -1,6 +1,5 @@
 using System.Buffers;
 using System.Collections.Immutable;
-using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -11,7 +10,7 @@ namespace RunaString;
 /// </summary>
 [RuneEnumerable]
 public readonly partial struct Utf8String
-    : IRuneEnumerable<Utf8String, Utf8MemoryEnumerator, Utf8RuneIndex>
+    : IRuneString<Utf8String, Utf8MemoryEnumerator, Utf8RuneIndex>
     , IComparable<Utf8String>
     , IEquatable<Utf8String>
 {
