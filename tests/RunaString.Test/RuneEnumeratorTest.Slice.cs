@@ -50,8 +50,8 @@ public partial class RuneEnumeratorTest
     public void SliceUtf8Span(string value, int startIndex, int endIndex, string expected)
     {
         var utf8 = Encoding.UTF8.GetBytes(value);
-        var span = Utf8Span.DangerousFromSpan(utf8);
-        SliceTestCore<Utf8Span, Utf8SpanEnumerator, Utf8Index, ReadOnlySpan<byte>>(span, startIndex, endIndex, expected);
+        var span = Utf8SpanString.DangerousFromSpan(utf8);
+        SliceTestCore<Utf8SpanString, Utf8SpanEnumerator, Utf8Index, ReadOnlySpan<byte>>(span, startIndex, endIndex, expected);
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
@@ -71,7 +71,7 @@ public partial class RuneEnumeratorTest
     [Theory, MemberData(nameof(SliceTestCases))]
     public void SliceCharsMemory(string value, int startIndex, int endIndex, string expected)
     {
-        SliceTestCore<CharsMemoryString, CharsMemoryEnumerator, CharsIndex, ReadOnlyMemory<char>>(value.AsRunaString(), startIndex, endIndex, expected);
+        SliceTestCore<CharsString, CharsMemoryEnumerator, CharsIndex, ReadOnlyMemory<char>>(value.AsRunaString(), startIndex, endIndex, expected);
     }
 
     [Theory, MemberData(nameof(SliceTestCases))]
@@ -87,6 +87,6 @@ public partial class RuneEnumeratorTest
     {
         var runes = value.EnumerateRunes().ToImmutableArray();
         var memory = runes.AsMemory().AsRunaString();
-        SliceTestCore<RunesMemoryString, RunesMemoryEnumerator, RunesIndex, ReadOnlyMemory<Rune>>(memory, startIndex, endIndex, expected);
+        SliceTestCore<RunesString, RunesMemoryEnumerator, RunesIndex, ReadOnlyMemory<Rune>>(memory, startIndex, endIndex, expected);
     }
 }

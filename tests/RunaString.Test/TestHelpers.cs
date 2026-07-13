@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace RunaString.Test;
 
@@ -26,27 +27,14 @@ internal static class TestHelpers
             "Variation Selectors: 葛\U000E0100飾区 葛\U000E0100城市",
         ];
 
+    public static readonly TheoryData<Utf8TestCase> Utf8TestCases =
+        [.. CommonTestStrings.Select(Utf8TestCase.Create)];
 
-    public static int GetUtf8CodeUnitCount(string s, int start, int count) =>
-        s.EnumerateRunes()
-        .Skip(start)
-        .Take(count)
-        .Select(static x => x.Utf8SequenceLength)
-        .Sum();
+    public static readonly TheoryData<CharsTestCase> CharsTestCases =
+        [.. CommonTestStrings.Select(CharsTestCase.Create)];
 
-
-    public static int GetCharsCodeUnitCount(string s, int start, int count) =>
-        s.EnumerateRunes()
-        .Skip(start)
-        .Take(count)
-        .Select(static x => x.Utf16SequenceLength)
-        .Sum();
-
-    public static int GetRunesCodeUnitCount(string s, int start, int count) =>
-        s.EnumerateRunes()
-        .Skip(start)
-        .Take(count)
-        .Count();
+    public static readonly TheoryData<RunesTestCase> RunesTestCases =
+        [.. CommonTestStrings.Select(RunesTestCase.Create)];
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     public static extern Utf8Index CreateUtf8Index(int byteIndex, int runePosition);
@@ -56,4 +44,88 @@ internal static class TestHelpers
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     public static extern RunesIndex CreateRunesIndex(int runePosition);
+}
+
+
+public record Utf8TestCase(string String, ImmutableArray<byte> Bytes, int RuneLength)
+{
+    public static Utf8TestCase Create(string s) =>
+        new(s, [.. Encoding.UTF8.GetBytes(s)], s.EnumerateRunes().Count());
+
+    public Utf8String GetMemoryString() => Utf8String.DangerousFromUtf8(Bytes, 0, Bytes.Length);
+    public Utf8SpanString GetSpanString() => Utf8SpanString.DangerousFromSpan(Bytes.AsSpan());
+
+    public int GetCodeUnitCount(int start, int count)
+    {
+        if (count < 0)
+        {
+            return -1;
+        }
+        return String.EnumerateRunes()
+        .Skip(start)
+        .Take(count)
+        .Sum(static x => x.Utf8SequenceLength);
+    }
+
+    public Utf8Index GetIndex(Index runeIndex)
+    {
+        var i = runeIndex.GetOffset(RuneLength);
+        return TestHelpers.CreateUtf8Index(GetCodeUnitCount(0, i), i);
+    }
+}
+
+public record CharsTestCase(string Chars, int RuneLength)
+{
+    public static CharsTestCase Create(string s) =>
+        new(s, s.EnumerateRunes().Count());
+
+    public CharsString GetMemoryString() => new (Chars.AsMemory());
+    public CharsSpanString GetSpanString() => new (Chars.AsSpan());
+
+
+    public int GetCodeUnitCount(int start, int count)
+    {
+        if(count < 0)
+        {
+            return -1;
+        }
+        return Chars.EnumerateRunes()
+        .Skip(start)
+        .Take(count)
+        .Sum(static x => x.Utf16SequenceLength);
+    }
+
+    public CharsIndex GetIndex(Index runeIndex)
+    {
+        var i = runeIndex.GetOffset(RuneLength);
+        return TestHelpers.CreateCharsIndex(GetCodeUnitCount(0, i), i);
+    }
+
+}
+
+public record RunesTestCase(ImmutableArray<Rune> Runes, int RuneLength)
+{
+    public static RunesTestCase Create(string s) =>
+        new([.. s.EnumerateRunes()], s.EnumerateRunes().Count());
+
+    public RunesString GetMemoryString() => new (Runes.AsMemory());
+    public RunesSpanString GetSpanString() => new (Runes.AsSpan());
+
+    public int GetCodeUnitCount(int start, int count)
+    {
+        if (count < 0)
+        {
+            return -1;
+        }
+        return Runes
+            .Skip(start)
+            .Take(count)
+            .Count();
+    }
+
+    public RunesIndex GetIndex(Index runeIndex)
+    {
+        var i = runeIndex.GetOffset(RuneLength);
+        return TestHelpers.CreateRunesIndex(i);
+    }
 }

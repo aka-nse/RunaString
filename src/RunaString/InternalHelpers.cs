@@ -62,7 +62,7 @@ internal static class InternalHelpers
         return hash.ToHashCode();
     }
 
-    public static int Compare(Utf8Span x, Utf8Span y)
+    public static int Compare(Utf8SpanString x, Utf8SpanString y)
     {
         var enumeratorX = x.GetEnumerator();
         var enumeratorY = y.GetEnumerator();
@@ -83,7 +83,7 @@ internal static class InternalHelpers
         }
     }
 
-    public static bool Equals(Utf8Span x, Utf8Span y)
+    public static bool Equals(Utf8SpanString x, Utf8SpanString y)
     {
         if(x.BufferLength != y.BufferLength)
         {

@@ -19,6 +19,11 @@ public interface ISeekIndex<TSelf> : ISeekIndex, IEquatable<TSelf>, IComparable<
     where TSelf : ISeekIndex<TSelf>
 {
     /// <summary>
+    /// Gets a <typeparamref name="TSelf"/> instance that represents the stop value of decremental iteration.
+    /// </summary>
+    public abstract static TSelf DecrementEnd { get; }
+
+    /// <summary>
     /// Compares two <typeparamref name="TSelf"/> instances for equality by comparing their byte indices and rune positions.
     /// </summary>
     /// <param name="x"></param>

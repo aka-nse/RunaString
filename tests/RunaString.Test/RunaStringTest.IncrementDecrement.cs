@@ -1,216 +1,148 @@
-using System.Text;
-
 namespace RunaString.Test;
-using static TestHelpers;
 
 public partial class RunaStringTest
 {
-    /// <summary>
-    /// Provides test cases covering a variety of Unicode inputs (multiple languages, diacritics, combining marks, and emoji sequences)
-    /// for increment/decrement rune iteration tests. Uses well-known test strings where appropriate.
-    /// </summary>
-    public static TheoryData<string, int> IncrementDecrementTestCases()
-    {
-        var retval = new TheoryData<string, int>();
+    // Provides test cases covering a variety of Unicode inputs (multiple languages, diacritics, combining marks, and emoji sequences)
+    // for increment/decrement rune iteration tests. Uses well-known test strings where appropriate.
 
-        void core(string input, int runeIndex)
-        {
-            retval.Add(input, runeIndex);
-        }
-
-        foreach(var str in TestHelpers.CommonTestStrings)
-        {
-            var runeCount = str.EnumerateRunes().Count();
-            for (int i = 0; i <= runeCount; i++)
-            {
-                core(str, i);
-            }
-        }
-
-        return retval;
-    }
+    public static TheoryData<Utf8TestCase> IncrementDecrementUtf8TestCases() => TestHelpers.Utf8TestCases;
+    public static TheoryData<CharsTestCase> IncrementDecrementCharsTestCases() => TestHelpers.CharsTestCases;
+    public static TheoryData<RunesTestCase> IncrementDecrementRunesTestCases() => TestHelpers.RunesTestCases;
 
     [Theory]
-    [MemberData(nameof(IncrementDecrementTestCases))]
-    public void TestIncrementUtf8(string input, int runeIndex)
+    [MemberData(nameof(IncrementDecrementUtf8TestCases))]
+    public void TestIncrementUtf8(Utf8TestCase testCase)
     {
-        var bytes = Encoding.UTF8.GetBytes(input);
-        var charIndex = GetUtf8CodeUnitCount(input, 0, runeIndex);
-        var runeLength = input.EnumerateRunes().Count();
-        var nextRuneIndex = runeIndex + 1;
-        var index = CreateUtf8Index(charIndex, runeIndex);
-        var memory = Utf8String.DangerousFromUtf8([.. bytes], 0, bytes.Length);
-        var span = Utf8Span.DangerousFromSpan(bytes);
-        if ((uint)nextRuneIndex < (uint)runeLength)
+        var memory = testCase.GetMemoryString();
+        var span = testCase.GetSpanString();
+        for(var runeIndex = 0; runeIndex < testCase.RuneLength - 1; runeIndex++)
         {
-            var nextCharIndex = GetUtf8CodeUnitCount(input, 0, nextRuneIndex);
-            var nextIndex = CreateUtf8Index(nextCharIndex, nextRuneIndex);
-            IncrementTestCore_True(
-                memory,
-                index,
-                nextIndex);
-            IncrementTestCore_True(
-                span,
-                index,
-                nextIndex);
-        }
-        else
-        {
-            IncrementTestCore_False(
-                memory,
-                index);
-            IncrementTestCore_False(
-                span,
-                index);
-        }
-    }
-
-    [Theory]
-    [MemberData(nameof(IncrementDecrementTestCases))]
-    public void TestIncrementChars(string input, int runeIndex)
-    {
-        var charIndex = GetCharsCodeUnitCount(input, 0, runeIndex);
-        var runeLength = input.EnumerateRunes().Count();
-        var nextRuneIndex = runeIndex + 1;
-        var index = CreateCharsIndex(charIndex, runeIndex);
-        var memory = new CharsMemoryString(input.AsMemory());
-        var span = new CharsSpanString(input.AsSpan());
-        if ((uint)nextRuneIndex < (uint)runeLength)
-        {
-            var nextCharIndex = GetCharsCodeUnitCount(input, 0, nextRuneIndex);
-            var nextIndex = CreateCharsIndex(nextCharIndex, nextRuneIndex);
+            var index = testCase.GetIndex(runeIndex);
+            var nextIndex = testCase.GetIndex(runeIndex + 1);
             IncrementTestCore_True(memory, index, nextIndex);
             IncrementTestCore_True(span, index, nextIndex);
         }
-        else
-        {
-            IncrementTestCore_False(memory, index);
-            IncrementTestCore_False(span, index);
-        }
+        IncrementTestCore_False(memory, testCase.GetIndex(^1));
+        IncrementTestCore_False(span, testCase.GetIndex(^1));
     }
 
     [Theory]
-    [MemberData(nameof(IncrementDecrementTestCases))]
-    public void TestIncrementRunes(string input, int runeIndex)
+    [MemberData(nameof(IncrementDecrementUtf8TestCases))]
+    public void TestDecrementUtf8(Utf8TestCase testCase)
     {
-        var runes = input.EnumerateRunes().ToArray();
-        var runeLength = input.EnumerateRunes().Count();
-        var nextRuneIndex = runeIndex + 1;
-        var index = CreateRunesIndex(runeIndex);
-        var memory = new RunesMemoryString(runes);
-        var span = new RunesSpanString(runes);
-        if ((uint)nextRuneIndex < (uint)runeLength)
+        var memory = testCase.GetMemoryString();
+        var span = testCase.GetSpanString();
+        for (var runeIndex = testCase.RuneLength; runeIndex > 0; runeIndex--)
         {
-            var nextIndex = CreateRunesIndex(nextRuneIndex);
+            var index = testCase.GetIndex(runeIndex);
+            var nextIndex = testCase.GetIndex(runeIndex - 1);
+            DecrementTestCore_True(memory, index, nextIndex);
+            DecrementTestCore_True(span, index, nextIndex);
+        }
+        DecrementTestCore_False(memory, testCase.GetIndex(0));
+        DecrementTestCore_False(span, testCase.GetIndex(0));
+    }
+
+    [Theory]
+    [MemberData(nameof(IncrementDecrementCharsTestCases))]
+    public void TestIncrementChars(CharsTestCase testCase)
+    {
+        var memory = testCase.GetMemoryString();
+        var span = testCase.GetSpanString();
+        for (var runeIndex = 0; runeIndex < testCase.RuneLength - 1; runeIndex++)
+        {
+            var index = testCase.GetIndex(runeIndex);
+            var nextIndex = testCase.GetIndex(runeIndex + 1);
             IncrementTestCore_True(memory, index, nextIndex);
             IncrementTestCore_True(span, index, nextIndex);
         }
-        else
-        {
-            IncrementTestCore_False(memory, index);
-            IncrementTestCore_False(span, index);
-        }
+        IncrementTestCore_False(memory, testCase.GetIndex(^1));
+        IncrementTestCore_False(span, testCase.GetIndex(^1));
     }
+
+
+    [Theory]
+    [MemberData(nameof(IncrementDecrementCharsTestCases))]
+    public void TestDecrementChars(CharsTestCase testCase)
+    {
+        var memory = testCase.GetMemoryString();
+        var span = testCase.GetSpanString();
+        for (var runeIndex = testCase.RuneLength; runeIndex > 0; runeIndex--)
+        {
+            var index = testCase.GetIndex(runeIndex);
+            var nextIndex = testCase.GetIndex(runeIndex - 1);
+            DecrementTestCore_True(memory, index, nextIndex);
+            DecrementTestCore_True(span, index, nextIndex);
+        }
+        DecrementTestCore_False(memory, testCase.GetIndex(0));
+        DecrementTestCore_False(span, testCase.GetIndex(0));
+    }
+
+    [Theory]
+    [MemberData(nameof(IncrementDecrementRunesTestCases))]
+    public void TestIncrementRunes(RunesTestCase testCase)
+    {
+        var memory = testCase.GetMemoryString();
+        var span = testCase.GetSpanString();
+        for (var runeIndex = 0; runeIndex < testCase.RuneLength - 1; runeIndex++)
+        {
+            var index = testCase.GetIndex(runeIndex);
+            var nextIndex = testCase.GetIndex(runeIndex + 1);
+            IncrementTestCore_True(memory, index, nextIndex);
+            IncrementTestCore_True(span, index, nextIndex);
+        }
+        IncrementTestCore_False(memory, testCase.GetIndex(^1));
+        IncrementTestCore_False(span, testCase.GetIndex(^1));
+    }
+
+
+    [Theory]
+    [MemberData(nameof(IncrementDecrementRunesTestCases))]
+    public void TestDecrementRunes(RunesTestCase testCase)
+    {
+        var memory = testCase.GetMemoryString();
+        var span = testCase.GetSpanString();
+        for (var runeIndex = testCase.RuneLength; runeIndex > 0; runeIndex--)
+        {
+            var index = testCase.GetIndex(runeIndex);
+            var nextIndex = testCase.GetIndex(runeIndex - 1);
+            DecrementTestCore_True(memory, index, nextIndex);
+            DecrementTestCore_True(span, index, nextIndex);
+        }
+        DecrementTestCore_False(memory, testCase.GetIndex(0));
+        DecrementTestCore_False(span, testCase.GetIndex(0));
+    }
+
 
     private static void IncrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, ISeekIndex
+        where TIndex : struct, ISeekIndex<TIndex>
     {
-        Assert.True(input.TryIncrement(ref index));
+        Assert.Equal(expected, input.Increment(ref index));
         Assert.Equal(expected, index);
     }
 
     private static void IncrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, ISeekIndex
+        where TIndex : struct, ISeekIndex<TIndex>
     {
-        Assert.False(input.TryIncrement(ref index));
-    }
-
-    [Theory]
-    [MemberData(nameof(IncrementDecrementTestCases))]
-    public void TestDecrementUtf8(string input, int runeIndex)
-    {
-        var bytes = Encoding.UTF8.GetBytes(input);
-        var charIndex = GetUtf8CodeUnitCount(input, 0, runeIndex);
-        var runeLength = input.EnumerateRunes().Count();
-        var nextRuneIndex = runeIndex - 1;
-        var index = CreateUtf8Index(charIndex, runeIndex);
-        var memory = Utf8String.DangerousFromUtf8([.. bytes], 0, bytes.Length);
-        var span = Utf8Span.DangerousFromSpan(bytes);
-        if ((uint)nextRuneIndex < (uint)runeLength)
-        {
-            var nextCharIndex = GetUtf8CodeUnitCount(input, 0, nextRuneIndex);
-            var nextIndex = CreateUtf8Index(nextCharIndex, nextRuneIndex);
-            DecrementTestCore_True(memory, index, nextIndex);
-            DecrementTestCore_True(span, index, nextIndex);
-        }
-        else
-        {
-            DecrementTestCore_False(memory, index);
-            DecrementTestCore_False(span, index);
-        }
-    }
-
-    [Theory]
-    [MemberData(nameof(IncrementDecrementTestCases))]
-    public void TestDecrementUtf16(string input, int runeIndex)
-    {
-        var charIndex = GetCharsCodeUnitCount(input, 0, runeIndex);
-        var runeLength = input.EnumerateRunes().Count();
-        var nextRuneIndex = runeIndex - 1;
-        var index = CreateCharsIndex(charIndex, runeIndex);
-        var memory = new CharsMemoryString(input.AsMemory());
-        var span = new CharsSpanString(input.AsSpan());
-        if ((uint)nextRuneIndex < (uint)runeLength)
-        {
-            var nextCharIndex = GetCharsCodeUnitCount(input, 0, nextRuneIndex);
-            var nextIndex = CreateCharsIndex(nextCharIndex, nextRuneIndex);
-            DecrementTestCore_True(memory, index, nextIndex);
-            DecrementTestCore_True(span, index, nextIndex);
-        }
-        else
-        {
-            DecrementTestCore_False(memory, index);
-            DecrementTestCore_False(span, index);
-        }
-    }
-
-    [Theory]
-    [MemberData(nameof(IncrementDecrementTestCases))]
-    public void TestDecrementRunes(string input, int runeIndex)
-    {
-        var runes = input.EnumerateRunes().ToArray();
-        var runeLength = input.EnumerateRunes().Count();
-        var nextRuneIndex = runeIndex - 1;
-        var index = CreateRunesIndex(runeIndex);
-        var memory = new RunesMemoryString(runes);
-        var span = new RunesSpanString(runes);
-        if ((uint)nextRuneIndex < (uint)runeLength)
-        {
-            var nextIndex = CreateRunesIndex(nextRuneIndex);
-            DecrementTestCore_True(memory, index, nextIndex);
-            DecrementTestCore_True(span, index, nextIndex);
-        }
-        else
-        {
-            DecrementTestCore_False(memory, index);
-            DecrementTestCore_False(span, index);
-        }
+        input.Increment(ref index);
+        Assert.False(input.IsInRange(index));
     }
 
     private static void DecrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, ISeekIndex
+        where TIndex : struct, ISeekIndex<TIndex>
     {
-        Assert.True(input.TryDecrement(ref index));
+        Assert.Equal(expected, input.Decrement(ref index));
         Assert.Equal(expected, index);
     }
 
     private static void DecrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, ISeekIndex
+        where TIndex : struct, ISeekIndex<TIndex>
     {
-        Assert.False(input.TryDecrement(ref index));
+        input.Decrement(ref index);
+        Assert.False(input.IsInRange(index));
     }
 }

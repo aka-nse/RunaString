@@ -46,7 +46,7 @@ public ref struct Utf8SpanEnumerator
     /// Initializes a new instance of the <see cref="Utf8SpanEnumerator"/> struct with the specified UTF-8 string.
     /// </summary>
     /// <param name="buffer"></param>
-    public Utf8SpanEnumerator(Utf8Span buffer)
+    public Utf8SpanEnumerator(Utf8SpanString buffer)
         : this(buffer.Buffer)
     {
     }
