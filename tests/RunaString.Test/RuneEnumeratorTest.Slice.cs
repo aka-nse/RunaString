@@ -16,7 +16,7 @@ public partial class RuneEnumeratorTest
 
     private static void SliceTestCore<TEnumerable, TEnumerator, TIndex, TBuffer>(TEnumerable value, int start, int end, string expected)
         where TEnumerable : struct, IRunaString<TEnumerable, TEnumerator, TIndex>, allows ref struct
-        where TEnumerator : struct, IRuneEnumerator<TEnumerator, TIndex, TBuffer>, allows ref struct
+        where TEnumerator : struct, IRunaEnumerator<TEnumerator, TIndex, TBuffer>, allows ref struct
         where TIndex : ISeekIndex
         where TBuffer : struct, allows ref struct
     {

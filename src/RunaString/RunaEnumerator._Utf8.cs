@@ -7,7 +7,7 @@ namespace RunaString;
 /// An enumerator that iterates over Unicode scalar values (runes) in a UTF-8 encoded buffer.
 /// </summary>
 public ref struct Utf8SpanEnumerator
-    : IRuneEnumerator<Utf8SpanEnumerator, Utf8Index, ReadOnlySpan<byte>>
+    : IRunaEnumerator<Utf8SpanEnumerator, Utf8Index, ReadOnlySpan<byte>>
 {
     /// <inheritdoc />
     public static Utf8SpanEnumerator Empty =>
@@ -23,19 +23,19 @@ public ref struct Utf8SpanEnumerator
     internal readonly int NextByteIndex => _nextByteIndex;
 
     /// <inheritdoc />
-    public Utf8Index SeekIndex => new(_currByteIndex, _runePosition);
+    public readonly Utf8Index SeekIndex => new(_currByteIndex, _runePosition);
 
     /// <inheritdoc />
-    public Rune Current => _current;
+    public readonly Rune Current => _current;
 
     /// <inheritdoc />
-    public ReadOnlySpan<byte> SourceBuffer => _utf8Buffer;
+    public readonly ReadOnlySpan<byte> SourceBuffer => _utf8Buffer;
 
     /// <inheritdoc />
-    public ReadOnlySpan<byte> ConsumedBuffer => _utf8Buffer.Slice(0, _nextByteIndex);
+    public readonly ReadOnlySpan<byte> ConsumedBuffer => _utf8Buffer.Slice(0, _nextByteIndex);
 
     /// <inheritdoc />
-    public ReadOnlySpan<byte> RemainingBuffer => _utf8Buffer.Slice(_nextByteIndex);
+    public readonly ReadOnlySpan<byte> RemainingBuffer => _utf8Buffer.Slice(_nextByteIndex);
 
     private Utf8SpanEnumerator(ReadOnlySpan<byte> utf8Buffer)
     {
@@ -92,7 +92,7 @@ public ref struct Utf8SpanEnumerator
 /// An enumerator that iterates over Unicode scalar values (runes) in a UTF-8 encoded buffer.
 /// </summary>
 public struct Utf8MemoryEnumerator
-    : IRuneEnumerator<Utf8MemoryEnumerator, Utf8Index, ReadOnlyMemory<byte>>
+    : IRunaEnumerator<Utf8MemoryEnumerator, Utf8Index, ReadOnlyMemory<byte>>
 {
     /// <inheritdoc />
     public static Utf8MemoryEnumerator Empty { get; } =
@@ -108,19 +108,19 @@ public struct Utf8MemoryEnumerator
     internal readonly int NextByteIndex => _nextByteIndex;
 
     /// <inheritdoc />
-    public Utf8Index SeekIndex => new(_currByteIndex, _runePosition);
+    public readonly Utf8Index SeekIndex => new(_currByteIndex, _runePosition);
 
     /// <inheritdoc />
-    public Rune Current => _current;
+    public readonly Rune Current => _current;
 
     /// <inheritdoc />
-    public ReadOnlyMemory<byte> SourceBuffer => _utf8Buffer;
+    public readonly ReadOnlyMemory<byte> SourceBuffer => _utf8Buffer;
 
     /// <inheritdoc />
-    public ReadOnlyMemory<byte> ConsumedBuffer => _utf8Buffer.Slice(0, _nextByteIndex);
+    public readonly ReadOnlyMemory<byte> ConsumedBuffer => _utf8Buffer.Slice(0, _nextByteIndex);
 
     /// <inheritdoc />
-    public ReadOnlyMemory<byte> RemainingBuffer => _utf8Buffer.Slice(_nextByteIndex);
+    public readonly ReadOnlyMemory<byte> RemainingBuffer => _utf8Buffer.Slice(_nextByteIndex);
 
     private Utf8MemoryEnumerator(ReadOnlyMemory<byte> utf8Buffer)
     {
