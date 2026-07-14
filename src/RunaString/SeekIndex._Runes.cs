@@ -12,6 +12,9 @@ namespace RunaString;
 /// </remarks>
 public readonly struct RunesIndex : ISeekIndex<RunesIndex>
 {
+    /// <inheritdoc />
+    public static RunesIndex DecrementEnd { get; } = new(-1);
+
     /// <summary>
     /// A hash code that represents the source string from which this index was created.
     /// </summary>

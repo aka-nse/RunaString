@@ -7,7 +7,7 @@ namespace RunaString;
 /// An enumerator that iterates over Unicode scalar values (runes) in a <see cref="char"/> buffer.
 /// </summary>
 public ref struct CharsSpanEnumerator
-    : IRuneEnumerator<CharsSpanEnumerator, CharsIndex, ReadOnlySpan<char>>
+    : IRunaEnumerator<CharsSpanEnumerator, CharsIndex, ReadOnlySpan<char>>
 {
     /// <inheritdoc />
     public static CharsSpanEnumerator Empty =>
@@ -21,19 +21,19 @@ public ref struct CharsSpanEnumerator
     private readonly ReadOnlySpan<char> _buffer;
 
     /// <inheritdoc />
-    public CharsIndex SeekIndex => new(_currCharIndex, _runePosition);
+    public readonly CharsIndex SeekIndex => new(_currCharIndex, _runePosition);
 
     /// <inheritdoc />
-    public Rune Current => _current;
+    public readonly Rune Current => _current;
 
     /// <inheritdoc />
-    public ReadOnlySpan<char> SourceBuffer => _buffer;
+    public readonly ReadOnlySpan<char> SourceBuffer => _buffer;
 
     /// <inheritdoc />
-    public ReadOnlySpan<char> ConsumedBuffer => _buffer.Slice(0, _nextCharIndex);
+    public readonly ReadOnlySpan<char> ConsumedBuffer => _buffer.Slice(0, _nextCharIndex);
 
     /// <inheritdoc />
-    public ReadOnlySpan<char> RemainingBuffer => _buffer.Slice(_nextCharIndex);
+    public readonly ReadOnlySpan<char> RemainingBuffer => _buffer.Slice(_nextCharIndex);
 
     private CharsSpanEnumerator(ReadOnlySpan<char> buffer)
     {
@@ -69,7 +69,7 @@ public ref struct CharsSpanEnumerator
 /// An enumerator that iterates over Unicode scalar values (runes) in a <see cref="char"/> buffer.
 /// </summary>
 public struct CharsMemoryEnumerator
-    : IRuneEnumerator<CharsMemoryEnumerator, CharsIndex, ReadOnlyMemory<char>>
+    : IRunaEnumerator<CharsMemoryEnumerator, CharsIndex, ReadOnlyMemory<char>>
 {
     /// <inheritdoc />
     public static CharsMemoryEnumerator Empty { get; } =
@@ -82,19 +82,19 @@ public struct CharsMemoryEnumerator
     private readonly ReadOnlyMemory<char> _buffer;
 
     /// <inheritdoc />
-    public CharsIndex SeekIndex => new(_currCharIndex, _runePosition);
+    public readonly CharsIndex SeekIndex => new(_currCharIndex, _runePosition);
 
     /// <inheritdoc />
-    public Rune Current => _current;
+    public readonly Rune Current => _current;
 
     /// <inheritdoc />
-    public ReadOnlyMemory<char> SourceBuffer => _buffer;
+    public readonly ReadOnlyMemory<char> SourceBuffer => _buffer;
 
     /// <inheritdoc />
-    public ReadOnlyMemory<char> ConsumedBuffer => _buffer.Slice(0, _nextCharIndex);
+    public readonly ReadOnlyMemory<char> ConsumedBuffer => _buffer.Slice(0, _nextCharIndex);
 
     /// <inheritdoc />
-    public ReadOnlyMemory<char> RemainingBuffer => _buffer.Slice(_nextCharIndex);
+    public readonly ReadOnlyMemory<char> RemainingBuffer => _buffer.Slice(_nextCharIndex);
 
     private CharsMemoryEnumerator(ReadOnlyMemory<char> buffer)
     {

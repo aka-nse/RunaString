@@ -6,9 +6,9 @@ namespace RunaString;
 /// Provides methods for comparing UTF-8 encoded strings and spans, as well as computing their hash codes.
 /// </summary>
 public abstract partial class Utf8Comparer
-    : IComparer<Utf8Span>
+    : IComparer<Utf8SpanString>
     , IComparer<Utf8String>
-    , IEqualityComparer<Utf8Span>
+    , IEqualityComparer<Utf8SpanString>
     , IEqualityComparer<Utf8String>
 {
     /// <summary>
@@ -18,13 +18,13 @@ public abstract partial class Utf8Comparer
 
     private sealed class Default_ : Utf8Comparer
     {
-        public override int Compare(Utf8Span x, Utf8Span y) =>
+        public override int Compare(Utf8SpanString x, Utf8SpanString y) =>
             InternalHelpers.Compare(x, y);
 
-        public override bool Equals(Utf8Span x, Utf8Span y) =>
+        public override bool Equals(Utf8SpanString x, Utf8SpanString y) =>
             InternalHelpers.Equals(x, y);
 
-        public override int GetHashCode([NotNull] Utf8Span obj) =>
+        public override int GetHashCode([NotNull] Utf8SpanString obj) =>
             InternalHelpers.GetHashCode(obj.Buffer);
     }
 
@@ -33,23 +33,23 @@ public abstract partial class Utf8Comparer
     }
 
     /// <inheritdoc />
-    public abstract int Compare(Utf8Span x, Utf8Span y);
+    public abstract int Compare(Utf8SpanString x, Utf8SpanString y);
 
     /// <inheritdoc />
     public int Compare(Utf8String x, Utf8String y) =>
         Compare(x, y);
 
     /// <inheritdoc />
-    public abstract bool Equals(Utf8Span x, Utf8Span y);
+    public abstract bool Equals(Utf8SpanString x, Utf8SpanString y);
 
     /// <inheritdoc />
     public bool Equals(Utf8String x, Utf8String y) =>
-        Equals((Utf8Span)x, (Utf8Span)y);
+        Equals((Utf8SpanString)x, (Utf8SpanString)y);
 
     /// <inheritdoc />
-    public abstract int GetHashCode([DisallowNull] Utf8Span obj);
+    public abstract int GetHashCode([DisallowNull] Utf8SpanString obj);
 
     /// <inheritdoc />
     public int GetHashCode([DisallowNull] Utf8String obj) =>
-        GetHashCode((Utf8Span)obj);
+        GetHashCode((Utf8SpanString)obj);
 }

@@ -2,7 +2,7 @@ using System.Text;
 
 namespace RunaString;
 
-/// <inheritdoc cref="IRuneEnumerator{TSelf, TableIndex, TBuffer}" />
+/// <inheritdoc cref="IRunaEnumerator{TSelf, TableIndex, TBuffer}" />
 public interface IRunaEnumerator<TSelf>
     where TSelf : IRunaEnumerator<TSelf>, allows ref struct
 {
@@ -24,7 +24,7 @@ public interface IRunaEnumerator<TSelf>
 }
 
 
-/// <inheritdoc cref="IRuneEnumerator{TSelf, TableIndex, TBuffer}" />
+/// <inheritdoc cref="IRunaEnumerator{TSelf, TableIndex, TBuffer}" />
 public interface IRuneEnumerator<TSelf, TIndex> : IRunaEnumerator<TSelf>
     where TSelf : IRuneEnumerator<TSelf, TIndex>, allows ref struct
     where TIndex : ISeekIndex
@@ -52,8 +52,8 @@ public interface IRuneEnumerator<TSelf, TIndex> : IRunaEnumerator<TSelf>
 /// <remarks>
 /// This type is designed to be implemented by structs.
 /// </remarks>
-public interface IRuneEnumerator<TSelf, TIndex, TBuffer> : IRuneEnumerator<TSelf, TIndex>
-    where TSelf : IRuneEnumerator<TSelf, TIndex, TBuffer>, allows ref struct
+public interface IRunaEnumerator<TSelf, TIndex, TBuffer> : IRuneEnumerator<TSelf, TIndex>
+    where TSelf : IRunaEnumerator<TSelf, TIndex, TBuffer>, allows ref struct
     where TIndex : ISeekIndex
     where TBuffer : allows ref struct
 {
@@ -74,7 +74,7 @@ public interface IRuneEnumerator<TSelf, TIndex, TBuffer> : IRuneEnumerator<TSelf
 }
 
 
-internal static class RuneEnumerator
+internal static class RunaEnumerator
 {
     public static class ErrorMessages
     {

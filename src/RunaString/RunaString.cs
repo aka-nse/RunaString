@@ -1,373 +1,138 @@
-using System.Buffers;
 using System.Text;
 
 namespace RunaString;
 
 /// <summary>
+/// Defines a contract for enumerating Unicode runes.
+/// </summary>
+/// <typeparam name="TSelf">
+/// The type that implements this interface, enabling fluent method chaining and type safety for operations that return a new enumerator.
+/// </typeparam>
+/// <typeparam name="TEnumerator">
+/// The type of the enumerator that iterates over the runes in the source buffer, which must implement the IRuneEnumerable interface to support slicing and range operations.
+/// </typeparam>
+public interface IRunaEnumerable<TSelf, TEnumerator>
+    where TSelf : allows ref struct
+    where TEnumerator : IRunaEnumerator<TEnumerator>, allows ref struct
+{
+    /// <summary>
+    /// Returns an enumerator that iterates through the runes in the source buffer.
+    /// </summary>
+    /// <returns></returns>
+    public TEnumerator GetEnumerator();
+}
+
+
+/// <inheritdoc cref="IRunaString{TSelf, TEnumerator, TIndex}" />
+public interface IRunaString<TSelf, TIndex>
+    where TSelf : IRunaString<TSelf, TIndex>, allows ref struct
+    where TIndex : ISeekIndex
+{
+    /// <summary>
+    /// Gets the rune located at the specified index in the collection.
+    /// </summary>
+    /// <returns>The rune at the specified index.</returns>
+    /// <exception cref="ArgumentOutOfRangeException" />
+    public Rune this[TIndex index] { get; }
+
+    /// <summary>
+    /// Creates a new enumerator that iterates over the runes in the specified range of the source.
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="end"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException">
+    /// <para>Cannot slice between enumerators with different source buffers;</para>
+    /// <para>- or -</para>
+    /// <para>Start enumerator must be at an earlier position than end enumerator.</para>
+    /// </exception>
+    public TSelf Slice(TIndex start, TIndex end);
+
+    /// <summary>
+    /// Attempts to get the rune located at the specified index in the collection.
+    /// </summary>
+    /// <param name="index">The index of the rune to retrieve.</param>
+    /// <param name="rune">When this method returns, contains the rune at the specified index, if the index is valid; otherwise, the default value.</param>
+    /// <returns>True if the rune was successfully retrieved; otherwise, false.</returns>
+    /// <remarks>
+    /// This method only validates code unit indices, not rune indices.
+    /// A valid code unit index must be within the bounds of the source buffer and must not point to the middle of a multi-code-unit sequence that forms a single rune.
+    /// </remarks>
+    public bool TryGetRune(TIndex index, out Rune rune);
+
+    /// <summary>
+    /// Attempts to get the rune located at the specified index in the collection.
+    /// </summary>
+    /// <param name="index">The index of the rune to retrieve. This must be an index instance created from this string instance.</param>
+    /// <param name="rune">When this method returns, contains the rune at the specified index, if the index is valid; otherwise, the default value.</param>
+    /// <param name="codeUnitConsumed">When this method returns, contains the number of code units consumed to decode the rune, if the index is valid; otherwise, zero.</param>
+    /// <returns>True if the rune was successfully retrieved; otherwise, false.</returns>
+    /// <remarks>
+    /// This method only validates code unit indices, not rune indices.
+    /// This method behave undefined if <c>rune</c> is not related from this string instance.
+    /// </remarks>
+    public bool TryGetRune(TIndex index, out Rune rune, out int codeUnitConsumed);
+
+    /// <summary>
+    /// Attempts to increment the specified index to the next position in the source buffer.
+    /// </summary>
+    /// <param name="index">The index to increment. This must be an index instance created from this string instance.</param>
+    /// <returns>The incremented index.</returns>
+    /// <remarks>
+    /// This method only validates code unit indices, not rune indices.
+    /// This method behave undefined if <c>rune</c> is not related from this string instance.
+    /// Refer to <seealso cref="TryGetRune(TIndex, out Rune)"/>.
+    /// </remarks>
+    public TIndex Increment(ref TIndex index);
+
+    /// <summary>
+    /// Attempts to decrement the specified index to the previous position in the source buffer.
+    /// </summary>
+    /// <param name="index">The index to decrement. This must be an index instance created from this string instance.</param>
+    /// <returns>The decremented index.</returns>
+    /// <remarks>
+    /// This method only validates code unit indices, not rune indices.
+    /// This method behave undefined if <c>rune</c> is not related from this string instance.
+    /// Refer to <seealso cref="TryGetRune(TIndex, out Rune)"/>.
+    /// </remarks>
+    public TIndex Decrement(ref TIndex index);
+
+    /// <summary>
+    /// Determines whether the specified index is within the valid range of the source buffer.
+    /// </summary>
+    /// <param name="index">The index to check.</param>
+    /// <returns>True if the index is within the valid range of this instance; otherwise, false.</returns>
+    public bool IsInRange(TIndex index);
+
+    /// <inheritdoc />
+    public string ToString();
+}
+
+
+/// <summary>
+/// Defines a contract for Unicode runes string with support for creating slices over a specified range of the source data.
+/// </summary>
+/// <typeparam name="TSelf">
+/// The type that implements this interface, enabling fluent method chaining and type safety for operations that return a new enumerator.
+/// </typeparam>
+/// <typeparam name="TEnumerator">
+/// The type of the enumerator that iterates over the runes in the source buffer, which must implement the IRuneEnumerable interface to support slicing and range operations.
+/// </typeparam>
+/// <typeparam name="TIndex">
+/// The type used to index into the source data, which must implement the ISeekIndex interface to support seeking and range operations.
+/// </typeparam>
+public interface IRunaString<TSelf, TEnumerator, TIndex> : IRunaString<TSelf, TIndex>, IRunaEnumerable<TSelf, TEnumerator>
+    where TSelf : IRunaString<TSelf, TEnumerator, TIndex>, allows ref struct
+    where TEnumerator : IRunaEnumerator<TEnumerator>, allows ref struct
+    where TIndex : ISeekIndex
+{
+}
+
+
+/// <summary>
 /// Extensions for <see cref="ReadOnlySpan{Char}"/>, <see cref="ReadOnlyMemory{Char}"/>,
 /// <see cref="ReadOnlySpan{Rune}"/>, and <see cref="ReadOnlyMemory{Rune}"/>.
 /// </summary>
-public static class RunaString
+public static partial class RunaString
 {
-    extension(ReadOnlySpan<char> source)
-    {
-        /// <summary>
-        /// Creates a <see cref="CharsSpanString"/> from the given read-only span of <see cref="char"/>.
-        /// </summary>
-        /// <returns></returns>
-        public CharsSpanString AsRunaString() => new(source);
-    }
-
-    extension(string source)
-    {
-        /// <summary>
-        /// Creates a <see cref="CharsMemoryString"/> from the given read-only span of string.
-        /// </summary>
-        /// <returns></returns>
-        public CharsMemoryString AsRunaString() => source.AsMemory().AsRunaString();
-    }
-
-    extension(ReadOnlyMemory<char> source)
-    {
-        /// <summary>
-        /// Creates a <see cref="CharsMemoryString"/> from the given read-only span of <see cref="char"/>.
-        /// </summary>
-        /// <returns></returns>
-        public CharsMemoryString AsRunaString() => new(source);
-    }
-
-    extension(ReadOnlySpan<Rune> source)
-    {
-        /// <summary>
-        /// Creates a <see cref="RunesSpanString"/> from the given read-only span of <see cref="Rune"/>.
-        /// </summary>
-        /// <returns></returns>
-        public RunesSpanString AsRunaString() => new(source);
-    }
-
-    extension(ReadOnlyMemory<Rune> source)
-    {
-        /// <summary>
-        /// Creates a <see cref="RunesMemoryString"/> from the given read-only span of <see cref="Rune"/>.
-        /// </summary>
-        /// <returns></returns>
-        public RunesMemoryString AsRunaString() => new(source);
-    }
-}
-
-
-/// <summary>
-/// Represents an enumerable collection of Unicode runes backed by a read-only span of <see cref="char"/>.
-/// </summary>
-/// <param name="source"></param>
-[RunaString]
-public readonly ref partial struct CharsSpanString(ReadOnlySpan<char> source)
-    : IRunaString<CharsSpanString, CharsSpanEnumerator, CharsIndex>
-{
-    #region source generated members
-
-    public partial Rune this[CharsIndex index] { get; }
-    public partial bool TryGetRune(CharsIndex index, out Rune rune);
-
-    #endregion
-
-    /// <summary>
-    /// Gets the source data as a read-only span of characters, which serves as the underlying buffer for enumerating Unicode runes in this enumerable.
-    /// </summary>
-    public ReadOnlySpan<char> Source { get; } = source;
-
-    /// <inheritdoc />
-    public CharsSpanEnumerator GetEnumerator() =>
-        CharsSpanEnumerator.Create(Source);
-
-    /// <inheritdoc />
-    public CharsSpanString Slice(CharsIndex start, CharsIndex end) =>
-        new (Source.Slice(start.CharIndex, end.CharIndex - start.CharIndex));
-
-    /// <inheritdoc />
-    public bool TryGetRune(CharsIndex index, out Rune rune, out int codeUnitConsumed)
-    {
-        var result = Rune.DecodeFromUtf16(Source.Slice(index.CharIndex), out rune, out codeUnitConsumed);
-        return result == OperationStatus.Done;
-    }
-
-    /// <inheritdoc />
-    public bool TryIncrement(ref CharsIndex index)
-    {
-        if (index.CharIndex >= Source.Length)
-        {
-            return false;
-        }
-        var newRuneIndex = index.RuneIndex + 1;
-        var newCharIndex = index.CharIndex + (char.IsHighSurrogate(Source[index.CharIndex]) ? 2 : 1);
-        if (Source.Length <= newCharIndex)
-        {
-            return false;
-        }
-        index = new(newCharIndex, newRuneIndex);
-        return true;
-    }
-
-    /// <inheritdoc />
-    public bool TryDecrement(ref CharsIndex index)
-    {
-        if(index.CharIndex == 0)
-        {
-            return false;
-        }
-        var newRuneIndex = index.RuneIndex - 1;
-        var newCharIndex = index.CharIndex - 1;
-        if (char.IsLowSurrogate(Source[newCharIndex]))
-        {
-            --newCharIndex;
-        }
-        index = new(newCharIndex, newRuneIndex);
-        return true;
-    }
-
-    /// <inheritdoc />
-    public override string ToString() =>
-        Source.ToString();
-}
-
-
-/// <summary>
-/// Represents an enumerable collection of Unicode runes backed by a read-only memory of <see cref="char"/>.
-/// </summary>
-/// <param name="source"></param>
-[RunaString]
-public readonly partial struct CharsMemoryString(ReadOnlyMemory<char> source)
-    : IRunaString<CharsMemoryString, CharsMemoryEnumerator, CharsIndex>
-{
-    #region source generated members
-
-    public partial Rune this[CharsIndex index] { get; }
-    public partial bool TryGetRune(CharsIndex index, out Rune rune);
-
-    #endregion
-
-    /// <summary>
-    /// Gets the source data as a read-only span of characters, which serves as the underlying buffer for enumerating Unicode runes in this enumerable.
-    /// </summary>
-    public ReadOnlyMemory<char> Source { get; } = source;
-
-    /// <inheritdoc />
-    public CharsMemoryEnumerator GetEnumerator() =>
-        CharsMemoryEnumerator.Create(Source);
-
-    /// <inheritdoc />
-    public CharsMemoryString Slice(CharsIndex start, CharsIndex end) =>
-        new(Source.Slice(start.CharIndex, end.CharIndex - start.CharIndex));
-
-    /// <inheritdoc />
-    public bool TryGetRune(CharsIndex index, out Rune rune, out int codeUnitConsumed)
-    {
-        var result = Rune.DecodeFromUtf16(Source.Span.Slice(index.CharIndex), out rune, out codeUnitConsumed);
-        return result == OperationStatus.Done;
-    }
-
-    /// <inheritdoc />
-    public bool TryIncrement(ref CharsIndex index)
-    {
-        if(index.CharIndex >= Source.Length)
-        {
-            return false;
-        }
-        var newRuneIndex = index.RuneIndex + 1;
-        var newCharIndex = index.CharIndex + (char.IsHighSurrogate(Source.Span[index.CharIndex]) ? 2 : 1);
-        if (Source.Length <= newCharIndex)
-        {
-            return false;
-        }
-        index = new(newCharIndex, newRuneIndex);
-        return true;
-    }
-
-    /// <inheritdoc />
-    public bool TryDecrement(ref CharsIndex index)
-    {
-        if (index.CharIndex == 0)
-        {
-            return false;
-        }
-        var newRuneIndex = index.RuneIndex - 1;
-        var newCharIndex = index.CharIndex - 1;
-        if (char.IsLowSurrogate(Source.Span[newCharIndex]))
-        {
-            --newCharIndex;
-        }
-        index = new(newCharIndex, newRuneIndex);
-        return true;
-    }
-
-    /// <inheritdoc />
-    public override string ToString() =>
-        Source.ToString();
-}
-
-
-/// <summary>
-/// Represents an enumerable collection of Unicode runes backed by a read-only span of <see cref="Rune"/>.
-/// </summary>
-/// <param name="source"></param>
-[RunaString]
-public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
-    : IRunaString<RunesSpanString, RunesSpanEnumerator, RunesIndex>
-{
-    #region source generated members
-
-    public partial Rune this[RunesIndex index] { get; }
-    public partial bool TryGetRune(RunesIndex index, out Rune rune);
-
-    #endregion
-
-    /// <summary>
-    /// Gets the source data as a read-only span of characters, which serves as the underlying buffer for enumerating Unicode runes in this enumerable.
-    /// </summary>
-    public ReadOnlySpan<Rune> Source { get; } = source;
-
-    /// <inheritdoc />
-    public RunesSpanEnumerator GetEnumerator() =>
-        RunesSpanEnumerator.Create(Source);
-
-    /// <inheritdoc />
-    public RunesSpanString Slice(RunesIndex start, RunesIndex end) =>
-        new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
-
-    /// <inheritdoc />
-    public bool TryGetRune(RunesIndex index, out Rune rune, out int codeUnitConsumed)
-    {
-        if((uint)index.RuneIndex >= (uint)Source.Length)
-        {
-            rune = default;
-            codeUnitConsumed = 0;
-            return false;
-        }
-        rune = Source[index.RuneIndex];
-        codeUnitConsumed = 1;
-        return true;
-    }
-
-    /// <inheritdoc />
-    public bool TryIncrement(ref RunesIndex index)
-    {
-        var newIndex = index.RuneIndex + 1;
-        if(Source.Length <= newIndex)
-        {
-            return false;
-        }
-        index = new(newIndex);
-        return true;
-    }
-
-    /// <inheritdoc />
-    public bool TryDecrement(ref RunesIndex index)
-    {
-        if(index.RuneIndex <= 0)
-        {
-            return false;
-        }
-        index = new(index.RuneIndex - 1);
-        return true;
-    }
-
-    /// <inheritdoc />
-    public override string ToString()
-    {
-        var len = 0;
-        foreach (var rune in Source)
-        {
-            len += rune.Utf16SequenceLength;
-        }
-        return string.Create(len, Source, static (span, source) =>
-        {
-            foreach (var rune in source)
-            {
-                span = span.Slice(rune.EncodeToUtf16(span));
-            }
-        });
-    }
-}
-
-
-/// <summary>
-/// Represents an enumerable collection of Unicode runes backed by a read-only memory of <see cref="Rune"/>.
-/// </summary>
-/// <param name="source"></param>
-[RunaString]
-public readonly partial struct RunesMemoryString(ReadOnlyMemory<Rune> source)
-    : IRunaString<RunesMemoryString, RunesMemoryEnumerator, RunesIndex>
-{
-    #region source generated members
-
-    public partial Rune this[RunesIndex index] { get; }
-    public partial bool TryGetRune(RunesIndex index, out Rune rune);
-
-    #endregion
-    /// <summary>
-    /// Gets the source data as a read-only span of characters, which serves as the underlying buffer for enumerating Unicode runes in this enumerable.
-    /// </summary>
-    public ReadOnlyMemory<Rune> Source { get; } = source;
-
-    /// <inheritdoc />
-    public RunesMemoryEnumerator GetEnumerator() =>
-        RunesMemoryEnumerator.Create(Source);
-
-    /// <inheritdoc />
-    public RunesMemoryString Slice(RunesIndex start, RunesIndex end) =>
-        new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
-
-    /// <inheritdoc />
-    public bool TryGetRune(RunesIndex index, out Rune rune, out int codeUnitConsumed)
-    {
-        if ((uint)index.RuneIndex >= (uint)Source.Length)
-        {
-            rune = default;
-            codeUnitConsumed = 0;
-            return false;
-        }
-        rune = Source.Span[index.RuneIndex];
-        codeUnitConsumed = 1;
-        return true;
-    }
-
-    /// <inheritdoc />
-    public bool TryIncrement(ref RunesIndex index)
-    {
-        var newIndex = index.RuneIndex + 1;
-        if (Source.Length <= newIndex)
-        {
-            return false;
-        }
-        index = new(newIndex);
-        return true;
-    }
-
-    /// <inheritdoc />
-    public bool TryDecrement(ref RunesIndex index)
-    {
-        if (index.RuneIndex <= 0)
-        {
-            return false;
-        }
-        index = new(index.RuneIndex - 1);
-        return true;
-    }
-
-    /// <inheritdoc />
-    public override string ToString()
-    {
-        var len = 0;
-        foreach (var rune in Source.Span)
-        {
-            len += rune.Utf16SequenceLength;
-        }
-        return string.Create(len, Source.Span, static (span, source) =>
-        {
-            foreach (var rune in source)
-            {
-                span = span.Slice(rune.EncodeToUtf16(span));
-            }
-        });
-    }
 }

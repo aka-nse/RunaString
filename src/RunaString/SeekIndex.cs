@@ -12,12 +12,17 @@ public interface ISeekIndex
 
 /// <summary>
 /// Defines a type that represents a seekable index into a source buffer for an
-/// <see cref="IRunaString{TSelf, TEnumerator, TIndex}"/> and <see cref="IRuneEnumerator{TSelf, TIndex, TBuffer}"/>.
+/// <see cref="IRunaString{TSelf, TEnumerator, TIndex}"/> and <see cref="IRunaEnumerator{TSelf, TIndex, TBuffer}"/>.
 /// </summary>
 /// <typeparam name="TSelf">The type that implements this interface.</typeparam>
 public interface ISeekIndex<TSelf> : ISeekIndex, IEquatable<TSelf>, IComparable<TSelf>
     where TSelf : ISeekIndex<TSelf>
 {
+    /// <summary>
+    /// Gets a <typeparamref name="TSelf"/> instance that represents the stop value of decremental iteration.
+    /// </summary>
+    public abstract static TSelf DecrementEnd { get; }
+
     /// <summary>
     /// Compares two <typeparamref name="TSelf"/> instances for equality by comparing their byte indices and rune positions.
     /// </summary>

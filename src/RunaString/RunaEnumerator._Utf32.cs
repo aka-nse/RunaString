@@ -6,7 +6,7 @@ namespace RunaString;
 /// An enumerator that iterates over Unicode scalar values (runes) in a <see cref="Rune"/> buffer.
 /// </summary>
 public ref struct RunesSpanEnumerator
-    : IRuneEnumerator<RunesSpanEnumerator, RunesIndex, ReadOnlySpan<Rune>>
+    : IRunaEnumerator<RunesSpanEnumerator, RunesIndex, ReadOnlySpan<Rune>>
 {
     /// <inheritdoc />
     public static RunesSpanEnumerator Empty =>
@@ -18,19 +18,19 @@ public ref struct RunesSpanEnumerator
     private Rune _current = default;
 
     /// <inheritdoc />
-    public RunesIndex SeekIndex => new(_runeIndex);
+    public readonly RunesIndex SeekIndex => new(_runeIndex);
 
     /// <inheritdoc />
-    public Rune Current => _current;
+    public readonly Rune Current => _current;
 
     /// <inheritdoc />
-    public ReadOnlySpan<Rune> SourceBuffer => _buffer;
+    public readonly ReadOnlySpan<Rune> SourceBuffer => _buffer;
 
     /// <inheritdoc />
-    public ReadOnlySpan<Rune> ConsumedBuffer => _buffer.Slice(0, Math.Max(_runeIndex + 1, _buffer.Length));
+    public readonly ReadOnlySpan<Rune> ConsumedBuffer => _buffer.Slice(0, Math.Max(_runeIndex + 1, _buffer.Length));
 
     /// <inheritdoc />
-    public ReadOnlySpan<Rune> RemainingBuffer => _buffer.Slice(Math.Max(_runeIndex + 1, _buffer.Length));
+    public readonly ReadOnlySpan<Rune> RemainingBuffer => _buffer.Slice(Math.Max(_runeIndex + 1, _buffer.Length));
 
     private RunesSpanEnumerator(ReadOnlySpan<Rune> buffer)
     {
@@ -62,7 +62,7 @@ public ref struct RunesSpanEnumerator
 /// An enumerator that iterates over Unicode scalar values (runes) in a <see cref="Rune"/> buffer.
 /// </summary>
 public struct RunesMemoryEnumerator
-    : IRuneEnumerator<RunesMemoryEnumerator, RunesIndex, ReadOnlyMemory<Rune>>
+    : IRunaEnumerator<RunesMemoryEnumerator, RunesIndex, ReadOnlyMemory<Rune>>
 {
     /// <inheritdoc />
     public static RunesMemoryEnumerator Empty { get; } =
@@ -73,19 +73,19 @@ public struct RunesMemoryEnumerator
     private Rune _current = default;
 
     /// <inheritdoc />
-    public RunesIndex SeekIndex => new(_runeIndex);
+    public readonly RunesIndex SeekIndex => new(_runeIndex);
 
     /// <inheritdoc />
-    public Rune Current => _current;
+    public readonly Rune Current => _current;
 
     /// <inheritdoc />
-    public ReadOnlyMemory<Rune> SourceBuffer => _buffer;
+    public readonly ReadOnlyMemory<Rune> SourceBuffer => _buffer;
 
     /// <inheritdoc />
-    public ReadOnlyMemory<Rune> ConsumedBuffer => _buffer.Slice(0, Math.Max(_runeIndex + 1, _buffer.Length));
+    public readonly ReadOnlyMemory<Rune> ConsumedBuffer => _buffer.Slice(0, Math.Max(_runeIndex + 1, _buffer.Length));
 
     /// <inheritdoc />
-    public ReadOnlyMemory<Rune> RemainingBuffer => _buffer.Slice(Math.Max(_runeIndex + 1, _buffer.Length));
+    public readonly ReadOnlyMemory<Rune> RemainingBuffer => _buffer.Slice(Math.Max(_runeIndex + 1, _buffer.Length));
 
     private RunesMemoryEnumerator(ReadOnlyMemory<Rune> buffer)
     {

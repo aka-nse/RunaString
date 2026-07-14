@@ -12,6 +12,9 @@ namespace RunaString;
 /// </remarks>
 public readonly struct Utf8Index : ISeekIndex<Utf8Index>
 {
+    /// <inheritdoc />
+    public static Utf8Index DecrementEnd { get; } = new(-1, -1);
+
     /// <summary></summary>
     public int ByteIndex { get; }
 
