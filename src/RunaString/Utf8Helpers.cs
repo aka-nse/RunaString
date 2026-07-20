@@ -12,7 +12,7 @@ internal static class Utf8Helpers
         {
             return utf8Buffer.Length;
         }
-        Rune.DecodeFromUtf8(utf8Buffer.Slice(currentByteIndex), out _, out var bytesConsumed);
+        RuneHelpers.DecodeFromUtf8At(utf8Buffer, currentByteIndex, out _, out var bytesConsumed);
         return currentByteIndex + bytesConsumed;
     }
 
