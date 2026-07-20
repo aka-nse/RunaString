@@ -412,9 +412,9 @@ file static class FileHelpers
     {
         if((uint)index.ByteIndex < (uint)buffer.Length)
         {
-            Rune.DecodeFromUtf8(buffer.Slice(index.ByteIndex), out _, out var codeUnitConsumed);
-            var newByteIndex = index.ByteIndex + codeUnitConsumed;
-            index = new(newByteIndex, index.RuneIndex + 1);
+            var (byteIndex, runeIndex) = index;
+            Utf8Helpers.TryGetRuneAndMoveNext(buffer, ref byteIndex, ref runeIndex, out _);
+            index = new(byteIndex, runeIndex);
         }
         return index;
     }

@@ -138,8 +138,8 @@ file static class FileHelpers
 {
     public static bool TryGetRune(ReadOnlySpan<char> source, CharsIndex index, out Rune rune, out int codeUnitConsumed)
     {
-        var result = Rune.DecodeFromUtf16(source.Slice(index.CharIndex), out rune, out codeUnitConsumed);
-        return result == OperationStatus.Done;
+        Rune.DecodeFromUtf16(source.Slice(index.CharIndex), out rune, out codeUnitConsumed);
+        return codeUnitConsumed > 0;
     }
 
     public static CharsIndex Increment(ReadOnlySpan<char> Source, ref CharsIndex index)

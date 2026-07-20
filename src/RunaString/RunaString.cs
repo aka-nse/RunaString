@@ -50,27 +50,40 @@ public interface IRunaString<TSelf, TIndex>
 
     /// <summary>
     /// Attempts to get the rune located at the specified index in the collection.
+    /// 
+    /// <para>
+    ///     This method only validates code unit indices, not rune indices.
+    ///     A valid code unit index must be within the bounds of the source buffer
+    ///     and must not point to the middle of a multi-code-unit sequence that forms a single rune.
+    /// </para>
+    /// <para>
+    ///     This method returns true if the read position advances, even if an invalid sequence is encountered.
+    /// </para>
     /// </summary>
-    /// <param name="index">The index of the rune to retrieve.</param>
-    /// <param name="rune">When this method returns, contains the rune at the specified index, if the index is valid; otherwise, the default value.</param>
+    /// <param name="index">
+    ///     The index of the rune to retrieve.
+    /// </param>
+    /// <param name="rune">
+    ///     When this method returns, contains the rune at the specified index,
+    ///     if the index is valid; otherwise, the default value.
+    /// </param>
     /// <returns>True if the rune was successfully retrieved; otherwise, false.</returns>
-    /// <remarks>
-    /// This method only validates code unit indices, not rune indices.
-    /// A valid code unit index must be within the bounds of the source buffer and must not point to the middle of a multi-code-unit sequence that forms a single rune.
-    /// </remarks>
     public bool TryGetRune(TIndex index, out Rune rune);
 
     /// <summary>
     /// Attempts to get the rune located at the specified index in the collection.
+    /// 
+    /// <para>
+    ///     This method only validates code unit indices, not rune indices.
+    ///     This method behave undefined if <c>rune</c> is not related from this string instance.
+    /// </para>
+    /// <para>
+    ///     This method returns true if the read position advances, even if an invalid sequence is encountered.
+    /// </para>
     /// </summary>
     /// <param name="index">The index of the rune to retrieve. This must be an index instance created from this string instance.</param>
     /// <param name="rune">When this method returns, contains the rune at the specified index, if the index is valid; otherwise, the default value.</param>
     /// <param name="codeUnitConsumed">When this method returns, contains the number of code units consumed to decode the rune, if the index is valid; otherwise, zero.</param>
-    /// <returns>True if the rune was successfully retrieved; otherwise, false.</returns>
-    /// <remarks>
-    /// This method only validates code unit indices, not rune indices.
-    /// This method behave undefined if <c>rune</c> is not related from this string instance.
-    /// </remarks>
     public bool TryGetRune(TIndex index, out Rune rune, out int codeUnitConsumed);
 
     /// <summary>
