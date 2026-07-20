@@ -68,7 +68,7 @@ public readonly partial struct Utf8String
     /// <param name="utf8Buffer"></param>
     /// <returns></returns>
     public static Utf8String DangerousFromUtf8(ReadOnlyMemory<byte> utf8Buffer) =>
-        DangerousFromUtf8(utf8Buffer);
+        new Utf8String(utf8Buffer);
 
     /// <summary>
     /// Returns a new <see cref="Utf8String" />  that is a slice of the current string, starting at the specified rune index and with the specified rune length.
