@@ -1,4 +1,4 @@
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("RunaString.Benchmark")]
-[assembly: InternalsVisibleTo("RunaString.Tests")]
+[assembly: InternalsVisibleTo("RunaString.Test")]
