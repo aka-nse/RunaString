@@ -88,7 +88,7 @@ public record Utf8TestCase(string String, ImmutableArray<byte> Bytes, int RuneLe
     public ReadOnlySpan<byte> GetSpan() => Bytes.AsSpan();
     public ReadOnlyMemory<byte> GetMemory() => Bytes.AsMemory();
 
-    public Utf8String GetMemoryString() => Utf8String.DangerousFromUtf8(Bytes, 0, Bytes.Length);
+    public Utf8String GetMemoryString() => Utf8String.DangerousFromUtf8(Bytes.AsMemory());
     public Utf8SpanString GetSpanString() => Utf8SpanString.DangerousFromSpan(Bytes.AsSpan());
 
     public int GetCodeUnitCount(int start, int count)
