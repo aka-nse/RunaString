@@ -1,4 +1,3 @@
-using System.Buffers;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -50,6 +49,15 @@ public readonly partial struct Utf8String
     /// Creates a new <see cref="Utf8String" /> from a given UTF-8 encoded byte buffer, starting at the specified index and with the specified length.
     /// </summary>
     /// <param name="utf8Buffer"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException" />
+    public static Utf8String FromUtf8(ImmutableArray<byte> utf8Buffer) =>
+        FromUtf8(utf8Buffer, 0, utf8Buffer.Length);
+
+    /// <summary>
+    /// Creates a new <see cref="Utf8String" /> from a given UTF-8 encoded byte buffer, starting at the specified index and with the specified length.
+    /// </summary>
+    /// <param name="utf8Buffer"></param>
     /// <param name="byteStart"></param>
     /// <param name="byteLength"></param>
     /// <returns></returns>
@@ -59,6 +67,14 @@ public readonly partial struct Utf8String
         InternalHelpers.ValidateUtf8(utf8Buffer.AsSpan(byteStart, byteLength));
         return new(utf8Buffer, byteStart, byteLength);
     }
+
+    /// <summary>
+    /// Creates a new <see cref="Utf8String" />  from a given UTF-8 encoded byte buffer, starting at the specified index and with the specified length, without validating the UTF-8 encoding.
+    /// </summary>
+    /// <param name="utf8Buffer"></param>
+    /// <returns></returns>
+    public static Utf8String DangerousFromUtf8(ImmutableArray<byte> utf8Buffer) =>
+        DangerousFromUtf8(utf8Buffer, 0, utf8Buffer.Length);
 
     /// <summary>
     /// Creates a new <see cref="Utf8String" />  from a given UTF-8 encoded byte buffer, starting at the specified index and with the specified length, without validating the UTF-8 encoding.
@@ -386,8 +402,10 @@ file static class FileHelpers
 {
     public static bool TryGetRune(ReadOnlySpan<byte> buffer, Utf8Index index, out Rune rune, out int codeUnitConsumed)
     {
-        var result = Rune.DecodeFromUtf8(buffer.Slice(index.ByteIndex), out rune, out codeUnitConsumed);
-        return result == OperationStatus.Done;
+        var (byteIndex, runeIndex) = index;
+        var result = Utf8Helpers.TryGetRuneAndMoveNext(buffer, ref byteIndex, ref runeIndex, out rune);
+        codeUnitConsumed = byteIndex - index.ByteIndex;
+        return result;
     }
 
     public static Utf8Index Increment(ReadOnlySpan<byte> buffer, ref Utf8Index index)

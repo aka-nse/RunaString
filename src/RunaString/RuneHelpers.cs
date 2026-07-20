@@ -1,0 +1,125 @@
+using System.Runtime.CompilerServices;
+using System.Text;
+
+namespace RunaString;
+
+internal static class RuneHelpers
+{
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static bool DecodeFromUtf8At(ReadOnlySpan<byte> utf8Buffer, int byteIndex, out Rune rune, out int bytesConsumed)
+    {
+        var len = utf8Buffer.Length;
+        if((uint)byteIndex >= (uint)len)
+        {
+            rune = default;
+            bytesConsumed = 0;
+            return false;
+        }
+
+        uint value;
+        var b0 = utf8Buffer[byteIndex];
+
+        // ASCII fast-path  0xxxx-xxxx
+        if (b0 <= 0x7F)
+        {
+            value = b0;
+            bytesConsumed = 1;
+            goto succeeded;
+        }
+
+        // 2-byte sequence  110x-xxxx 10xx-xxxx
+        if ((b0 & 0xE0) == 0xC0)
+        {
+            if(byteIndex + 1 >= len)
+            {
+                goto invalid;
+            }
+            var b1 = utf8Buffer[byteIndex + 1];
+            if((b1 & 0xC0) != 0x80)
+            {
+                goto invalid;
+            }
+            if(b0 < 0xC2)
+            {
+                // overlong
+                goto invalid;
+            }
+            value = ((b0 & 0x1Fu) << 6) | (b1 & 0x3Fu);
+            bytesConsumed = 2;
+            goto succeeded;
+        }
+
+        // 3-byte sequence  1110-xxxx 10xx-xxxx 10xx-xxxx
+        if ((b0 & 0xF0) == 0xE0)
+        {
+            if (byteIndex + 2 >= len)
+            {
+                goto invalid;
+            }
+            var b1 = utf8Buffer[byteIndex + 1];
+            var b2 = utf8Buffer[byteIndex + 2];
+            if ((b1 & 0xC0) != 0x80 || (b2 & 0xC0) != 0x80)
+            {
+                goto invalid;
+            }
+            if (b0 == 0xE0 && b1 < 0xA0)
+            {
+                // overlong
+                goto invalid;
+            }
+            if (b0 == 0xED && b1 >= 0xA0)
+            {
+                // surrogate
+                goto invalid;
+            }
+            value = ((b0 & 0xFu) << 12) | ((b1 & 0x3Fu) << 6) | (b2 & 0x3Fu);
+            bytesConsumed = 3;
+            goto succeeded;
+        }
+
+        // 4-byte sequence  1111-0xxx 10xx-xxxx 10xx-xxxx 10xx-xxxx
+        if((b0 & 0xF8) == 0xF0)
+        {
+            if (byteIndex + 3 >= len)
+            {
+                goto invalid;
+            }
+            if(b0 > 0xF4)
+            {
+                // > U+10FFFF
+                goto invalid;
+            }
+            var b1 = utf8Buffer[byteIndex + 1];
+            var b2 = utf8Buffer[byteIndex + 2];
+            var b3 = utf8Buffer[byteIndex + 3];
+            if ((b1 & 0xC0) != 0x80 || (b2 & 0xC0) != 0x80 || (b3 & 0xC0) != 0x80)
+            {
+                goto invalid;
+            }
+            if (b0 == 0xF0 && b1 < 0x90)
+            {
+                // overlong
+                goto invalid;
+            }
+            if (b0 == 0xF4 && b1 >= 0x90)
+            {
+                // > U+10FFFF
+                goto invalid;
+            }
+            value = ((b0 & 0x7u) << 18) | ((b1 & 0x3Fu) << 12) | ((b2 & 0x3Fu) << 6) | (b3 & 0x3Fu);
+            bytesConsumed = 4;
+            goto succeeded;
+        }
+
+    invalid:
+        rune = Rune.ReplacementChar;
+        bytesConsumed = 1;
+        return true;
+
+    succeeded:
+        rune = Unsafe.BitCast<uint, Rune>(value);
+        return true;
+    }
+
+
+}

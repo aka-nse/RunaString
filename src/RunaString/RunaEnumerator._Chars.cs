@@ -16,12 +16,12 @@ public ref struct CharsSpanEnumerator
     // NOTE: keep order to save size
     private int _currCharIndex = -1;
     private int _nextCharIndex = 0;
-    private int _runePosition = -1;
+    private int _runeIndex = -1;
     private Rune _current = default;
     private readonly ReadOnlySpan<char> _buffer;
 
     /// <inheritdoc />
-    public readonly CharsIndex SeekIndex => new(_currCharIndex, _runePosition);
+    public readonly CharsIndex SeekIndex => new(_currCharIndex, _runeIndex);
 
     /// <inheritdoc />
     public readonly Rune Current => _current;
@@ -51,7 +51,7 @@ public ref struct CharsSpanEnumerator
     public bool MoveNext()
     {
         _currCharIndex = _nextCharIndex;
-        return Helpers.MoveNext(_buffer, ref _nextCharIndex, ref _runePosition, out _current);
+        return Helpers.MoveNext(_buffer, ref _nextCharIndex, ref _runeIndex, out _current);
     }
 
     /// <inheritdoc />
@@ -60,7 +60,7 @@ public ref struct CharsSpanEnumerator
         {
             _currCharIndex = index.CharIndex,
             _nextCharIndex = Helpers.GetNextCharIndex(_buffer, index.CharIndex),
-            _runePosition = index.RuneIndex,
+            _runeIndex = index.RuneIndex,
         };
 }
 
@@ -77,12 +77,12 @@ public struct CharsMemoryEnumerator
 
     private int _currCharIndex = -1;
     private int _nextCharIndex = 0;
-    private int _runePosition = -1;
+    private int _runeIndex = -1;
     private Rune _current = default;
     private readonly ReadOnlyMemory<char> _buffer;
 
     /// <inheritdoc />
-    public readonly CharsIndex SeekIndex => new(_currCharIndex, _runePosition);
+    public readonly CharsIndex SeekIndex => new(_currCharIndex, _runeIndex);
 
     /// <inheritdoc />
     public readonly Rune Current => _current;
@@ -112,7 +112,7 @@ public struct CharsMemoryEnumerator
     public bool MoveNext()
     {
         _currCharIndex = _nextCharIndex;
-        return Helpers.MoveNext(_buffer.Span, ref _nextCharIndex, ref _runePosition, out _current);
+        return Helpers.MoveNext(_buffer.Span, ref _nextCharIndex, ref _runeIndex, out _current);
     }
 
     /// <inheritdoc />
@@ -121,7 +121,7 @@ public struct CharsMemoryEnumerator
         {
             _currCharIndex = index.CharIndex,
             _nextCharIndex = Helpers.GetNextCharIndex(_buffer.Span, index.CharIndex),
-            _runePosition = index.RuneIndex,
+            _runeIndex = index.RuneIndex,
         };
 }
 
@@ -145,7 +145,7 @@ file static class Helpers
     public static bool MoveNext(
         ReadOnlySpan<char> buffer,
         ref int nextCharIndex,
-        ref int runePosition,
+        ref int runeIndex,
         out Rune current)
     {
         if (nextCharIndex >= buffer.Length)
@@ -159,7 +159,7 @@ file static class Helpers
             throw new InvalidOperationException($"Invalid char sequence at char index {nextCharIndex}");
         }
         nextCharIndex += charsConsumed;
-        ++runePosition;
+        ++runeIndex;
         return true;
     }
 }

@@ -13,6 +13,7 @@
     <Project Path="src/RunaString/RunaString.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/RunaString.Benchmark/RunaString.Benchmark.csproj" Id="2d2a418c-3e27-4b48-86e2-a00c8a1007b2" />
     <Project Path="tests/RunaString.Test/RunaString.Test.csproj" />
   </Folder>
 </Solution>

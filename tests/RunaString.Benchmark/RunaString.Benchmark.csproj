@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <BenchmarkResultsRelativePath>bin\$(Configuration)\$(TargetFramework)\BenchmarkDotNet.Artifacts</BenchmarkResultsRelativePath>
+
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+        <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.8" />
+    </ItemGroup>
+
+    <ItemGroup Label="benchmark artifacts">
+        <None Include="$(BenchmarkResultsRelativePath)\**\*.*">
+            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+            <Visible>true</Visible>
+            <Link>(benchmark artifacts)\%(RecursiveDir)%(Filename)%(Extension)</Link>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="bin\Release\net10.0\BenchmarkDotNet.Artifacts\RunaString.Benchmark.Utf8RuneEnumeratorBenchmarkContext-20260718-194417.log" />
+      <None Remove="bin\Release\net10.0\BenchmarkDotNet.Artifacts\RunaString.Benchmark.Utf8RuneEnumeratorBenchmarkContext-20260718-215309.log" />
+      <None Remove="bin\Release\net10.0\BenchmarkDotNet.Artifacts\RunaString.Benchmark.Utf8RuneEnumeratorBenchmarkContext.RuneEnumerator-20260718-194416.etl" />
+      <None Remove="bin\Release\net10.0\BenchmarkDotNet.Artifacts\RunaString.Benchmark.Utf8RuneEnumeratorBenchmarkContext.RuneEnumerator-20260718-215308.etl" />
+      <None Remove="bin\Release\net10.0\BenchmarkDotNet.Artifacts\RunaString.Benchmark.Utf8RuneEnumeratorBenchmarkContext.StandardCounting-20260718-194416.etl" />
+      <None Remove="bin\Release\net10.0\BenchmarkDotNet.Artifacts\RunaString.Benchmark.Utf8RuneEnumeratorBenchmarkContext.StandardCounting-20260718-215308.etl" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\RunaString\RunaString.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -1,7 +1,7 @@
 namespace RunaString;
 
-/// <inheritdoc cref="ISeekIndex{TSelf}" />
-public interface ISeekIndex
+/// <inheritdoc cref="IRunaIndex{TSelf}" />
+public interface IRunaIndex
 {
     /// <summary>
     /// Gets the zero-based index of the current rune in the source buffer.
@@ -15,8 +15,8 @@ public interface ISeekIndex
 /// <see cref="IRunaString{TSelf, TEnumerator, TIndex}"/> and <see cref="IRunaEnumerator{TSelf, TIndex, TBuffer}"/>.
 /// </summary>
 /// <typeparam name="TSelf">The type that implements this interface.</typeparam>
-public interface ISeekIndex<TSelf> : ISeekIndex, IEquatable<TSelf>, IComparable<TSelf>
-    where TSelf : ISeekIndex<TSelf>
+public interface IRunaIndex<TSelf> : IRunaIndex, IEquatable<TSelf>, IComparable<TSelf>
+    where TSelf : IRunaIndex<TSelf>
 {
     /// <summary>
     /// Gets a <typeparamref name="TSelf"/> instance that represents the stop value of decremental iteration.

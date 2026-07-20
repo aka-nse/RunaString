@@ -26,7 +26,7 @@ public interface IRunaEnumerable<TSelf, TEnumerator>
 /// <inheritdoc cref="IRunaString{TSelf, TEnumerator, TIndex}" />
 public interface IRunaString<TSelf, TIndex>
     where TSelf : IRunaString<TSelf, TIndex>, allows ref struct
-    where TIndex : ISeekIndex
+    where TIndex : IRunaIndex
 {
     /// <summary>
     /// Gets the rune located at the specified index in the collection.
@@ -124,7 +124,7 @@ public interface IRunaString<TSelf, TIndex>
 public interface IRunaString<TSelf, TEnumerator, TIndex> : IRunaString<TSelf, TIndex>, IRunaEnumerable<TSelf, TEnumerator>
     where TSelf : IRunaString<TSelf, TEnumerator, TIndex>, allows ref struct
     where TEnumerator : IRunaEnumerator<TEnumerator>, allows ref struct
-    where TIndex : ISeekIndex
+    where TIndex : IRunaIndex
 {
 }
 
