@@ -85,6 +85,9 @@ public record Utf8TestCase(string String, ImmutableArray<byte> Bytes, int RuneLe
     public static Utf8TestCase Create(string s) =>
         new(s, [.. Encoding.UTF8.GetBytes(s)], s.EnumerateRunes().Count());
 
+    public ReadOnlySpan<byte> GetSpan() => Bytes.AsSpan();
+    public ReadOnlyMemory<byte> GetMemory() => Bytes.AsMemory();
+
     public Utf8String GetMemoryString() => Utf8String.DangerousFromUtf8(Bytes, 0, Bytes.Length);
     public Utf8SpanString GetSpanString() => Utf8SpanString.DangerousFromSpan(Bytes.AsSpan());
 
@@ -109,8 +112,13 @@ public record Utf8TestCase(string String, ImmutableArray<byte> Bytes, int RuneLe
 
 public record CharsTestCase(string Chars, int RuneLength)
 {
+    public string String => Chars;
+
     public static CharsTestCase Create(string s) =>
         new(s, s.EnumerateRunes().Count());
+
+    public ReadOnlySpan<char> GetSpan() => Chars;
+    public ReadOnlyMemory<char> GetMemory() => Chars.AsMemory();
 
     public CharsString GetMemoryString() => new (Chars.AsMemory());
     public CharsSpanString GetSpanString() => new (Chars.AsSpan());
@@ -136,10 +144,13 @@ public record CharsTestCase(string Chars, int RuneLength)
 
 }
 
-public record RunesTestCase(ImmutableArray<Rune> Runes, int RuneLength)
+public record RunesTestCase(string String, ImmutableArray<Rune> Runes, int RuneLength)
 {
     public static RunesTestCase Create(string s) =>
-        new([.. s.EnumerateRunes()], s.EnumerateRunes().Count());
+        new(s, [.. s.EnumerateRunes()], s.EnumerateRunes().Count());
+
+    public ReadOnlySpan<Rune> GetSpan() => Runes.AsSpan();
+    public ReadOnlyMemory<Rune> GetMemory() => Runes.AsMemory();
 
     public RunesString GetMemoryString() => new (Runes.AsMemory());
     public RunesSpanString GetSpanString() => new (Runes.AsSpan());
