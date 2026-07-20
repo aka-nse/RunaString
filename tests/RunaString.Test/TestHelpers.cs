@@ -70,13 +70,13 @@ internal static class TestHelpers
         [.. CommonTestStrings.Select(RunesTestCase.Create)];
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    public static extern Utf8Index CreateUtf8Index(int byteIndex, int runePosition);
+    public static extern Utf8Index CreateUtf8Index(int byteIndex, int runeIndex);
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    public static extern CharsIndex CreateCharsIndex(int charIndex, int runePosition);
+    public static extern CharsIndex CreateCharsIndex(int charIndex, int runeIndex);
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    public static extern RunesIndex CreateRunesIndex(int runePosition);
+    public static extern RunesIndex CreateRunesIndex(int runeIndex);
 }
 
 

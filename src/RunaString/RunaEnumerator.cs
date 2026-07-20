@@ -27,7 +27,7 @@ public interface IRunaEnumerator<TSelf>
 /// <inheritdoc cref="IRunaEnumerator{TSelf, TableIndex, TBuffer}" />
 public interface IRuneEnumerator<TSelf, TIndex> : IRunaEnumerator<TSelf>
     where TSelf : IRuneEnumerator<TSelf, TIndex>, allows ref struct
-    where TIndex : ISeekIndex
+    where TIndex : IRunaIndex
 {
     /// <summary>
     /// Gets the seek index that represents the current position of the enumerator in the source buffer.
@@ -54,7 +54,7 @@ public interface IRuneEnumerator<TSelf, TIndex> : IRunaEnumerator<TSelf>
 /// </remarks>
 public interface IRunaEnumerator<TSelf, TIndex, TBuffer> : IRuneEnumerator<TSelf, TIndex>
     where TSelf : IRunaEnumerator<TSelf, TIndex, TBuffer>, allows ref struct
-    where TIndex : ISeekIndex
+    where TIndex : IRunaIndex
     where TBuffer : allows ref struct
 {
     /// <summary>

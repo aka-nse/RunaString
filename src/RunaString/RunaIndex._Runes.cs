@@ -10,7 +10,7 @@ namespace RunaString;
 /// It is not valid for other sequences, even if they contain the same data.
 /// The behavior is undefined if used with a different source sequence.
 /// </remarks>
-public readonly struct RunesIndex : ISeekIndex<RunesIndex>
+public readonly struct RunesIndex : IRunaIndex<RunesIndex>
 {
     /// <inheritdoc />
     public static RunesIndex DecrementEnd { get; } = new(-1);
@@ -26,10 +26,10 @@ public readonly struct RunesIndex : ISeekIndex<RunesIndex>
     /// <summary>
     /// Initializes a new instance of the <see cref="RunesIndex"/> struct with the specified byte index and rune position.
     /// </summary>
-    /// <param name="runePosition"></param>
-    internal RunesIndex(int runePosition)
+    /// <param name="runeIndex"></param>
+    internal RunesIndex(int runeIndex)
     {
-        RuneIndex = runePosition;
+        RuneIndex = runeIndex;
     }
 
     /// <inheritdoc />

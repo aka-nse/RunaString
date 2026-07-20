@@ -10,7 +10,7 @@ namespace RunaString;
 /// It is not valid for other sequences, even if they contain the same data.
 /// The behavior is undefined if used with a different source sequence.
 /// </remarks>
-public readonly struct Utf8Index : ISeekIndex<Utf8Index>
+public readonly struct Utf8Index : IRunaIndex<Utf8Index>
 {
     /// <inheritdoc />
     public static Utf8Index DecrementEnd { get; } = new(-1, -1);
@@ -25,11 +25,22 @@ public readonly struct Utf8Index : ISeekIndex<Utf8Index>
     /// Initializes a new instance of the <see cref="Utf8Index"/> struct with the specified byte index and rune position.
     /// </summary>
     /// <param name="byteIndex"></param>
-    /// <param name="runePosition"></param>
-    internal Utf8Index(int byteIndex, int runePosition)
+    /// <param name="runeIndex"></param>
+    internal Utf8Index(int byteIndex, int runeIndex)
     {
         ByteIndex = byteIndex;
-        RuneIndex = runePosition;
+        RuneIndex = runeIndex;
+    }
+
+    /// <summary>
+    /// Deconstructs the <see cref="Utf8Index"/> into its constituent parts: byte index and rune position.
+    /// </summary>
+    /// <param name="byteIndex"></param>
+    /// <param name="runeIndex"></param>
+    public void Deconstruct(out int byteIndex, out int runeIndex)
+    {
+        byteIndex = ByteIndex;
+        runeIndex = RuneIndex;
     }
 
     /// <inheritdoc />

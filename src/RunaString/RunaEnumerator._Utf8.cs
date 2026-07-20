@@ -1,4 +1,3 @@
-using System.Buffers;
 using System.Text;
 
 namespace RunaString;
@@ -16,14 +15,14 @@ public ref struct Utf8SpanEnumerator
     // NOTE: keep order to save size
     private int _currByteIndex = -1;
     private int _nextByteIndex = 0;
-    private int _runePosition = -1;
+    private int _nextRuneIndex = 0;
     private Rune _current = default;
     private readonly ReadOnlySpan<byte> _utf8Buffer;
 
     internal readonly int NextByteIndex => _nextByteIndex;
 
     /// <inheritdoc />
-    public readonly Utf8Index SeekIndex => new(_currByteIndex, _runePosition);
+    public readonly Utf8Index SeekIndex => new(_currByteIndex, _nextRuneIndex - 1);
 
     /// <inheritdoc />
     public readonly Rune Current => _current;
@@ -59,7 +58,7 @@ public ref struct Utf8SpanEnumerator
     public static Utf8SpanEnumerator Create(ReadOnlySpan<byte> utf8Buffer)
     {
         InternalHelpers.ValidateUtf8(utf8Buffer);
-        return new (utf8Buffer);
+        return new(utf8Buffer);
     }
 
     /// <summary>
@@ -74,17 +73,23 @@ public ref struct Utf8SpanEnumerator
     public bool MoveNext()
     {
         _currByteIndex = _nextByteIndex;
-        return Helpers.MoveNext(_utf8Buffer, ref _nextByteIndex, ref _runePosition, out _current);
+        return Utf8Helpers.TryGetRuneAndMoveNext(_utf8Buffer, ref _nextByteIndex, ref _nextRuneIndex, out _current);
     }
 
     /// <inheritdoc />
-    public Utf8SpanEnumerator Seek(Utf8Index index) =>
-        new(_utf8Buffer)
+    public readonly Utf8SpanEnumerator Seek(Utf8Index index)
     {
-        _currByteIndex = index.ByteIndex,
-        _nextByteIndex = Helpers.GetNextByteIndex(_utf8Buffer, index.ByteIndex),
-        _runePosition = index.RuneIndex,
-    };
+        var byteIndex = index.ByteIndex;
+        var runeIndex = index.RuneIndex;
+        Utf8Helpers.TryGetRuneAndMoveNext(_utf8Buffer, ref byteIndex, ref runeIndex, out var current);
+        return new(_utf8Buffer)
+        {
+            _currByteIndex = index.ByteIndex,
+            _nextByteIndex = byteIndex,
+            _nextRuneIndex = runeIndex,
+            _current = current,
+        };
+    }
 }
 
 
@@ -101,14 +106,14 @@ public struct Utf8MemoryEnumerator
     // NOTE: keep order to save size
     private int _currByteIndex = -1;
     private int _nextByteIndex = 0;
-    private int _runePosition = -1;
+    private int _nextRuneIndex = 0;
     private Rune _current = default;
     private readonly ReadOnlyMemory<byte> _utf8Buffer;
 
     internal readonly int NextByteIndex => _nextByteIndex;
 
     /// <inheritdoc />
-    public readonly Utf8Index SeekIndex => new(_currByteIndex, _runePosition);
+    public readonly Utf8Index SeekIndex => new(_currByteIndex, _nextRuneIndex - 1);
 
     /// <inheritdoc />
     public readonly Rune Current => _current;
@@ -144,7 +149,7 @@ public struct Utf8MemoryEnumerator
     public static Utf8MemoryEnumerator Create(ReadOnlyMemory<byte> utf8Buffer)
     {
         InternalHelpers.ValidateUtf8(utf8Buffer.Span);
-        return new (utf8Buffer);
+        return new(utf8Buffer);
     }
 
     /// <summary>
@@ -159,54 +164,21 @@ public struct Utf8MemoryEnumerator
     public bool MoveNext()
     {
         _currByteIndex = _nextByteIndex;
-        return Helpers.MoveNext(_utf8Buffer.Span, ref _nextByteIndex, ref _runePosition, out _current);
+        return Utf8Helpers.TryGetRuneAndMoveNext(_utf8Buffer.Span, ref _nextByteIndex, ref _nextRuneIndex, out _current);
     }
 
     /// <inheritdoc />
-    public Utf8MemoryEnumerator Seek(Utf8Index index) =>
-        new(_utf8Buffer)
+    public readonly Utf8MemoryEnumerator Seek(Utf8Index index)
+    {
+        var byteIndex = index.ByteIndex;
+        var runeIndex = index.RuneIndex;
+        Utf8Helpers.TryGetRuneAndMoveNext(_utf8Buffer.Span, ref byteIndex, ref runeIndex, out var current);
+        return new(_utf8Buffer)
         {
             _currByteIndex = index.ByteIndex,
-            _nextByteIndex = Helpers.GetNextByteIndex(_utf8Buffer.Span, index.ByteIndex),
-            _runePosition = index.RuneIndex,
+            _nextByteIndex = byteIndex,
+            _nextRuneIndex = runeIndex,
+            _current = current,
         };
-}
-
-
-file static class Helpers
-{
-    public static int GetNextByteIndex(ReadOnlySpan<byte> utf8Buffer, int currentByteIndex)
-    {
-        if (currentByteIndex >= utf8Buffer.Length)
-        {
-            return -1;
-        }
-        var status = Rune.DecodeFromUtf8(utf8Buffer.Slice(currentByteIndex), out _, out var bytesConsumed);
-        if (status != OperationStatus.Done)
-        {
-            throw new InvalidOperationException($"Invalid UTF-8 sequence at byte index {currentByteIndex}");
-        }
-        return currentByteIndex + bytesConsumed;
-    }
-
-    public static bool MoveNext(
-        ReadOnlySpan<byte> utf8Buffer,
-        ref int nextByteIndex,
-        ref int runePosition,
-        out Rune current)
-    {
-        if (nextByteIndex >= utf8Buffer.Length)
-        {
-            current = default;
-            return false;
-        }
-        var status = Rune.DecodeFromUtf8(utf8Buffer.Slice(nextByteIndex), out current, out var bytesConsumed);
-        if (status != OperationStatus.Done)
-        {
-            throw new InvalidOperationException($"Invalid UTF-8 sequence at byte index {nextByteIndex}");
-        }
-        nextByteIndex += bytesConsumed;
-        ++runePosition;
-        return true;
     }
 }

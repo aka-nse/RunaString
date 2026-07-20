@@ -116,7 +116,7 @@ public partial class RunaStringTest
 
     private static void IncrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, ISeekIndex<TIndex>
+        where TIndex : struct, IRunaIndex<TIndex>
     {
         Assert.Equal(expected, input.Increment(ref index));
         Assert.Equal(expected, index);
@@ -124,7 +124,7 @@ public partial class RunaStringTest
 
     private static void IncrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, ISeekIndex<TIndex>
+        where TIndex : struct, IRunaIndex<TIndex>
     {
         input.Increment(ref index);
         Assert.False(input.IsInRange(index));
@@ -132,7 +132,7 @@ public partial class RunaStringTest
 
     private static void DecrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, ISeekIndex<TIndex>
+        where TIndex : struct, IRunaIndex<TIndex>
     {
         Assert.Equal(expected, input.Decrement(ref index));
         Assert.Equal(expected, index);
@@ -140,7 +140,7 @@ public partial class RunaStringTest
 
     private static void DecrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, ISeekIndex<TIndex>
+        where TIndex : struct, IRunaIndex<TIndex>
     {
         input.Decrement(ref index);
         Assert.False(input.IsInRange(index));

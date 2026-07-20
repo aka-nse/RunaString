@@ -5,33 +5,33 @@ namespace RunaString.Test;
 public partial class RuneIndexTest
 {
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = ".ctor")]
-    private static extern void ctor_Utf8Index(ref Utf8Index index, int byteIndex, int runePosition);
-    private static Utf8Index CreateUtf8Index(int byteIndex, int runePosition)
+    private static extern void ctor_Utf8Index(ref Utf8Index index, int byteIndex, int runeIndex);
+    private static Utf8Index CreateUtf8Index(int byteIndex, int runeIndex)
     {
         Utf8Index index = default;
-        ctor_Utf8Index(ref index, byteIndex, runePosition);
+        ctor_Utf8Index(ref index, byteIndex, runeIndex);
         return index;
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = ".ctor")]
-    private static extern void ctor_CharsIndex(ref CharsIndex index, int charIndex, int runePosition);
-    private static CharsIndex CreateCharsIndex(int charIndex, int runePosition)
+    private static extern void ctor_CharsIndex(ref CharsIndex index, int charIndex, int runeIndex);
+    private static CharsIndex CreateCharsIndex(int charIndex, int runeIndex)
     {
         CharsIndex index = default;
-        ctor_CharsIndex(ref index, charIndex, runePosition);
+        ctor_CharsIndex(ref index, charIndex, runeIndex);
         return index;
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = ".ctor")]
-    private static extern void ctor_RunesIndex(ref RunesIndex index, int runePosition);
-    private static RunesIndex CreateRunesIndex(int runePosition)
+    private static extern void ctor_RunesIndex(ref RunesIndex index, int runeIndex);
+    private static RunesIndex CreateRunesIndex(int runeIndex)
     {
         RunesIndex index = default;
-        ctor_RunesIndex(ref index, runePosition);
+        ctor_RunesIndex(ref index, runeIndex);
         return index;
     }
 
-    public static TheoryData<ISeekIndex, ISeekIndex, int> EquatableComparableTestCase() =>
+    public static TheoryData<IRunaIndex, IRunaIndex, int> EquatableComparableTestCase() =>
         new()
         {
             { CreateUtf8Index(0, 0), CreateUtf8Index(0, 0), 0 },
@@ -57,7 +57,7 @@ public partial class RuneIndexTest
     [Theory]
     [MemberData(nameof(EquatableComparableTestCase))]
     public void Equal<TIndex>(TIndex x, TIndex y, int expected)
-        where TIndex : unmanaged, ISeekIndex<TIndex>
+        where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         var exp = expected == 0;
         Assert.Equal(exp, TIndex.Equals(x, y));
@@ -77,7 +77,7 @@ public partial class RuneIndexTest
     [Theory]
     [MemberData(nameof(EquatableComparableTestCase))]
     public void Compare<TIndex>(TIndex x, TIndex y, int expected)
-        where TIndex : unmanaged, ISeekIndex<TIndex>
+        where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         Assert.Equal(Math.Sign(expected), Math.Sign(TIndex.Compare(x, y)));
         Assert.Equal(Math.Sign(expected), Math.Sign(x.CompareTo(y)));
