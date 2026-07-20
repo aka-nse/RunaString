@@ -23,27 +23,19 @@ public readonly partial struct Utf8String
 
     #endregion
 
-    private readonly int _byteStart;
-
-    private readonly int _byteLength;
-
-    private readonly ImmutableArray<byte> _buffer;
-
     /// <summary>
     /// Gets a read-only memory of bytes representing the UTF-8 encoded string.
     /// </summary>
-    public ReadOnlyMemory<byte> Buffer => _buffer.AsMemory().Slice(_byteStart, _byteLength);
+    public ReadOnlyMemory<byte> Buffer { get; }
 
     /// <summary>
     /// Gets the length of the UTF-8 encoded string in bytes.
     /// </summary>
-    public int BufferLength => _byteLength;
+    public int BufferLength => Buffer.Length;
 
-    private Utf8String(ImmutableArray<byte> buffer, int start, int length)
+    private Utf8String(ReadOnlyMemory<byte> buffer)
     {
-        _buffer = buffer;
-        _byteStart = start;
-        _byteLength = length;
+        Buffer = buffer;
     }
 
     /// <summary>
@@ -65,8 +57,9 @@ public readonly partial struct Utf8String
     /// <exception cref="ArgumentException" />
     public static Utf8String FromUtf8(ImmutableArray<byte> utf8Buffer, int byteStart, int byteLength)
     {
-        InternalHelpers.ValidateUtf8(utf8Buffer.AsSpan(byteStart, byteLength));
-        return new(utf8Buffer, byteStart, byteLength);
+        var memory = utf8Buffer.AsMemory().Slice(byteStart, byteLength);
+        InternalHelpers.ValidateUtf8(memory.Span);
+        return new(memory);
     }
 
     /// <summary>
@@ -74,18 +67,8 @@ public readonly partial struct Utf8String
     /// </summary>
     /// <param name="utf8Buffer"></param>
     /// <returns></returns>
-    public static Utf8String DangerousFromUtf8(ImmutableArray<byte> utf8Buffer) =>
-        DangerousFromUtf8(utf8Buffer, 0, utf8Buffer.Length);
-
-    /// <summary>
-    /// Creates a new <see cref="Utf8String" />  from a given UTF-8 encoded byte buffer, starting at the specified index and with the specified length, without validating the UTF-8 encoding.
-    /// </summary>
-    /// <param name="utf8Buffer"></param>
-    /// <param name="byteStart"></param>
-    /// <param name="byteLength"></param>
-    /// <returns></returns>
-    public static Utf8String DangerousFromUtf8(ImmutableArray<byte> utf8Buffer, int byteStart, int byteLength) =>
-        new(utf8Buffer, byteStart, byteLength);
+    public static Utf8String DangerousFromUtf8(ReadOnlyMemory<byte> utf8Buffer) =>
+        new Utf8String(utf8Buffer);
 
     /// <summary>
     /// Returns a new <see cref="Utf8String" />  that is a slice of the current string, starting at the specified rune index and with the specified rune length.
@@ -97,24 +80,24 @@ public readonly partial struct Utf8String
     public Utf8String Slice(int runeStart, int runeLength)
     {
         var (byteIndex, byteLength) = FileHelpers.GetSliceIndex(this, runeStart, runeLength);
-        return new(_buffer, _byteStart + byteIndex, byteLength);
+        return new(Buffer.Slice(byteIndex, byteLength));
     }
 
     /// <inheritdoc />
     public Utf8String Slice(Utf8Index start, Utf8Index end)
     {
-        var byteStart = _byteStart + start.ByteIndex;
+        var byteStart = start.ByteIndex;
         var byteLength = end.ByteIndex - start.ByteIndex;
-        if (byteStart < 0 || (uint)(byteStart + byteLength) > (uint)_buffer.Length)
+        if (byteStart < 0 || (uint)(byteStart + byteLength) > (uint)Buffer.Length)
         {
             throw new ArgumentOutOfRangeException(nameof(start));
         }
-        return new(_buffer, byteStart, byteLength);
+        return new(Buffer.Slice(byteStart, byteLength));
     }
 
     internal readonly Utf8String DangerousSlice(int byteStart, int byteLength)
     {
-        return new(_buffer, _byteStart + byteStart, byteLength);
+        return new(Buffer.Slice(byteStart, byteLength));
     }
 
 
