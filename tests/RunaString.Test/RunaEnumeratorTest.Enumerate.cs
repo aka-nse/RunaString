@@ -2,7 +2,7 @@ using System.Text;
 
 namespace RunaString.Test;
 
-public partial class RuneEnumeratorTest
+public partial class RunaEnumeratorTest
 {
     public static TheoryData<string> EnumerateTestCases() => [.. TestHelpers.CommonTestStrings];
 

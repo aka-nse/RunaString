@@ -20,6 +20,8 @@ public ref struct CharsSpanEnumerator
     private Rune _current = default;
     private readonly ReadOnlySpan<char> _buffer;
 
+    internal readonly int NextCharIndex => _nextCharIndex;
+
     /// <inheritdoc />
     public readonly CharsIndex SeekIndex => new(_currCharIndex, _runeIndex);
 

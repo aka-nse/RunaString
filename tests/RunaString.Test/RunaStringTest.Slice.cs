@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using System.Text;
 
-namespace RunaString.Test;  
+namespace RunaString.Test;
 
-public partial class RuneEnumeratorTest
+public partial class RunaStringTest
 {
     public static TheoryData<string, int, int, string> SliceTestCases() =>
         new()
@@ -14,35 +14,43 @@ public partial class RuneEnumeratorTest
             { "Hello, world!", 0, 13, "Hello, world!" },
         };
 
-    private static void SliceTestCore<TEnumerable, TEnumerator, TIndex, TBuffer>(TEnumerable value, int start, int end, string expected)
-        where TEnumerable : struct, IRunaString<TEnumerable, TEnumerator, TIndex>, allows ref struct
+    private static void SliceTestCore<TString, TEnumerator, TIndex, TBuffer>(TString value, int start, int end, string expected)
+        where TString : struct, IRunaString<TString, TEnumerator, TIndex>, allows ref struct
         where TEnumerator : struct, IRunaEnumerator<TEnumerator, TIndex, TBuffer>, allows ref struct
         where TIndex : IRunaIndex
         where TBuffer : struct, allows ref struct
     {
-        var startEnumerator = TEnumerator.Empty;
-        var endEnumerator = TEnumerator.Empty;
-        var enumerator = value.GetEnumerator();
-        var i = 0;
-        while(true)
         {
-            var result = enumerator.MoveNext();
-            if (i == start)
-            {
-                startEnumerator = enumerator;
-            }
-            if (i == end)
-            {
-                endEnumerator = enumerator;
-            }
-            if(!result)
-            {
-                break;
-            }
-            ++i;
+            // int index of Rune slicing
+            var actual = value.Slice(start, end - start).ToString();
+            Assert.Equal(expected, actual);
         }
-        var actual = value.Slice(startEnumerator.SeekIndex, endEnumerator.SeekIndex).ToString();
-        Assert.Equal(expected, actual);
+        {
+            // TIndex slicing
+            var startEnumerator = TEnumerator.Empty;
+            var endEnumerator = TEnumerator.Empty;
+            var enumerator = value.GetEnumerator();
+            var i = 0;
+            while (true)
+            {
+                var result = enumerator.MoveNext();
+                if (i == start)
+                {
+                    startEnumerator = enumerator;
+                }
+                if (i == end)
+                {
+                    endEnumerator = enumerator;
+                }
+                if (!result)
+                {
+                    break;
+                }
+                ++i;
+            }
+            var actual = value.Slice(startEnumerator.SeekIndex, endEnumerator.SeekIndex).ToString();
+            Assert.Equal(expected, actual);
+        }
     }
 
 

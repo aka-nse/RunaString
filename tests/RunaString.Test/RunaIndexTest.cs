@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace RunaString.Test;
 
-public partial class RuneIndexTest
+public partial class RunaIndexTest
 {
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = ".ctor")]
     private static extern void ctor_Utf8Index(ref Utf8Index index, int byteIndex, int runeIndex);

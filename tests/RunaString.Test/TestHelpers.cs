@@ -60,13 +60,13 @@ internal static class TestHelpers
             /* Miscellaneous                        */ "\u0000é漢𐀀😀𠀋\U000E0100\U0010FFFF",
         ];
 
-    public static readonly TheoryData<Utf8TestCase> Utf8TestCases =
+    public static readonly ImmutableArray<Utf8TestCase> Utf8TestCases =
         [.. CommonTestStrings.Select(Utf8TestCase.Create)];
 
-    public static readonly TheoryData<CharsTestCase> CharsTestCases =
+    public static readonly ImmutableArray<CharsTestCase> CharsTestCases =
         [.. CommonTestStrings.Select(CharsTestCase.Create)];
 
-    public static readonly TheoryData<RunesTestCase> RunesTestCases =
+    public static readonly ImmutableArray<RunesTestCase> RunesTestCases =
         [.. CommonTestStrings.Select(RunesTestCase.Create)];
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]

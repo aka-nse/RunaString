@@ -25,8 +25,8 @@ public interface IRunaEnumerator<TSelf>
 
 
 /// <inheritdoc cref="IRunaEnumerator{TSelf, TableIndex, TBuffer}" />
-public interface IRuneEnumerator<TSelf, TIndex> : IRunaEnumerator<TSelf>
-    where TSelf : IRuneEnumerator<TSelf, TIndex>, allows ref struct
+public interface IRunaEnumerator<TSelf, TIndex> : IRunaEnumerator<TSelf>
+    where TSelf : IRunaEnumerator<TSelf, TIndex>, allows ref struct
     where TIndex : IRunaIndex
 {
     /// <summary>
@@ -52,7 +52,7 @@ public interface IRuneEnumerator<TSelf, TIndex> : IRunaEnumerator<TSelf>
 /// <remarks>
 /// This type is designed to be implemented by structs.
 /// </remarks>
-public interface IRunaEnumerator<TSelf, TIndex, TBuffer> : IRuneEnumerator<TSelf, TIndex>
+public interface IRunaEnumerator<TSelf, TIndex, TBuffer> : IRunaEnumerator<TSelf, TIndex>
     where TSelf : IRunaEnumerator<TSelf, TIndex, TBuffer>, allows ref struct
     where TIndex : IRunaIndex
     where TBuffer : allows ref struct
