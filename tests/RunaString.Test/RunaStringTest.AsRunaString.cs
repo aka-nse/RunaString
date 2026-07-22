@@ -2,8 +2,8 @@ namespace RunaString.Test;
 
 public partial class RunaStringTest
 {
-    public static TheoryData<CharsTestCase> AsRunaStringCharsTestCases() => TestHelpers.CharsTestCases;
-    public static TheoryData<RunesTestCase> AsRunaStringRunesTestCases() => TestHelpers.RunesTestCases;
+    public static TheoryData<CharsTestCase> AsRunaStringCharsTestCases() => [..TestHelpers.CharsTestCases];
+    public static TheoryData<RunesTestCase> AsRunaStringRunesTestCases() => [..TestHelpers.RunesTestCases];
 
     [Theory]
     [MemberData(nameof(AsRunaStringCharsTestCases))]

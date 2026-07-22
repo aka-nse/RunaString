@@ -68,15 +68,9 @@ public readonly partial struct Utf8String
     /// <param name="utf8Buffer"></param>
     /// <returns></returns>
     public static Utf8String DangerousFromUtf8(ReadOnlyMemory<byte> utf8Buffer) =>
-        new Utf8String(utf8Buffer);
+        new (utf8Buffer);
 
-    /// <summary>
-    /// Returns a new <see cref="Utf8String" />  that is a slice of the current string, starting at the specified rune index and with the specified rune length.
-    /// </summary>
-    /// <param name="runeStart"></param>
-    /// <param name="runeLength"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <inheritdoc />
     public Utf8String Slice(int runeStart, int runeLength)
     {
         var (byteIndex, byteLength) = FileHelpers.GetSliceIndex(this, runeStart, runeLength);
@@ -117,16 +111,10 @@ public readonly partial struct Utf8String
     public bool IsInRange(Utf8Index index) =>
         FileHelpers.IsInRange(Buffer.Span, index);
 
-    /// <summary>
-    /// Returns an enumerator that iterates through the UTF-8 encoded string as a sequence of Unicode code points (runes).
-    /// </summary>
-    /// <returns></returns>
+    /// <inheritdoc />
     public Utf8MemoryEnumerator GetEnumerator() => new(this);
 
-    /// <summary>
-    /// Returns the number of Unicode code points (runes) in the UTF-8 encoded string.
-    /// </summary>
-    /// <returns></returns>
+    /// <inheritdoc />
     public int GetRuneCount() => InternalHelpers.GetRuneCount(GetEnumerator());
 
     /// <inheritdoc />
@@ -145,38 +133,18 @@ public readonly partial struct Utf8String
     /// <inheritdoc />
     public bool Equals(Utf8String other) => Equals(this, other);
 
-    /// <summary>
-    /// Determines whether two <see cref="Utf8String" />  instances are equal by comparing their UTF-8 encoded byte sequences for equality.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static bool Equals(Utf8String x, Utf8String y) =>
-        FileHelpers.Equals((Utf8SpanString)x, (Utf8SpanString)y);
+        InternalHelpers.Equals(x.Buffer.Span, y.Buffer.Span);
 
-    /// <summary>
-    /// Compares two <see cref="Utf8String" />  instances by comparing their UTF-8 encoded byte sequences in lexicographical order.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static int Compare(Utf8String x, Utf8String y) =>
-        FileHelpers.Compare((Utf8SpanString)x, (Utf8SpanString)y);
+        InternalHelpers.Compare<Utf8String, Utf8MemoryEnumerator>(x, y);
 
-    /// <summary>
-    /// Determines whether two <see cref="Utf8String" />  instances are equal by comparing their UTF-8 encoded byte sequences for equality.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static bool operator ==(Utf8String x, Utf8String y) => Equals(x, y);
 
-    /// <summary>
-    /// Determines whether two <see cref="Utf8String" />  instances are not equal by comparing their UTF-8 encoded byte sequences for inequality.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static bool operator !=(Utf8String x, Utf8String y) => !Equals(x, y);
 }
 
@@ -234,13 +202,7 @@ public readonly ref partial struct Utf8SpanString
     public static Utf8SpanString DangerousFromSpan(ReadOnlySpan<byte> utf8Buffer) =>
         new(in MemoryMarshal.GetReference(utf8Buffer), utf8Buffer.Length);
 
-    /// <summary>
-    /// Returns a new <see cref="Utf8SpanString" /> that is a slice of the current string, starting at the specified rune index and with the specified rune length.
-    /// </summary>
-    /// <param name="runeStart"></param>
-    /// <param name="runeLength"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <inheritdoc />
     public Utf8SpanString Slice(int runeStart, int runeLength)
     {
         var (byteIndex, byteLength) = FileHelpers.GetSliceIndex(this, runeStart, runeLength);
@@ -259,11 +221,6 @@ public readonly ref partial struct Utf8SpanString
         return DangerousFromSpan(Buffer.Slice(byteStart, byteLength));
     }
 
-    internal Utf8SpanString DangerousSlice(int byteStart, int byteLength)
-    {
-        return new(in Unsafe.Add(ref Unsafe.AsRef(in _reference), byteStart), byteLength);
-    }
-
     /// <inheritdoc />
     public bool TryGetRune(Utf8Index index, out Rune rune, out int codeUnitConsumed) =>
         FileHelpers.TryGetRune(Buffer, index, out rune, out codeUnitConsumed);
@@ -280,16 +237,10 @@ public readonly ref partial struct Utf8SpanString
     public bool IsInRange(Utf8Index index) =>
         FileHelpers.IsInRange(Buffer, index);
 
-    /// <summary>
-    /// Returns an enumerator that iterates through the UTF-8 encoded string as a sequence of Unicode code points (runes).
-    /// </summary>
-    /// <returns></returns>
+    /// <inheritdoc />
     public Utf8SpanEnumerator GetEnumerator() => new(this);
 
-    /// <summary>
-    /// Returns the number of Unicode code points (runes) in the UTF-8 encoded string.
-    /// </summary>
-    /// <returns></returns>
+    /// <inheritdoc />
     public int GetRuneCount() => InternalHelpers.GetRuneCount(GetEnumerator());
 
     /// <inheritdoc />
@@ -307,38 +258,18 @@ public readonly ref partial struct Utf8SpanString
     /// <inheritdoc />
     public bool Equals(Utf8SpanString other) => Equals(this, other);
 
-    /// <summary>
-    /// Determines whether two <see cref="Utf8SpanString" />  instances are equal by comparing their UTF-8 encoded byte sequences for equality.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static bool Equals(Utf8SpanString x, Utf8SpanString y) =>
-        FileHelpers.Equals(x, y);
+        InternalHelpers.Equals(x.Buffer, y.Buffer);
 
-    /// <summary>
-    /// Compares two <see cref="Utf8SpanString" />  instances by comparing their UTF-8 encoded byte sequences in lexicographical order.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static int Compare(Utf8SpanString x, Utf8SpanString y) =>
-        FileHelpers.Compare(x, y);
+        InternalHelpers.Compare<Utf8SpanString, Utf8SpanEnumerator>(x, y);
 
-    /// <summary>
-    /// Determines whether two <see cref="Utf8SpanString" />  instances are equal by comparing their UTF-8 encoded byte sequences for equality.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static bool operator ==(Utf8SpanString x, Utf8SpanString y) => Equals(x, y);
 
-    /// <summary>
-    /// Determines whether two <see cref="Utf8SpanString" />  instances are not equal by comparing their UTF-8 encoded byte sequences for inequality.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static bool operator !=(Utf8SpanString x, Utf8SpanString y) => !Equals(x, y);
 
     /// <summary>
@@ -368,10 +299,10 @@ public abstract partial class Utf8Comparer
     private sealed class Default_ : Utf8Comparer
     {
         public override int Compare(Utf8SpanString x, Utf8SpanString y) =>
-            FileHelpers.Compare(x, y);
+            InternalHelpers.Compare<Utf8SpanString, Utf8SpanEnumerator>(x, y);
 
         public override bool Equals(Utf8SpanString x, Utf8SpanString y) =>
-            FileHelpers.Equals(x, y);
+            InternalHelpers.Equals(x.Buffer, y.Buffer);
 
         public override int GetHashCode([NotNull] Utf8SpanString obj) =>
             InternalHelpers.GetHashCode(obj.Buffer);
@@ -468,63 +399,4 @@ file static class FileHelpers
 
     public static bool IsInRange(ReadOnlySpan<byte> buffer, Utf8Index index) =>
         (uint)index.ByteIndex < (uint)buffer.Length;
-
-
-
-    public static int Compare(Utf8SpanString x, Utf8SpanString y)
-    {
-        var enumeratorX = x.GetEnumerator();
-        var enumeratorY = y.GetEnumerator();
-        while (true)
-        {
-            var hasX = enumeratorX.MoveNext();
-            var hasY = enumeratorY.MoveNext();
-            if (!hasX && !hasY) return 0;
-            if (!hasX) return -1;
-            if (!hasY) return 1;
-            var runeX = enumeratorX.Current;
-            var runeY = enumeratorY.Current;
-            var comparison = runeX.CompareTo(runeY);
-            if (comparison != 0)
-            {
-                return comparison;
-            }
-        }
-    }
-
-    public static bool Equals(Utf8SpanString x, Utf8SpanString y)
-    {
-        if (x.BufferLength != y.BufferLength)
-        {
-            return false;
-        }
-        var vx = MemoryMarshal.Cast<byte, Vector<byte>>(x.Buffer);
-        var vy = MemoryMarshal.Cast<byte, Vector<byte>>(y.Buffer);
-        for (int i = 0; i < vx.Length; i++)
-        {
-            if (vx[i] != vy[i])
-            {
-                return false;
-            }
-        }
-        var ux = MemoryMarshal.Cast<byte, uint>(x.Buffer.Slice(vx.Length * Vector<byte>.Count));
-        var uy = MemoryMarshal.Cast<byte, uint>(y.Buffer.Slice(vy.Length * Vector<byte>.Count));
-        for (int i = 0; i < ux.Length; i++)
-        {
-            if (ux[i] != uy[i])
-            {
-                return false;
-            }
-        }
-        var xx = x.Buffer.Slice((vx.Length * Vector<byte>.Count) + (ux.Length * sizeof(uint)));
-        var yy = y.Buffer.Slice((vy.Length * Vector<byte>.Count) + (uy.Length * sizeof(uint)));
-        for (int i = 0; i < xx.Length; i++)
-        {
-            if (xx[i] != yy[i])
-            {
-                return false;
-            }
-        }
-        return true;
-    }
 }

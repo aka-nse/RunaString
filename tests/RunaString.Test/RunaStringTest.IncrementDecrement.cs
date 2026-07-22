@@ -5,9 +5,9 @@ public partial class RunaStringTest
     // Provides test cases covering a variety of Unicode inputs (multiple languages, diacritics, combining marks, and emoji sequences)
     // for increment/decrement rune iteration tests. Uses well-known test strings where appropriate.
 
-    public static TheoryData<Utf8TestCase> IncrementDecrementUtf8TestCases() => TestHelpers.Utf8TestCases;
-    public static TheoryData<CharsTestCase> IncrementDecrementCharsTestCases() => TestHelpers.CharsTestCases;
-    public static TheoryData<RunesTestCase> IncrementDecrementRunesTestCases() => TestHelpers.RunesTestCases;
+    public static TheoryData<Utf8TestCase> IncrementDecrementUtf8TestCases() => [..TestHelpers.Utf8TestCases];
+    public static TheoryData<CharsTestCase> IncrementDecrementCharsTestCases() => [..TestHelpers.CharsTestCases];
+    public static TheoryData<RunesTestCase> IncrementDecrementRunesTestCases() => [..TestHelpers.RunesTestCases];
 
     [Theory]
     [MemberData(nameof(IncrementDecrementUtf8TestCases))]

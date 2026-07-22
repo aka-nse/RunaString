@@ -1,3 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace RunaString;
@@ -44,8 +47,8 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
     public ReadOnlyMemory<Rune> Source { get; } = source;
 
     /// <inheritdoc />
-    public RunesMemoryEnumerator GetEnumerator() =>
-        RunesMemoryEnumerator.Create(Source);
+    public RunesString Slice(int runeStart, int runeLength) =>
+        new(Source.Slice(runeStart, runeLength));
 
     /// <inheritdoc />
     public RunesString Slice(RunesIndex start, RunesIndex end) =>
@@ -68,6 +71,17 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
         FileHelpers.IsInRange(Source.Span, index);
 
     /// <inheritdoc />
+    public RunesMemoryEnumerator GetEnumerator() =>
+        RunesMemoryEnumerator.Create(Source);
+
+    /// <inheritdoc />
+    public int GetRuneCount() => InternalHelpers.GetRuneCount(GetEnumerator());
+
+    /// <inheritdoc />
+    public override bool Equals([NotNullWhen(true)] object? obj) =>
+        obj is Utf8String other && Equals(this, other);
+
+    /// <inheritdoc />
     public override string ToString()
     {
         var len = 0;
@@ -83,6 +97,29 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
             }
         });
     }
+
+    /// <inheritdoc />
+    public override int GetHashCode() => InternalHelpers.GetHashCode(Source.Span);
+
+    /// <inheritdoc />
+    public int CompareTo(RunesString other) => Compare(this, other);
+
+    /// <inheritdoc />
+    public bool Equals(RunesString other) => Equals(this, other);
+
+    /// <inheritdoc />
+    public static bool Equals(RunesString x, RunesString y) =>
+        InternalHelpers.Equals(x.Source.Span, y.Source.Span);
+
+    /// <inheritdoc />
+    public static int Compare(RunesString x, RunesString y) =>
+        InternalHelpers.Compare<RunesString, RunesMemoryEnumerator>(x, y);
+
+    /// <inheritdoc />
+    public static bool operator ==(RunesString x, RunesString y) => Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator !=(RunesString x, RunesString y) => !Equals(x, y);
 }
 
 
@@ -107,8 +144,8 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
     public ReadOnlySpan<Rune> Source { get; } = source;
 
     /// <inheritdoc />
-    public RunesSpanEnumerator GetEnumerator() =>
-        RunesSpanEnumerator.Create(Source);
+    public RunesSpanString Slice(int runeStart, int runeLength) =>
+        new(Source.Slice(runeStart, runeLength));
 
     /// <inheritdoc />
     public RunesSpanString Slice(RunesIndex start, RunesIndex end) =>
@@ -131,6 +168,16 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
         FileHelpers.IsInRange(Source, index);
 
     /// <inheritdoc />
+    public RunesSpanEnumerator GetEnumerator() =>
+        RunesSpanEnumerator.Create(Source);
+
+    /// <inheritdoc />
+    public int GetRuneCount() => InternalHelpers.GetRuneCount(GetEnumerator());
+
+    /// <inheritdoc />
+    public override bool Equals([NotNullWhen(true)] object? obj) => false;
+
+    /// <inheritdoc />
     public override string ToString()
     {
         var len = 0;
@@ -146,6 +193,36 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
             }
         });
     }
+
+    /// <inheritdoc />
+    public override int GetHashCode() => InternalHelpers.GetHashCode(Source);
+
+    /// <inheritdoc />
+    public int CompareTo(RunesSpanString other) => Compare(this, other);
+
+    /// <inheritdoc />
+    public bool Equals(RunesSpanString other) => Equals(this, other);
+
+    /// <inheritdoc />
+    public static bool Equals(RunesSpanString x, RunesSpanString y) =>
+        InternalHelpers.Equals(x.Source, y.Source);
+
+    /// <inheritdoc />
+    public static int Compare(RunesSpanString x, RunesSpanString y) =>
+        InternalHelpers.Compare<RunesSpanString, RunesSpanEnumerator>(x, y);
+
+    /// <inheritdoc />
+    public static bool operator ==(RunesSpanString x, RunesSpanString y) => Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator !=(RunesSpanString x, RunesSpanString y) => !Equals(x, y);
+
+    /// <summary>
+    /// Defines an implicit conversion from <see cref="RunesString" /> to <see cref="RunesSpanString" /> that creates a new <see cref="RunesSpanString" /> representing the UTF-8 encoded string.
+    /// </summary>
+    /// <param name="str"></param>
+    public static implicit operator RunesSpanString(RunesString str) =>
+        new(str.Source.Span);
 }
 
 

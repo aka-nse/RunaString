@@ -4,7 +4,7 @@ namespace RunaString.Test;
 
 public class CharsStringTest
 {
-    public static TheoryData<CharsTestCase> CharsStringTestCases() => TestHelpers.CharsTestCases;
+    public static TheoryData<CharsTestCase> CharsStringTestCases() => [..TestHelpers.CharsTestCases];
 
     public static TheoryData<string, int, int, string> SliceTestCases() =>
         new()

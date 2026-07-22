@@ -28,6 +28,67 @@ internal static class InternalHelpers
     public static bool AreSame<T>(ReadOnlyMemory<T> x, ReadOnlyMemory<T> y) =>
         AreSame(x.Span, y.Span);
 
+    public static int Compare<TString, TEnumerator>(TString x, TString y)
+        where TString : IRunaEnumerable<TString, TEnumerator>, allows ref struct
+        where TEnumerator : IRunaEnumerator<TEnumerator>, allows ref struct
+    {
+        var enumeratorX = x.GetEnumerator();
+        var enumeratorY = y.GetEnumerator();
+        while (true)
+        {
+            var hasX = enumeratorX.MoveNext();
+            var hasY = enumeratorY.MoveNext();
+            if (!hasX && !hasY) return 0;
+            if (!hasX) return -1;
+            if (!hasY) return 1;
+            var runeX = enumeratorX.Current;
+            var runeY = enumeratorY.Current;
+            var comparison = runeX.CompareTo(runeY);
+            if (comparison != 0)
+            {
+                return comparison;
+            }
+        }
+    }
+
+    public static bool Equals<T>(ReadOnlySpan<T> x, ReadOnlySpan<T> y)
+        where T : unmanaged
+    {
+        if (x.Length != y.Length)
+        {
+            return false;
+        }
+
+        var vx = MemoryMarshal.Cast<T, Vector<uint>>(x);
+        var vy = MemoryMarshal.Cast<T, Vector<uint>>(y);
+        for (int i = 0; i < vx.Length; i++)
+        {
+            if (vx[i] != vy[i])
+            {
+                return false;
+            }
+        }
+        var ux = MemoryMarshal.Cast<T, uint>(x.Slice(vx.Length * Vector<uint>.Count));
+        var uy = MemoryMarshal.Cast<T, uint>(y.Slice(vy.Length * Vector<uint>.Count));
+        for (int i = 0; i < ux.Length; i++)
+        {
+            if (ux[i] != uy[i])
+            {
+                return false;
+            }
+        }
+        var xx = MemoryMarshal.Cast<T, byte>(x.Slice((vx.Length * Vector<uint>.Count) + ux.Length * sizeof(uint) / Unsafe.SizeOf<T>()));
+        var yy = MemoryMarshal.Cast<T, byte>(y.Slice((vy.Length * Vector<uint>.Count) + uy.Length * sizeof(uint) / Unsafe.SizeOf<T>()));
+        for (int i = 0; i < xx.Length; i++)
+        {
+            if (xx[i] != yy[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static void ValidateUtf8(ReadOnlySpan<byte> utf8Buffer)
     {
         if (!Utf8.IsValid(utf8Buffer))
@@ -56,6 +117,26 @@ internal static class InternalHelpers
     {
         var hash = new HashCode();
         foreach (var x in MemoryMarshal.Cast<byte, int>(utf8Buffer))
+        {
+            hash.Add(x);
+        }
+        return hash.ToHashCode();
+    }
+
+    public static int GetHashCode(ReadOnlySpan<char> charsBuffer)
+    {
+        var hash = new HashCode();
+        foreach (var x in MemoryMarshal.Cast<char, int>(charsBuffer))
+        {
+            hash.Add(x);
+        }
+        return hash.ToHashCode();
+    }
+
+    public static int GetHashCode(ReadOnlySpan<Rune> runesBuffer)
+    {
+        var hash = new HashCode();
+        foreach (var x in MemoryMarshal.Cast<Rune, int>(runesBuffer))
         {
             hash.Add(x);
         }

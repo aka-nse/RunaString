@@ -25,6 +25,7 @@ public interface IRunaEnumerable<TSelf, TEnumerator>
 
 /// <inheritdoc cref="IRunaString{TSelf, TEnumerator, TIndex}" />
 public interface IRunaString<TSelf, TIndex>
+    : IEquatable<TSelf>, IComparable<TSelf>
     where TSelf : IRunaString<TSelf, TIndex>, allows ref struct
     where TIndex : IRunaIndex
 {
@@ -34,6 +35,15 @@ public interface IRunaString<TSelf, TIndex>
     /// <returns>The rune at the specified index.</returns>
     /// <exception cref="ArgumentOutOfRangeException" />
     public Rune this[TIndex index] { get; }
+
+    /// <summary>
+    /// Returns a new <typeparamref name="TSelf" /> that is a slice of the current string, starting at the specified rune index and with the specified rune length.
+    /// </summary>
+    /// <param name="runeStart"></param>
+    /// <param name="runeLength"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public TSelf Slice(int runeStart, int runeLength);
 
     /// <summary>
     /// Creates a new enumerator that iterates over the runes in the specified range of the source.
@@ -119,6 +129,44 @@ public interface IRunaString<TSelf, TIndex>
 
     /// <inheritdoc />
     public string ToString();
+
+    /// <summary>
+    /// Returns the number of Unicode code points (runes) in the UTF-8 encoded string.
+    /// </summary>
+    /// <returns></returns>
+    public int GetRuneCount();
+
+    /// <summary>
+    /// Determines whether two <see cref="Utf8SpanString" />  instances are equal by comparing their UTF-8 encoded byte sequences for equality.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    public static abstract bool Equals(TSelf x, TSelf y);
+
+    /// <summary>
+    /// Compares two <typeparamref name="TSelf" />  instances by comparing in lexicographical order.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    public static abstract int Compare(TSelf x, TSelf y);
+
+    /// <summary>
+    /// Determines whether two <typeparamref name="TSelf" />  instances are equal in lexicographical order.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    public static abstract bool operator ==(TSelf x, TSelf y);
+
+    /// <summary>
+    /// Determines whether two <typeparamref name="TSelf" />  instances are not equal in lexicographical order.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    public static abstract bool operator !=(TSelf x, TSelf y);
 }
 
 
