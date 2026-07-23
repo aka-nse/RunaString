@@ -33,7 +33,7 @@ public class Utf8EnumeratorHelpersBenchmarkContext
         var span = BenchmarkHelpers.Utf8Bytes.AsSpan();
         int nextByteIndex = 0;
         int runeIndex = 0;
-        while (Utf8Helpers.TryGetRuneAndMoveNext(span, ref nextByteIndex, ref runeIndex, out var _))
+        while (Utf8Helpers.UnsafeTryGetRuneAndMoveNext(span, ref nextByteIndex, ref runeIndex, out var _))
         {
             count++;
         }
