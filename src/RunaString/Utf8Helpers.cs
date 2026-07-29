@@ -1,7 +1,9 @@
 // #define VALIDATE_UTF8
 
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 using System.Text;
 
 namespace RunaString;
@@ -19,6 +21,7 @@ internal static class Utf8Helpers
         return currentByteIndex + bytesConsumed;
     }
 
+
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool UnsafeTryGetRuneAndMoveNext(
         ReadOnlySpan<byte> utf8Buffer,
@@ -26,7 +29,6 @@ internal static class Utf8Helpers
         ref int runeIndex,
         out Rune current)
     {
-
         if (byteIndex >= utf8Buffer.Length)
         {
             current = default;
@@ -191,4 +193,82 @@ internal static class Utf8Helpers
     private static readonly uint _bitMask4Byte = BitConverter.IsLittleEndian ? 0xC0C0C000u : 0x00C0C0C0u;
     private static readonly uint _bitPattern4Byte = BitConverter.IsLittleEndian ? 0x80808000u : 0x00808080u;
 #endif
+
+
+    public static int Compare(ReadOnlySpan<byte> lhsUtf8Buffer, ReadOnlySpan<byte> rhsUtf8Buffer)
+    {
+        if (Vector256.IsHardwareAccelerated)
+        {
+            while (lhsUtf8Buffer.Length >= Vector256<byte>.Count && rhsUtf8Buffer.Length >= Vector256<byte>.Count)
+            {
+                var lhsVector = Vector256.LoadUnsafe(in lhsUtf8Buffer[0]);
+                var rhsVector = Vector256.LoadUnsafe(in rhsUtf8Buffer[0]);
+                var diffMask = ~Vector256.ExtractMostSignificantBits(Vector256.Equals(lhsVector, rhsVector));
+                if (diffMask == 0)
+                {
+                    lhsUtf8Buffer = lhsUtf8Buffer[Vector256<byte>.Count..];
+                    rhsUtf8Buffer = rhsUtf8Buffer[Vector256<byte>.Count..];
+                    continue;
+                }
+                var firstDiffIndex = BitOperations.TrailingZeroCount(diffMask);
+                return lhsUtf8Buffer[firstDiffIndex] < rhsUtf8Buffer[firstDiffIndex]
+                    ? -1
+                    : +1;
+            }
+        }
+        if (Vector128.IsHardwareAccelerated)
+        {
+            while (lhsUtf8Buffer.Length >= Vector128<byte>.Count && rhsUtf8Buffer.Length >= Vector128<byte>.Count)
+            {
+                var lhsVector = Vector128.LoadUnsafe(in lhsUtf8Buffer[0]);
+                var rhsVector = Vector128.LoadUnsafe(in rhsUtf8Buffer[0]);
+                var diffMask = ~Vector128.ExtractMostSignificantBits(Vector128.Equals(lhsVector, rhsVector)) & 0xFFFFu;
+                if (diffMask == 0)
+                {
+                    lhsUtf8Buffer = lhsUtf8Buffer[Vector128<byte>.Count..];
+                    rhsUtf8Buffer = rhsUtf8Buffer[Vector128<byte>.Count..];
+                    continue;
+                }
+                var firstDiffIndex = BitOperations.TrailingZeroCount(diffMask);
+                return lhsUtf8Buffer[firstDiffIndex] < rhsUtf8Buffer[firstDiffIndex]
+                    ? -1
+                    : +1;
+            }
+        }
+        while(lhsUtf8Buffer.Length >= sizeof(uint) && rhsUtf8Buffer.Length >= sizeof(uint))
+        {
+            var lhsValue = Unsafe.ReadUnaligned<uint>(ref MemoryMarshal.GetReference(lhsUtf8Buffer));
+            var rhsValue = Unsafe.ReadUnaligned<uint>(ref MemoryMarshal.GetReference(rhsUtf8Buffer));
+            if (lhsValue == rhsValue)
+            {
+                lhsUtf8Buffer = lhsUtf8Buffer[sizeof(uint)..];
+                rhsUtf8Buffer = rhsUtf8Buffer[sizeof(uint)..];
+                continue;
+            }
+            return lhsValue < rhsValue
+                ? -1
+                : +1;
+        }
+        while(lhsUtf8Buffer.Length > 0 && rhsUtf8Buffer.Length > 0)
+        {
+            var lhsValue = lhsUtf8Buffer[0];
+            var rhsValue = rhsUtf8Buffer[0];
+            if (lhsValue == rhsValue)
+            {
+                lhsUtf8Buffer = lhsUtf8Buffer[1..];
+                rhsUtf8Buffer = rhsUtf8Buffer[1..];
+                continue;
+            }
+            return lhsValue < rhsValue
+                ? -1
+                : +1;
+        }
+        if(lhsUtf8Buffer.Length == rhsUtf8Buffer.Length)
+        {
+            return 0;
+        }
+        return lhsUtf8Buffer.Length < rhsUtf8Buffer.Length
+            ? -1
+            : +1;
+    }
 }

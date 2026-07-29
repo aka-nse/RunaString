@@ -4,7 +4,11 @@ namespace RunaString.Benchmark;
 
 internal static class BenchmarkHelpers
 {
-    public const string TestString = """
+    public const string TestString_Ascii1 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    public const string TestString_Ascii2 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborun.";
+    //                                       ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- benchmark testing difference ^
+
+    public const string TestString_Multilingual = """
             Hello, world!
             The quick brown fox jumps over the lazy dog
             CRLF\r\nTab\tEnd
@@ -58,5 +62,5 @@ internal static class BenchmarkHelpers
             """;
 
     public static readonly byte[] Utf8Bytes =
-        Encoding.UTF8.GetBytes(TestString);
+        Encoding.UTF8.GetBytes(TestString_Multilingual);
 }

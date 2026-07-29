@@ -146,7 +146,7 @@ public readonly partial struct Utf8String
 
     /// <inheritdoc />
     public static int Compare(Utf8String x, Utf8String y) =>
-        InternalHelpers.Compare<Utf8String, Utf8MemoryEnumerator>(x, y);
+        Utf8Helpers.Compare(x.Buffer.Span, y.Buffer.Span);
 
     /// <inheritdoc />
     public static bool operator ==(Utf8String x, Utf8String y) => Equals(x, y);
@@ -279,7 +279,7 @@ public readonly ref partial struct Utf8SpanString
 
     /// <inheritdoc />
     public static int Compare(Utf8SpanString x, Utf8SpanString y) =>
-        InternalHelpers.Compare<Utf8SpanString, Utf8SpanEnumerator>(x, y);
+        Utf8Helpers.Compare(x.Buffer, y.Buffer);
 
     /// <inheritdoc />
     public static bool operator ==(Utf8SpanString x, Utf8SpanString y) => Equals(x, y);
