@@ -3,7 +3,6 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Unicode;
 
 namespace RunaString;
 
@@ -89,16 +88,6 @@ internal static class InternalHelpers
         return true;
     }
 
-    public static void ValidateUtf8(ReadOnlySpan<byte> utf8Buffer)
-    {
-        if (!Utf8.IsValid(utf8Buffer))
-        {
-            throw new ArgumentException(
-                "The provided buffer is not a valid UTF-8 sequence.",
-                nameof(utf8Buffer));
-        }
-    }
-
     public static int GetRuneCount<TEnumerator>(TEnumerator enumerator)
         where TEnumerator : IRunaEnumerator<TEnumerator>, allows ref struct
     {
@@ -108,19 +97,6 @@ internal static class InternalHelpers
             count++;
         }
         return count;
-    }
-
-    public static string ToString(ReadOnlySpan<byte> utf8Buffer) =>
-        Encoding.UTF8.GetString(utf8Buffer);
-
-    public static int GetHashCode(ReadOnlySpan<byte> utf8Buffer)
-    {
-        var hash = new HashCode();
-        foreach (var x in MemoryMarshal.Cast<byte, int>(utf8Buffer))
-        {
-            hash.Add(x);
-        }
-        return hash.ToHashCode();
     }
 
     public static int GetHashCode(ReadOnlySpan<char> charsBuffer)
