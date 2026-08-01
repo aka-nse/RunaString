@@ -9,8 +9,45 @@ using System.Text.Unicode;
 
 namespace RunaString;
 
+/// <remarks>
+/// The `utf8Buffer` argument of methods in this class can only process valid UTF-8 byte sequences.
+///  Providing an invalid byte sequence results in undefined behavior.
+/// </remarks>
 internal static class Utf8Helpers
 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static bool IsContinuationByte(byte b)
+    {
+        return (b & 0xC0) == 0x80;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static int GetBytesConsumed(byte utf8CharHead)
+    {
+        if ((utf8CharHead & 0x80) == 0)
+        {
+            return 1;
+        }
+        return calculateMultiByteLength(utf8CharHead);
+
+        static int calculateMultiByteLength(byte utf8CharHead)
+        {
+            if ((utf8CharHead & 0b111_00000) == 0b110_00000)
+            {
+                return 2;
+            }
+            if ((utf8CharHead & 0b1111_0000) == 0b1110_0000)
+            {
+                return 3;
+            }
+            if ((utf8CharHead & 0b11111_000) == 0b11110_000)
+            {
+                return 4;
+            }
+            return 1;
+        }
+    }
+
     public static void ValidateUtf8(ReadOnlySpan<byte> utf8Buffer)
     {
         if (!Utf8.IsValid(utf8Buffer))
@@ -41,8 +78,47 @@ internal static class Utf8Helpers
         {
             return utf8Buffer.Length;
         }
-        RuneHelpers.DecodeFromUtf8At(utf8Buffer, currentByteIndex, out _, out var bytesConsumed);
-        return currentByteIndex + bytesConsumed;
+        return currentByteIndex + GetBytesConsumed(utf8Buffer[currentByteIndex]);
+    }
+
+
+    public static bool TrySkipRunes(ReadOnlySpan<byte> utf8Buffer, int runeCount, out int bytesConsumed)
+    {
+        bytesConsumed = 0;
+        while (true)
+        {
+            if (utf8Buffer.Length <= bytesConsumed)
+            {
+                return runeCount == 0;
+            }
+            if (runeCount <= 0)
+            {
+                return true;
+            }
+            if (!IsContinuationByte(utf8Buffer[bytesConsumed]))
+            {
+                --runeCount;
+            }
+            bytesConsumed += GetBytesConsumed(utf8Buffer[bytesConsumed]);
+        }
+    }
+
+
+    public static (int byteIndex, int byteLength) GetSliceIndex(ReadOnlySpan<byte> utf8Buffer, int runeStart, int runeLength)
+    {
+        if (!TrySkipRunes(utf8Buffer, runeStart, out var byteIndex))
+        {
+            throw new ArgumentOutOfRangeException(nameof(runeStart));
+        }
+        if (!TrySkipRunes(utf8Buffer[byteIndex..], runeLength, out var byteLength))
+        {
+            throw new ArgumentOutOfRangeException(nameof(runeLength));
+        }
+        if(byteLength >= 1 && byteIndex + byteLength < utf8Buffer.Length)
+        {
+            byteLength += GetBytesConsumed(utf8Buffer[byteIndex + byteLength - 1]) - 1;
+        }
+        return (byteIndex, byteLength);
     }
 
 
@@ -224,7 +300,7 @@ internal static class Utf8Helpers
         var continuationByteCount = 0;
         if (Vector256.IsHardwareAccelerated)
         {
-            while(utf8Buffer.Length >= Vector256<byte>.Count)
+            while (utf8Buffer.Length >= Vector256<byte>.Count)
             {
                 var bufferVector = Vector256.LoadUnsafe(in utf8Buffer[0]);
                 var masked = Vector256.Equals(
@@ -236,7 +312,7 @@ internal static class Utf8Helpers
                 utf8Buffer = utf8Buffer[Vector256<byte>.Count..];
             }
         }
-        if(Vector128.IsHardwareAccelerated)
+        if (Vector128.IsHardwareAccelerated)
         {
             while (utf8Buffer.Length >= Vector128<byte>.Count)
             {
@@ -252,7 +328,7 @@ internal static class Utf8Helpers
         }
         foreach (var b in utf8Buffer)
         {
-            if((b & 0xC0) == 0x80)
+            if (IsContinuationByte(b))
             {
                 ++continuationByteCount;
             }
@@ -305,7 +381,7 @@ internal static class Utf8Helpers
                     : +1;
             }
         }
-        while(lhsUtf8Buffer.Length >= sizeof(uint) && rhsUtf8Buffer.Length >= sizeof(uint))
+        while (lhsUtf8Buffer.Length >= sizeof(uint) && rhsUtf8Buffer.Length >= sizeof(uint))
         {
             var lhsValue = Unsafe.ReadUnaligned<uint>(ref MemoryMarshal.GetReference(lhsUtf8Buffer));
             var rhsValue = Unsafe.ReadUnaligned<uint>(ref MemoryMarshal.GetReference(rhsUtf8Buffer));
@@ -319,7 +395,7 @@ internal static class Utf8Helpers
                 ? -1
                 : +1;
         }
-        while(lhsUtf8Buffer.Length > 0 && rhsUtf8Buffer.Length > 0)
+        while (lhsUtf8Buffer.Length > 0 && rhsUtf8Buffer.Length > 0)
         {
             var lhsValue = lhsUtf8Buffer[0];
             var rhsValue = rhsUtf8Buffer[0];
@@ -333,7 +409,7 @@ internal static class Utf8Helpers
                 ? -1
                 : +1;
         }
-        if(lhsUtf8Buffer.Length == rhsUtf8Buffer.Length)
+        if (lhsUtf8Buffer.Length == rhsUtf8Buffer.Length)
         {
             return 0;
         }

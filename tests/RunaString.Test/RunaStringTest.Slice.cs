@@ -19,6 +19,18 @@ public partial class RunaStringTest
             { "👋🌍", 0, 1, "👋" },
             { "👋🌍", 1, 2, "🌍" },
             { "👋🌍", 0, 2, "👋🌍" },
+            {
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                335,
+                335 + 9,
+                "Excepteur"
+            },
+            {
+                "いろはにほへと　ちりぬるを　わかよたれそ　つねならむ　うゐのおくやま　けふこえて　あさきゆめみし　ゑひもせす",
+                41,
+                41+ 7,
+                "あさきゆめみし"
+            }
         };
 
     private static void SliceTestCore<TString, TEnumerator, TIndex, TBuffer>(TString value, int start, int end, string expected)

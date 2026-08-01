@@ -118,4 +118,29 @@ internal static class InternalHelpers
         }
         return hash.ToHashCode();
     }
+
+    public static (TIndex start, TIndex end) GetSliceIndex<TString, TEnumerator, TIndex>(TString str, int runeStart, int runeLength)
+        where TString : IRunaString<TString, TEnumerator, TIndex>, allows ref struct
+        where TEnumerator : IRunaEnumerator<TEnumerator, TIndex>, allows ref struct
+        where TIndex : struct, IRunaIndex
+    {
+        var enumerator = str.GetEnumerator();
+        for (var i = 0; i < runeStart; i++)
+        {
+            if (!enumerator.MoveNext())
+            {
+                throw new ArgumentOutOfRangeException(nameof(runeStart));
+            }
+        }
+        var startIndex = enumerator.SeekIndex;
+        for (var i = 0; i < runeLength; i++)
+        {
+            if (!enumerator.MoveNext())
+            {
+                throw new ArgumentOutOfRangeException(nameof(runeLength));
+            }
+        }
+        var endIndex = enumerator.SeekIndex;
+        return (startIndex, endIndex);
+    }
 }
