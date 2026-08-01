@@ -80,7 +80,7 @@ public readonly partial struct Utf8String
     /// <inheritdoc />
     public Utf8String Slice(int runeStart, int runeLength)
     {
-        var (byteIndex, byteLength) = FileHelpers.GetSliceIndex(this, runeStart, runeLength);
+        var (byteIndex, byteLength) = Utf8Helpers.GetSliceIndex(Buffer.Span, runeStart, runeLength);
         return new(Buffer.Slice(byteIndex, byteLength));
     }
 
@@ -220,8 +220,8 @@ public readonly ref partial struct Utf8SpanString
     /// <inheritdoc />
     public Utf8SpanString Slice(int runeStart, int runeLength)
     {
-        var (byteIndex, byteLength) = FileHelpers.GetSliceIndex(this, runeStart, runeLength);
-        return new(in Unsafe.Add(ref Unsafe.AsRef(in _reference), byteIndex), byteLength);
+        var (byteIndex, byteLength) = Utf8Helpers.GetSliceIndex(Buffer, runeStart, runeLength);
+        return DangerousFromSpan(Buffer.Slice(byteIndex, byteLength));
     }
 
     /// <inheritdoc />
@@ -352,28 +352,6 @@ public abstract partial class Utf8Comparer
 
 file static class FileHelpers
 {
-    public static (int byteIndex, int byteLength) GetSliceIndex(Utf8SpanString str, int runeStart, int runeLength)
-    {
-        var enumerator = str.GetEnumerator();
-        for (var i = 0; i < runeStart; i++)
-        {
-            if (!enumerator.MoveNext())
-            {
-                throw new ArgumentOutOfRangeException(nameof(runeStart));
-            }
-        }
-        var startByteIndex = enumerator.NextByteIndex;
-        for (var i = 0; i < runeLength; i++)
-        {
-            if (!enumerator.MoveNext())
-            {
-                throw new ArgumentOutOfRangeException(nameof(runeLength));
-            }
-        }
-        var endByteIndex = enumerator.NextByteIndex;
-        return (startByteIndex, endByteIndex - startByteIndex);
-    }
-
     public static bool TryGetRune(ReadOnlySpan<byte> buffer, Utf8Index index, out Rune rune, out int codeUnitConsumed)
     {
         var (byteIndex, runeIndex) = index;
