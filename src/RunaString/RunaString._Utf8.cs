@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -10,6 +9,11 @@ namespace RunaString;
 /// <summary>
 /// Represents an immutable UTF-8 encoded string.
 /// </summary>
+/// <remarks>
+/// This API is designed to handle only valid UTF-8 encoded strings.
+/// If invalid UTF-8 sequences are provided via <see cref="DangerousFromUtf8(ReadOnlyMemory{byte})"/>,
+/// the behavior is undefined and may lead to exceptions or incorrect results.
+/// </remarks>
 [RunaString]
 public readonly partial struct Utf8String
     : IRunaString<Utf8String, Utf8MemoryEnumerator, Utf8Index>
@@ -65,8 +69,11 @@ public readonly partial struct Utf8String
     /// <summary>
     /// Creates a new <see cref="Utf8String" />  from a given UTF-8 encoded byte buffer, starting at the specified index and with the specified length, without validating the UTF-8 encoding.
     /// </summary>
-    /// <param name="utf8Buffer"></param>
+    /// <param name="utf8Buffer"> Must be valid UTF-8 encoded bytes. </param>
     /// <returns></returns>
+    /// <remarks>
+    /// If an invalid UTF-8 byte sequence is input, the state of all members of this instance - as well as all members reachable via the return values ​​of those members - becomes undefined.
+    /// </remarks>
     public static Utf8String DangerousFromUtf8(ReadOnlyMemory<byte> utf8Buffer) =>
         new (utf8Buffer);
 
@@ -115,7 +122,7 @@ public readonly partial struct Utf8String
     public Utf8MemoryEnumerator GetEnumerator() => new(this);
 
     /// <inheritdoc />
-    public int GetRuneCount() => InternalHelpers.GetRuneCount(GetEnumerator());
+    public int GetRuneCount() => Utf8Helpers.GetRuneCount(Buffer.Span);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) =>
@@ -139,7 +146,7 @@ public readonly partial struct Utf8String
 
     /// <inheritdoc />
     public static int Compare(Utf8String x, Utf8String y) =>
-        InternalHelpers.Compare<Utf8String, Utf8MemoryEnumerator>(x, y);
+        Utf8Helpers.Compare(x.Buffer.Span, y.Buffer.Span);
 
     /// <inheritdoc />
     public static bool operator ==(Utf8String x, Utf8String y) => Equals(x, y);
@@ -152,6 +159,11 @@ public readonly partial struct Utf8String
 /// <summary>
 /// Represents a read-only span of UTF-8 encoded bytes.
 /// </summary>
+/// <remarks>
+/// This API is designed to handle only valid UTF-8 encoded strings.
+/// If invalid UTF-8 sequences are provided via <see cref="DangerousFromSpan(ReadOnlySpan{byte})"/>,
+/// the behavior is undefined and may lead to exceptions or incorrect results.
+/// </remarks>
 [RunaString]
 public readonly ref partial struct Utf8SpanString
     : IRunaString<Utf8SpanString, Utf8SpanEnumerator, Utf8Index>
@@ -197,8 +209,11 @@ public readonly ref partial struct Utf8SpanString
     /// <summary>
     /// Creates a new <see cref="Utf8SpanString" /> from a given UTF-8 encoded byte buffer, starting at the specified index and with the specified length, without validating the UTF-8 encoding.
     /// </summary>
-    /// <param name="utf8Buffer"></param>
+    /// <param name="utf8Buffer"> Must be valid UTF-8 encoded bytes. </param>
     /// <returns></returns>
+    /// <remarks>
+    /// If an invalid UTF-8 byte sequence is input, the state of all members of this instance - as well as all members reachable via the return values ​​of those members - becomes undefined.
+    /// </remarks>
     public static Utf8SpanString DangerousFromSpan(ReadOnlySpan<byte> utf8Buffer) =>
         new(in MemoryMarshal.GetReference(utf8Buffer), utf8Buffer.Length);
 
@@ -241,7 +256,7 @@ public readonly ref partial struct Utf8SpanString
     public Utf8SpanEnumerator GetEnumerator() => new(this);
 
     /// <inheritdoc />
-    public int GetRuneCount() => InternalHelpers.GetRuneCount(GetEnumerator());
+    public int GetRuneCount() => Utf8Helpers.GetRuneCount(Buffer);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) => false;
@@ -264,7 +279,7 @@ public readonly ref partial struct Utf8SpanString
 
     /// <inheritdoc />
     public static int Compare(Utf8SpanString x, Utf8SpanString y) =>
-        InternalHelpers.Compare<Utf8SpanString, Utf8SpanEnumerator>(x, y);
+        Utf8Helpers.Compare(x.Buffer, y.Buffer);
 
     /// <inheritdoc />
     public static bool operator ==(Utf8SpanString x, Utf8SpanString y) => Equals(x, y);
@@ -362,7 +377,7 @@ file static class FileHelpers
     public static bool TryGetRune(ReadOnlySpan<byte> buffer, Utf8Index index, out Rune rune, out int codeUnitConsumed)
     {
         var (byteIndex, runeIndex) = index;
-        var result = Utf8Helpers.TryGetRuneAndMoveNext(buffer, ref byteIndex, ref runeIndex, out rune);
+        var result = Utf8Helpers.UnsafeTryGetRuneAndMoveNext(buffer, ref byteIndex, ref runeIndex, out rune);
         codeUnitConsumed = byteIndex - index.ByteIndex;
         return result;
     }
@@ -372,7 +387,7 @@ file static class FileHelpers
         if((uint)index.ByteIndex < (uint)buffer.Length)
         {
             var (byteIndex, runeIndex) = index;
-            Utf8Helpers.TryGetRuneAndMoveNext(buffer, ref byteIndex, ref runeIndex, out _);
+            Utf8Helpers.UnsafeTryGetRuneAndMoveNext(buffer, ref byteIndex, ref runeIndex, out _);
             index = new(byteIndex, runeIndex);
         }
         return index;

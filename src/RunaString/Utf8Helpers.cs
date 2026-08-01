@@ -1,4 +1,9 @@
+// #define VALIDATE_UTF8
+
+using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 using System.Text;
 
 namespace RunaString;
@@ -16,8 +21,9 @@ internal static class Utf8Helpers
         return currentByteIndex + bytesConsumed;
     }
 
+
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public static bool TryGetRuneAndMoveNext(
+    public static bool UnsafeTryGetRuneAndMoveNext(
         ReadOnlySpan<byte> utf8Buffer,
         ref int byteIndex,
         ref int runeIndex,
@@ -30,34 +36,45 @@ internal static class Utf8Helpers
         }
         if (utf8Buffer[byteIndex] <= 0x7F)
         {
-            current = Unsafe.BitCast<uint, Rune>(utf8Buffer[byteIndex]);
+            unsafe
+            {
+                current = Unsafe.BitCast<uint, Rune>(utf8Buffer[byteIndex]);
+            }
             ++byteIndex;
             ++runeIndex;
             return true;
         }
         else
         {
-            decodeMultiBytes(utf8Buffer, byteIndex, out current, out var bytesConsumed);
+            int bytesConsumed;
+            unsafe
+            {
+                decodeMultiBytes(utf8Buffer, byteIndex, out current, out bytesConsumed);
+            }
             byteIndex += bytesConsumed;
             ++runeIndex;
             return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        static bool decodeMultiBytes(ReadOnlySpan<byte> utf8Buffer, int byteIndex, out Rune rune, out int bytesConsumed)
+        static unsafe bool decodeMultiBytes(ReadOnlySpan<byte> utf8Buffer, int byteIndex, out Rune rune, out int bytesConsumed)
         {
-            uint value;
+            Unsafe.SkipInit(out bytesConsumed);
+            Unsafe.SkipInit(out uint value);
             var len = utf8Buffer.Length;
-            var b0 = utf8Buffer[byteIndex];
+            ref var b0 = ref Unsafe.Add(ref MemoryMarshal.GetReference(utf8Buffer), byteIndex);
 
             // 2-byte sequence  110x-xxxx 10xx-xxxx
             if ((b0 & 0xE0) == 0xC0)
             {
+#if VALIDATE_UTF8
                 if (byteIndex + 1 >= len)
                 {
                     goto invalid;
                 }
-                var b1 = utf8Buffer[byteIndex + 1];
+#endif
+                var b1 = Unsafe.Add(ref b0, 1);
+#if VALIDATE_UTF8
                 if ((b1 & 0xC0) != 0x80)
                 {
                     goto invalid;
@@ -67,6 +84,7 @@ internal static class Utf8Helpers
                     // overlong
                     goto invalid;
                 }
+#endif
                 value = ((b0 & 0x1Fu) << 6) | (b1 & 0x3Fu);
                 bytesConsumed = 2;
                 goto succeeded;
@@ -75,19 +93,25 @@ internal static class Utf8Helpers
             // 3-byte sequence  1110-xxxx 10xx-xxxx 10xx-xxxx
             if ((b0 & 0xF0) == 0xE0)
             {
+#if VALIDATE_UTF8
                 if (byteIndex + 2 >= len)
                 {
                     goto invalid;
                 }
+#endif
 
+                ref var b1 = ref Unsafe.Add(ref b0, 1);
+
+#if VALIDATE_UTF8
                 // ****-**** 10xx-xxxx 10xx-xxxx
-                if ((readUnaligned<ushort>(utf8Buffer, byteIndex + 1) & 0xC0C0u) != 0x8080u)
+                if ((Unsafe.ReadUnaligned<ushort>(ref b1) & 0xC0C0u) != 0x8080u)
                 {
                     goto invalid;
                 }
+#endif
 
-                var b1 = utf8Buffer[byteIndex + 1];
-                var b2 = utf8Buffer[byteIndex + 2];
+                var b2 = Unsafe.Add(ref b0, 2);
+#if VALIDATE_UTF8
                 if (b0 == 0xE0 && b1 < 0xA0)
                 {
                     // overlong
@@ -98,6 +122,7 @@ internal static class Utf8Helpers
                     // surrogate
                     goto invalid;
                 }
+#endif
                 value = ((b0 & 0xFu) << 12) | ((b1 & 0x3Fu) << 6) | (b2 & 0x3Fu);
                 bytesConsumed = 3;
                 goto succeeded;
@@ -106,6 +131,7 @@ internal static class Utf8Helpers
             // 4-byte sequence  1111-0xxx 10xx-xxxx 10xx-xxxx 10xx-xxxx
             if ((b0 & 0xF8) == 0xF0)
             {
+#if VALIDATE_UTF8
                 if (byteIndex + 3 >= len)
                 {
                     goto invalid;
@@ -115,16 +141,20 @@ internal static class Utf8Helpers
                     // > U+10FFFF
                     goto invalid;
                 }
+#endif
 
+#if VALIDATE_UTF8
                 // ****-**** 10xx-xxxx 10xx-xxxx 10xx-xxxx
-                if ((readUnaligned<uint>(utf8Buffer, byteIndex) & _bitMask4Byte) != _bitPattern4Byte)
+                if ((Unsafe.ReadUnaligned<uint>(ref b0) & _bitMask4Byte) != _bitPattern4Byte)
                 {
                     goto invalid;
                 }
+#endif
 
-                var b1 = utf8Buffer[byteIndex + 1];
-                var b2 = utf8Buffer[byteIndex + 2];
-                var b3 = utf8Buffer[byteIndex + 3];
+                var b1 = Unsafe.Add(ref b0, 1);
+                var b2 = Unsafe.Add(ref b0, 2);
+                var b3 = Unsafe.Add(ref b0, 3);
+#if VALIDATE_UTF8
                 // // previous implementation
                 // if ((b1 & 0xC0) != 0x80 || (b2 & 0xC0) != 0x80 || (b3 & 0xC0) != 0x80)
                 // {
@@ -140,31 +170,151 @@ internal static class Utf8Helpers
                     // > U+10FFFF
                     goto invalid;
                 }
+#endif
                 value = ((b0 & 0x7u) << 18) | ((b1 & 0x3Fu) << 12) | ((b2 & 0x3Fu) << 6) | (b3 & 0x3Fu);
                 bytesConsumed = 4;
                 goto succeeded;
             }
 
+#if VALIDATE_UTF8
         invalid:
             rune = Rune.ReplacementChar;
             bytesConsumed = 1;
             return true;
+#endif
 
         succeeded:
             rune = Unsafe.BitCast<uint, Rune>(value);
             return true;
         }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        static T readUnaligned<T>(ReadOnlySpan<byte> span, int index)
-            where T : unmanaged
-        {
-            unsafe
-            {
-                return Unsafe.ReadUnaligned<T>(ref Unsafe.AsRef(in span[index]));
-            }
-        }
     }
+#if VALIDATE_UTF8
     private static readonly uint _bitMask4Byte = BitConverter.IsLittleEndian ? 0xC0C0C000u : 0x00C0C0C0u;
     private static readonly uint _bitPattern4Byte = BitConverter.IsLittleEndian ? 0x80808000u : 0x00808080u;
+#endif
+
+
+    public static int GetRuneCount(ReadOnlySpan<byte> utf8Buffer)
+    {
+        var totalLength = utf8Buffer.Length;
+        var continuationByteCount = 0;
+        if (Vector256.IsHardwareAccelerated)
+        {
+            while(utf8Buffer.Length >= Vector256<byte>.Count)
+            {
+                var bufferVector = Vector256.LoadUnsafe(in utf8Buffer[0]);
+                var masked = Vector256.Equals(
+                    Vector256.BitwiseAnd(
+                        bufferVector,
+                        _continuationByteMask256),
+                    _continuationBytePattern256);
+                continuationByteCount += BitOperations.PopCount(Vector256.ExtractMostSignificantBits(masked));
+                utf8Buffer = utf8Buffer[Vector256<byte>.Count..];
+            }
+        }
+        if(Vector128.IsHardwareAccelerated)
+        {
+            while (utf8Buffer.Length >= Vector128<byte>.Count)
+            {
+                var bufferVector = Vector128.LoadUnsafe(in utf8Buffer[0]);
+                var masked = Vector128.Equals(
+                    Vector128.BitwiseAnd(
+                        bufferVector,
+                        _continuationByteMask128),
+                    _continuationBytePattern128);
+                continuationByteCount += BitOperations.PopCount(Vector128.ExtractMostSignificantBits(masked));
+                utf8Buffer = utf8Buffer[Vector128<byte>.Count..];
+            }
+        }
+        foreach (var b in utf8Buffer)
+        {
+            if((b & 0xC0) == 0x80)
+            {
+                ++continuationByteCount;
+            }
+        }
+        return totalLength - continuationByteCount;
+    }
+    private static readonly Vector256<byte> _continuationByteMask256 = Vector256.Create((byte)0xC0);
+    private static readonly Vector128<byte> _continuationByteMask128 = Vector128.Create((byte)0xC0);
+    private static readonly Vector256<byte> _continuationBytePattern256 = Vector256.Create((byte)0x80);
+    private static readonly Vector128<byte> _continuationBytePattern128 = Vector128.Create((byte)0x80);
+
+
+    public static int Compare(ReadOnlySpan<byte> lhsUtf8Buffer, ReadOnlySpan<byte> rhsUtf8Buffer)
+    {
+        if (Vector256.IsHardwareAccelerated)
+        {
+            while (lhsUtf8Buffer.Length >= Vector256<byte>.Count && rhsUtf8Buffer.Length >= Vector256<byte>.Count)
+            {
+                var lhsVector = Vector256.LoadUnsafe(in lhsUtf8Buffer[0]);
+                var rhsVector = Vector256.LoadUnsafe(in rhsUtf8Buffer[0]);
+                var diffMask = ~Vector256.ExtractMostSignificantBits(Vector256.Equals(lhsVector, rhsVector));
+                if (diffMask == 0)
+                {
+                    lhsUtf8Buffer = lhsUtf8Buffer[Vector256<byte>.Count..];
+                    rhsUtf8Buffer = rhsUtf8Buffer[Vector256<byte>.Count..];
+                    continue;
+                }
+                var firstDiffIndex = BitOperations.TrailingZeroCount(diffMask);
+                return lhsUtf8Buffer[firstDiffIndex] < rhsUtf8Buffer[firstDiffIndex]
+                    ? -1
+                    : +1;
+            }
+        }
+        if (Vector128.IsHardwareAccelerated)
+        {
+            while (lhsUtf8Buffer.Length >= Vector128<byte>.Count && rhsUtf8Buffer.Length >= Vector128<byte>.Count)
+            {
+                var lhsVector = Vector128.LoadUnsafe(in lhsUtf8Buffer[0]);
+                var rhsVector = Vector128.LoadUnsafe(in rhsUtf8Buffer[0]);
+                var diffMask = ~Vector128.ExtractMostSignificantBits(Vector128.Equals(lhsVector, rhsVector)) & 0xFFFFu;
+                if (diffMask == 0)
+                {
+                    lhsUtf8Buffer = lhsUtf8Buffer[Vector128<byte>.Count..];
+                    rhsUtf8Buffer = rhsUtf8Buffer[Vector128<byte>.Count..];
+                    continue;
+                }
+                var firstDiffIndex = BitOperations.TrailingZeroCount(diffMask);
+                return lhsUtf8Buffer[firstDiffIndex] < rhsUtf8Buffer[firstDiffIndex]
+                    ? -1
+                    : +1;
+            }
+        }
+        while(lhsUtf8Buffer.Length >= sizeof(uint) && rhsUtf8Buffer.Length >= sizeof(uint))
+        {
+            var lhsValue = Unsafe.ReadUnaligned<uint>(ref MemoryMarshal.GetReference(lhsUtf8Buffer));
+            var rhsValue = Unsafe.ReadUnaligned<uint>(ref MemoryMarshal.GetReference(rhsUtf8Buffer));
+            if (lhsValue == rhsValue)
+            {
+                lhsUtf8Buffer = lhsUtf8Buffer[sizeof(uint)..];
+                rhsUtf8Buffer = rhsUtf8Buffer[sizeof(uint)..];
+                continue;
+            }
+            return lhsValue < rhsValue
+                ? -1
+                : +1;
+        }
+        while(lhsUtf8Buffer.Length > 0 && rhsUtf8Buffer.Length > 0)
+        {
+            var lhsValue = lhsUtf8Buffer[0];
+            var rhsValue = rhsUtf8Buffer[0];
+            if (lhsValue == rhsValue)
+            {
+                lhsUtf8Buffer = lhsUtf8Buffer[1..];
+                rhsUtf8Buffer = rhsUtf8Buffer[1..];
+                continue;
+            }
+            return lhsValue < rhsValue
+                ? -1
+                : +1;
+        }
+        if(lhsUtf8Buffer.Length == rhsUtf8Buffer.Length)
+        {
+            return 0;
+        }
+        return lhsUtf8Buffer.Length < rhsUtf8Buffer.Length
+            ? -1
+            : +1;
+    }
 }

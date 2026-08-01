@@ -73,7 +73,7 @@ public ref struct Utf8SpanEnumerator
     public bool MoveNext()
     {
         _currByteIndex = _nextByteIndex;
-        return Utf8Helpers.TryGetRuneAndMoveNext(_utf8Buffer, ref _nextByteIndex, ref _nextRuneIndex, out _current);
+        return Utf8Helpers.UnsafeTryGetRuneAndMoveNext(_utf8Buffer, ref _nextByteIndex, ref _nextRuneIndex, out _current);
     }
 
     /// <inheritdoc />
@@ -81,7 +81,7 @@ public ref struct Utf8SpanEnumerator
     {
         var byteIndex = index.ByteIndex;
         var runeIndex = index.RuneIndex;
-        Utf8Helpers.TryGetRuneAndMoveNext(_utf8Buffer, ref byteIndex, ref runeIndex, out var current);
+        Utf8Helpers.UnsafeTryGetRuneAndMoveNext(_utf8Buffer, ref byteIndex, ref runeIndex, out var current);
         return new(_utf8Buffer)
         {
             _currByteIndex = index.ByteIndex,
@@ -164,7 +164,7 @@ public struct Utf8MemoryEnumerator
     public bool MoveNext()
     {
         _currByteIndex = _nextByteIndex;
-        return Utf8Helpers.TryGetRuneAndMoveNext(_utf8Buffer.Span, ref _nextByteIndex, ref _nextRuneIndex, out _current);
+        return Utf8Helpers.UnsafeTryGetRuneAndMoveNext(_utf8Buffer.Span, ref _nextByteIndex, ref _nextRuneIndex, out _current);
     }
 
     /// <inheritdoc />
@@ -172,7 +172,7 @@ public struct Utf8MemoryEnumerator
     {
         var byteIndex = index.ByteIndex;
         var runeIndex = index.RuneIndex;
-        Utf8Helpers.TryGetRuneAndMoveNext(_utf8Buffer.Span, ref byteIndex, ref runeIndex, out var current);
+        Utf8Helpers.UnsafeTryGetRuneAndMoveNext(_utf8Buffer.Span, ref byteIndex, ref runeIndex, out var current);
         return new(_utf8Buffer)
         {
             _currByteIndex = index.ByteIndex,
