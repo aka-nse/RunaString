@@ -12,6 +12,13 @@ public partial class RunaStringTest
             { "Hello, world!", 0, 5, "Hello" },
             { "Hello, world!", 7, 12, "world" },
             { "Hello, world!", 0, 13, "Hello, world!" },
+            { "こんにちは、世界！", 0, 5, "こんにちは"  },
+            { "こんにちは、世界！", 5, 7, "、世" },
+            { "こんにちは、世界！", 7, 9, "界！" },
+            { "こんにちは、世界！", 0, 9, "こんにちは、世界！" },
+            { "👋🌍", 0, 1, "👋" },
+            { "👋🌍", 1, 2, "🌍" },
+            { "👋🌍", 0, 2, "👋🌍" },
         };
 
     private static void SliceTestCore<TString, TEnumerator, TIndex, TBuffer>(TString value, int start, int end, string expected)

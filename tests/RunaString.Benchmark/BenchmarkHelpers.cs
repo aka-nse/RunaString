@@ -61,6 +61,9 @@ internal static class BenchmarkHelpers
             \u0000é漢𐀀😀𠀋\U000E0100\U0010FFFF
             """;
 
-    public static readonly byte[] Utf8Bytes =
+    public static readonly byte[] Utf8Bytes_Ascii =
+        Encoding.UTF8.GetBytes(TestString_Ascii1);
+
+    public static readonly byte[] Utf8Bytes_Multilingual =
         Encoding.UTF8.GetBytes(TestString_Multilingual);
 }

@@ -188,11 +188,57 @@ internal static class Utf8Helpers
             return true;
         }
     }
-
 #if VALIDATE_UTF8
     private static readonly uint _bitMask4Byte = BitConverter.IsLittleEndian ? 0xC0C0C000u : 0x00C0C0C0u;
     private static readonly uint _bitPattern4Byte = BitConverter.IsLittleEndian ? 0x80808000u : 0x00808080u;
 #endif
+
+
+    public static int GetRuneCount(ReadOnlySpan<byte> utf8Buffer)
+    {
+        var totalLength = utf8Buffer.Length;
+        var continuationByteCount = 0;
+        if (Vector256.IsHardwareAccelerated)
+        {
+            while(utf8Buffer.Length >= Vector256<byte>.Count)
+            {
+                var bufferVector = Vector256.LoadUnsafe(in utf8Buffer[0]);
+                var masked = Vector256.Equals(
+                    Vector256.BitwiseAnd(
+                        bufferVector,
+                        _continuationByteMask256),
+                    _continuationBytePattern256);
+                continuationByteCount += BitOperations.PopCount(Vector256.ExtractMostSignificantBits(masked));
+                utf8Buffer = utf8Buffer[Vector256<byte>.Count..];
+            }
+        }
+        if(Vector128.IsHardwareAccelerated)
+        {
+            while (utf8Buffer.Length >= Vector128<byte>.Count)
+            {
+                var bufferVector = Vector128.LoadUnsafe(in utf8Buffer[0]);
+                var masked = Vector128.Equals(
+                    Vector128.BitwiseAnd(
+                        bufferVector,
+                        _continuationByteMask128),
+                    _continuationBytePattern128);
+                continuationByteCount += BitOperations.PopCount(Vector128.ExtractMostSignificantBits(masked));
+                utf8Buffer = utf8Buffer[Vector128<byte>.Count..];
+            }
+        }
+        foreach (var b in utf8Buffer)
+        {
+            if((b & 0xC0) == 0x80)
+            {
+                ++continuationByteCount;
+            }
+        }
+        return totalLength - continuationByteCount;
+    }
+    private static readonly Vector256<byte> _continuationByteMask256 = Vector256.Create((byte)0xC0);
+    private static readonly Vector128<byte> _continuationByteMask128 = Vector128.Create((byte)0xC0);
+    private static readonly Vector256<byte> _continuationBytePattern256 = Vector256.Create((byte)0x80);
+    private static readonly Vector128<byte> _continuationBytePattern128 = Vector128.Create((byte)0x80);
 
 
     public static int Compare(ReadOnlySpan<byte> lhsUtf8Buffer, ReadOnlySpan<byte> rhsUtf8Buffer)

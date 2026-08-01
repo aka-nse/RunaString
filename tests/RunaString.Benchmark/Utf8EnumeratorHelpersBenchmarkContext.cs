@@ -16,7 +16,7 @@ public class Utf8EnumeratorHelpersBenchmarkContext
     public int StandardCounting()
     {
         var count = 0;
-        var span = BenchmarkHelpers.Utf8Bytes.AsSpan();
+        var span = BenchmarkHelpers.Utf8Bytes_Multilingual.AsSpan();
         while (span.Length > 0)
         {
             Rune.DecodeFromUtf8(span, out _, out var bytesConsumed);
@@ -30,7 +30,7 @@ public class Utf8EnumeratorHelpersBenchmarkContext
     public int Utf8EnumeratorCounting()
     {
         var count = 0;
-        var span = BenchmarkHelpers.Utf8Bytes.AsSpan();
+        var span = BenchmarkHelpers.Utf8Bytes_Multilingual.AsSpan();
         int nextByteIndex = 0;
         int runeIndex = 0;
         while (Utf8Helpers.UnsafeTryGetRuneAndMoveNext(span, ref nextByteIndex, ref runeIndex, out var _))
@@ -44,7 +44,7 @@ public class Utf8EnumeratorHelpersBenchmarkContext
     public int LegacyCounting()
     {
         var count = 0;
-        var span = BenchmarkHelpers.Utf8Bytes.AsSpan();
+        var span = BenchmarkHelpers.Utf8Bytes_Multilingual.AsSpan();
         int nextByteIndex = 0;
         int runeIndex = 0;
         while (MoveNextLegacy(span, ref nextByteIndex, ref runeIndex, out var _))

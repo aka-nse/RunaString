@@ -122,7 +122,7 @@ public readonly partial struct Utf8String
     public Utf8MemoryEnumerator GetEnumerator() => new(this);
 
     /// <inheritdoc />
-    public int GetRuneCount() => InternalHelpers.GetRuneCount(GetEnumerator());
+    public int GetRuneCount() => Utf8Helpers.GetRuneCount(Buffer.Span);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) =>
@@ -256,7 +256,7 @@ public readonly ref partial struct Utf8SpanString
     public Utf8SpanEnumerator GetEnumerator() => new(this);
 
     /// <inheritdoc />
-    public int GetRuneCount() => InternalHelpers.GetRuneCount(GetEnumerator());
+    public int GetRuneCount() => Utf8Helpers.GetRuneCount(Buffer);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) => false;
