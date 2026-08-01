@@ -48,6 +48,29 @@ internal static class Utf8Helpers
         }
     }
 
+    private static readonly Vector256<byte> _continuationByteMask256 = Vector256.Create((byte)0xC0);
+    private static readonly Vector128<byte> _continuationByteMask128 = Vector128.Create((byte)0xC0);
+    private static readonly Vector256<byte> _continuationBytePattern256 = Vector256.Create((byte)0x80);
+    private static readonly Vector128<byte> _continuationBytePattern128 = Vector128.Create((byte)0x80);
+    public static int CalculateContinuationByteCount(Vector256<byte> vector)
+    {
+        var masked = Vector256.Equals(
+                    Vector256.BitwiseAnd(
+                        vector,
+                        _continuationByteMask256),
+                    _continuationBytePattern256);
+        return BitOperations.PopCount(Vector256.ExtractMostSignificantBits(masked));
+    }
+    public static int CalculateContinuationByteCount(Vector128<byte> vector)
+    {
+        var masked = Vector128.Equals(
+                    Vector128.BitwiseAnd(
+                        vector,
+                        _continuationByteMask128),
+                    _continuationBytePattern128);
+        return BitOperations.PopCount(Vector128.ExtractMostSignificantBits(masked));
+    }
+
     public static void ValidateUtf8(ReadOnlySpan<byte> utf8Buffer)
     {
         if (!Utf8.IsValid(utf8Buffer))
@@ -85,21 +108,59 @@ internal static class Utf8Helpers
     public static bool TrySkipRunes(ReadOnlySpan<byte> utf8Buffer, int runeCount, out int bytesConsumed)
     {
         bytesConsumed = 0;
-        while (true)
+
+        if(utf8Buffer.Length > Vector256<byte>.Count)
         {
-            if (utf8Buffer.Length <= bytesConsumed)
+            skipByVector(utf8Buffer, ref runeCount, ref bytesConsumed);
+            utf8Buffer = utf8Buffer[bytesConsumed..];
+        }
+        return skipByScalar(utf8Buffer, ref runeCount, ref bytesConsumed);
+
+        static void skipByVector(ReadOnlySpan<byte> utf8Buffer, ref int runeCount, ref int bytesConsumed)
+        {
+            if (Vector256.IsHardwareAccelerated)
             {
-                return runeCount == 0;
+                while (utf8Buffer.Length > Vector256<byte>.Count && runeCount > Vector256<byte>.Count)
+                {
+                    var runesInVector = Vector256<byte>.Count - CalculateContinuationByteCount(Vector256.LoadUnsafe(in utf8Buffer[0]));
+                    runeCount -= runesInVector;
+                    utf8Buffer = utf8Buffer[Vector256<byte>.Count..];
+                    bytesConsumed += Vector256<byte>.Count;
+                }
             }
-            if (runeCount <= 0)
+            if (Vector128.IsHardwareAccelerated)
             {
-                return true;
+                while (utf8Buffer.Length > Vector128<byte>.Count && runeCount > Vector128<byte>.Count)
+                {
+                    var runesInVector = Vector128<byte>.Count - CalculateContinuationByteCount(Vector128.LoadUnsafe(in utf8Buffer[0]));
+                    runeCount -= runesInVector;
+                    utf8Buffer = utf8Buffer[Vector128<byte>.Count..];
+                    bytesConsumed += Vector128<byte>.Count;
+                }
             }
-            if (!IsContinuationByte(utf8Buffer[bytesConsumed]))
+        }
+
+        static bool skipByScalar(ReadOnlySpan<byte> utf8Buffer, ref int runeCount, ref int bytesConsumed)
+        {
+            while (true)
             {
-                --runeCount;
+                if (utf8Buffer.Length <= 0)
+                {
+                    return runeCount == 0;
+                }
+                if (runeCount <= 0)
+                {
+                    return true;
+                }
+                if (!IsContinuationByte(utf8Buffer[0]))
+                {
+                    --runeCount;
+                }
+
+                var consumed = GetBytesConsumed(utf8Buffer[0]);
+                bytesConsumed += consumed;
+                utf8Buffer = utf8Buffer[consumed..];
             }
-            bytesConsumed += GetBytesConsumed(utf8Buffer[bytesConsumed]);
         }
     }
 
@@ -114,9 +175,10 @@ internal static class Utf8Helpers
         {
             throw new ArgumentOutOfRangeException(nameof(runeLength));
         }
-        if(byteLength >= 1 && byteIndex + byteLength < utf8Buffer.Length)
+        var end = byteIndex + byteLength;
+        if (byteLength >= 1 && end < utf8Buffer.Length)
         {
-            byteLength += GetBytesConsumed(utf8Buffer[byteIndex + byteLength - 1]) - 1;
+            byteLength += GetBytesConsumed(utf8Buffer[end - 1]) - 1;
         }
         return (byteIndex, byteLength);
     }
@@ -302,13 +364,7 @@ internal static class Utf8Helpers
         {
             while (utf8Buffer.Length >= Vector256<byte>.Count)
             {
-                var bufferVector = Vector256.LoadUnsafe(in utf8Buffer[0]);
-                var masked = Vector256.Equals(
-                    Vector256.BitwiseAnd(
-                        bufferVector,
-                        _continuationByteMask256),
-                    _continuationBytePattern256);
-                continuationByteCount += BitOperations.PopCount(Vector256.ExtractMostSignificantBits(masked));
+                continuationByteCount += CalculateContinuationByteCount(Vector256.LoadUnsafe(in utf8Buffer[0]));
                 utf8Buffer = utf8Buffer[Vector256<byte>.Count..];
             }
         }
@@ -316,13 +372,7 @@ internal static class Utf8Helpers
         {
             while (utf8Buffer.Length >= Vector128<byte>.Count)
             {
-                var bufferVector = Vector128.LoadUnsafe(in utf8Buffer[0]);
-                var masked = Vector128.Equals(
-                    Vector128.BitwiseAnd(
-                        bufferVector,
-                        _continuationByteMask128),
-                    _continuationBytePattern128);
-                continuationByteCount += BitOperations.PopCount(Vector128.ExtractMostSignificantBits(masked));
+                continuationByteCount += CalculateContinuationByteCount(Vector128.LoadUnsafe(in utf8Buffer[0]));
                 utf8Buffer = utf8Buffer[Vector128<byte>.Count..];
             }
         }
@@ -335,10 +385,6 @@ internal static class Utf8Helpers
         }
         return totalLength - continuationByteCount;
     }
-    private static readonly Vector256<byte> _continuationByteMask256 = Vector256.Create((byte)0xC0);
-    private static readonly Vector128<byte> _continuationByteMask128 = Vector128.Create((byte)0xC0);
-    private static readonly Vector256<byte> _continuationBytePattern256 = Vector256.Create((byte)0x80);
-    private static readonly Vector128<byte> _continuationBytePattern128 = Vector128.Create((byte)0x80);
 
 
     public static int Compare(ReadOnlySpan<byte> lhsUtf8Buffer, ReadOnlySpan<byte> rhsUtf8Buffer)
