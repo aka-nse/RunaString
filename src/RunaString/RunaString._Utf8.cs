@@ -62,7 +62,7 @@ public readonly partial struct Utf8String
     public static Utf8String FromUtf8(ImmutableArray<byte> utf8Buffer, int byteStart, int byteLength)
     {
         var memory = utf8Buffer.AsMemory().Slice(byteStart, byteLength);
-        InternalHelpers.ValidateUtf8(memory.Span);
+        Utf8Helpers.ValidateUtf8(memory.Span);
         return new(memory);
     }
 
@@ -129,10 +129,10 @@ public readonly partial struct Utf8String
         obj is Utf8String other && Equals(this, other);
 
     /// <inheritdoc />
-    public override string ToString() => InternalHelpers.ToString(Buffer.Span);
+    public override string ToString() => Utf8Helpers.ToString(Buffer.Span);
 
     /// <inheritdoc />
-    public override int GetHashCode() => InternalHelpers.GetHashCode(Buffer.Span);
+    public override int GetHashCode() => Utf8Helpers.GetHashCode(Buffer.Span);
 
     /// <inheritdoc />
     public int CompareTo(Utf8String other) => Compare(this, other);
@@ -262,10 +262,10 @@ public readonly ref partial struct Utf8SpanString
     public override bool Equals([NotNullWhen(true)] object? obj) => false;
 
     /// <inheritdoc />
-    public override string ToString() => InternalHelpers.ToString(Buffer);
+    public override string ToString() => Utf8Helpers.ToString(Buffer);
 
     /// <inheritdoc />
-    public override int GetHashCode() => InternalHelpers.GetHashCode(Buffer);
+    public override int GetHashCode() => Utf8Helpers.GetHashCode(Buffer);
 
     /// <inheritdoc />
     public int CompareTo(Utf8SpanString other) => Compare(this, other);
@@ -320,7 +320,7 @@ public abstract partial class Utf8Comparer
             InternalHelpers.Equals(x.Buffer, y.Buffer);
 
         public override int GetHashCode([NotNull] Utf8SpanString obj) =>
-            InternalHelpers.GetHashCode(obj.Buffer);
+            Utf8Helpers.GetHashCode(obj.Buffer);
     }
 
     private Utf8Comparer()

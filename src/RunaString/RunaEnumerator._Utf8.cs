@@ -57,7 +57,7 @@ public ref struct Utf8SpanEnumerator
     /// <returns></returns>
     public static Utf8SpanEnumerator Create(ReadOnlySpan<byte> utf8Buffer)
     {
-        InternalHelpers.ValidateUtf8(utf8Buffer);
+        Utf8Helpers.ValidateUtf8(utf8Buffer);
         return new(utf8Buffer);
     }
 
@@ -148,7 +148,7 @@ public struct Utf8MemoryEnumerator
     /// <returns></returns>
     public static Utf8MemoryEnumerator Create(ReadOnlyMemory<byte> utf8Buffer)
     {
-        InternalHelpers.ValidateUtf8(utf8Buffer.Span);
+        Utf8Helpers.ValidateUtf8(utf8Buffer.Span);
         return new(utf8Buffer);
     }
 
