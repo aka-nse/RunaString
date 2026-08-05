@@ -121,8 +121,8 @@ public record CharsTestCase(string Chars, int RuneLength)
     public ReadOnlySpan<char> GetSpan() => Chars;
     public ReadOnlyMemory<char> GetMemory() => Chars.AsMemory();
 
-    public CharsString GetMemoryString() => new (Chars.AsMemory());
-    public CharsSpanString GetSpanString() => new (Chars.AsSpan());
+    public CharsString GetMemoryString() => Chars.AsRunaString();
+    public CharsSpanString GetSpanString() => Chars.AsRunaString();
 
 
     public int GetCodeUnitCount(int start, int count)

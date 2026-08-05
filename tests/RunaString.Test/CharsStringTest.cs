@@ -16,6 +16,22 @@ public class CharsStringTest
             { "a\u0301b", 0, 2, "a\u0301" },
         };
 
+    [Fact]
+    public void Create_Throws_ForInvalidUtf16Sequence()
+    {
+        var value = "\uD800A";
+
+
+        Assert.Throws<ArgumentException>(() =>
+        {
+            value.AsRunaString();
+        });
+        Assert.Throws<ArgumentException>(() =>
+        {
+            value.AsSpan().AsRunaString();
+        });
+    }
+
     [Theory]
     [MemberData(nameof(CharsStringTestCases))]
     public void ToString_ReturnsOriginalString(CharsTestCase testCase)
@@ -68,43 +84,6 @@ public class CharsStringTest
             testCase.GetSpanString()
                 .Slice(testCase.GetIndex(new(start)), testCase.GetIndex(new(end)))
                 .ToString());
-    }
-
-    [Fact]
-    public void TryGetRune_ReturnsFalse_ForInvalidUtf16Sequence()
-    {
-        Rune c;
-        var value = "\uD800A";
-        var index = TestHelpers.CreateCharsIndex(0, 0);
-
-        var memory = value.AsRunaString();
-        var span = value.AsSpan().AsRunaString();
-
-        Assert.True(memory.TryGetRune(index, out _));
-        Assert.True(memory.TryGetRune(index, out c, out var memoryConsumed));
-        Assert.Equal(1, memoryConsumed);
-
-        Assert.True(span.TryGetRune(index, out _));
-        Assert.True(span.TryGetRune(index, out c, out var spanConsumed));
-        Assert.Equal(1, spanConsumed);
-    }
-
-    [Fact]
-    public void GetEnumerator_Throws_ForInvalidUtf16Sequence()
-    {
-        var value = "\uD800A";
-
-
-        Assert.Throws<InvalidOperationException>(() =>
-        {
-            var memoryEnumerator = value.AsRunaString().GetEnumerator();
-            return memoryEnumerator.MoveNext();
-        });
-        Assert.Throws<InvalidOperationException>(() =>
-        {
-            var spanEnumerator = value.AsSpan().AsRunaString().GetEnumerator();
-            return spanEnumerator.MoveNext();
-        });
     }
 
     private static void EnumerateTestCore<TString, TEnumerator>(string expected, TString value)
