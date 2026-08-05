@@ -1,6 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace RunaString;
@@ -13,7 +11,7 @@ partial class RunaString
         /// Creates a <see cref="CharsSpanString"/> from the given read-only span of <see cref="char"/>.
         /// </summary>
         /// <returns></returns>
-        public CharsSpanString AsRunaString() => new(source);
+        public CharsSpanString AsRunaString() => CharsSpanString.FromChars(source);
     }
 
     extension(string source)
@@ -31,7 +29,7 @@ partial class RunaString
         /// Creates a <see cref="CharsString"/> from the given read-only span of <see cref="char"/>.
         /// </summary>
         /// <returns></returns>
-        public CharsString AsRunaString() => new(source);
+        public CharsString AsRunaString() => CharsString.FromChars(source);
     }
 }
 
@@ -39,9 +37,13 @@ partial class RunaString
 /// <summary>
 /// Represents an enumerable collection of Unicode runes backed by a read-only memory of <see cref="char"/>.
 /// </summary>
-/// <param name="source"></param>
+/// <remarks>
+/// This API is designed to handle only valid UTF-16 encoded characters.
+/// If invalid UTF-16 sequences are provided via <see cref="DangerousFromChars(ReadOnlyMemory{char})"/>,
+/// the behavior is undefined and may lead to exceptions or incorrect results.
+/// </remarks>
 [RunaString]
-public readonly partial struct CharsString(ReadOnlyMemory<char> source)
+public readonly partial struct CharsString
     : IRunaString<CharsString, CharsMemoryEnumerator, CharsIndex>
 {
     #region source generated members
@@ -54,7 +56,34 @@ public readonly partial struct CharsString(ReadOnlyMemory<char> source)
     /// <summary>
     /// Gets the source data as a read-only span of characters, which serves as the underlying buffer for enumerating Unicode runes in this enumerable.
     /// </summary>
-    public ReadOnlyMemory<char> Source { get; } = source;
+    public ReadOnlyMemory<char> Source { get; }
+
+    /// <param name="source"></param>
+    private CharsString(ReadOnlyMemory<char> source)
+    {
+        Source = source;
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="CharsString"/> from the given read-only memory of <see cref="char"/>. The input is validated to ensure it is valid UTF-16."/>
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    public static CharsString FromChars(ReadOnlyMemory<char> source)
+    {
+        CharHelpers.ValidateUtf16(source.Span);
+        return new(source);
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="CharsString" />  from a given chars encoded byte buffer.
+    /// </summary>
+    /// <param name="source"> Must be valid UTF-16 encoded characters. </param>
+    /// <returns></returns>
+    /// <remarks>
+    /// If an invalid UTF-16 character sequence is input, the state of all members of this instance - as well as all members reachable via the return values ​​of those members - becomes undefined.
+    /// </remarks>
+    public static CharsString DangerousFromChars(ReadOnlyMemory<char> source) => new(source);
 
     /// <inheritdoc />
     public CharsString Slice(int runeStart, int runeLength)
@@ -88,7 +117,7 @@ public readonly partial struct CharsString(ReadOnlyMemory<char> source)
         CharsMemoryEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public int GetRuneCount() => InternalHelpers.GetRuneCount(GetEnumerator());
+    public int GetRuneCount() => CharHelpers.GetRuneCount(Source.Span);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) =>
@@ -145,10 +174,13 @@ public readonly partial struct CharsString(ReadOnlyMemory<char> source)
 /// <summary>
 /// Represents an enumerable collection of Unicode runes backed by a read-only span of <see cref="char"/>.
 /// </summary>
-/// <param name="source"></param>
+/// <remarks>
+/// This API is designed to handle only valid UTF-16 encoded characters.
+/// If invalid UTF-16 sequences are provided via <see cref="DangerousFromChars(ReadOnlySpan{char})"/>,
+/// the behavior is undefined and may lead to exceptions or incorrect results.
+/// </remarks>
 [RunaString]
-public readonly ref partial struct CharsSpanString(ReadOnlySpan<char> source)
-    : IRunaString<CharsSpanString, CharsSpanEnumerator, CharsIndex>
+public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString, CharsSpanEnumerator, CharsIndex>
 {
     #region source generated members
 
@@ -160,7 +192,34 @@ public readonly ref partial struct CharsSpanString(ReadOnlySpan<char> source)
     /// <summary>
     /// Gets the source data as a read-only span of characters, which serves as the underlying buffer for enumerating Unicode runes in this enumerable.
     /// </summary>
-    public ReadOnlySpan<char> Source { get; } = source;
+    public ReadOnlySpan<char> Source { get; }
+
+    private CharsSpanString(ReadOnlySpan<char> source)
+    {
+        Source = source;
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="CharsString"/> from the given read-only memory of <see cref="char"/>. The input is validated to ensure it is valid UTF-16."/>
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    public static CharsSpanString FromChars(ReadOnlySpan<char> source)
+    {
+        CharHelpers.ValidateUtf16(source);
+        return new(source);
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="CharsString" />  from a given chars encoded byte buffer.
+    /// </summary>
+    /// <param name="source"> Must be valid UTF-16 encoded characters. </param>
+    /// <returns></returns>
+    /// <remarks>
+    /// If an invalid UTF-16 character sequence is input, the state of all members of this instance - as well as all members reachable via the return values ​​of those members - becomes undefined.
+    /// </remarks>
+    public static CharsSpanString DangerousFromChars(ReadOnlySpan<char> source) => new(source);
+
 
     /// <inheritdoc />
     public CharsSpanString Slice(int runeStart, int runeLength)
@@ -194,7 +253,7 @@ public readonly ref partial struct CharsSpanString(ReadOnlySpan<char> source)
         CharsSpanEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public int GetRuneCount() => InternalHelpers.GetRuneCount(GetEnumerator());
+    public int GetRuneCount() => CharHelpers.GetRuneCount(Source);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) => false;

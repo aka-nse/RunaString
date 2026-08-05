@@ -43,7 +43,7 @@ public readonly partial struct Utf8String
     }
 
     /// <summary>
-    /// Creates a new <see cref="Utf8String" /> from a given UTF-8 encoded byte buffer, starting at the specified index and with the specified length.
+    /// Creates a new <see cref="Utf8String" /> from a given UTF-8 encoded byte buffer.
     /// </summary>
     /// <param name="utf8Buffer"></param>
     /// <returns></returns>
@@ -67,7 +67,7 @@ public readonly partial struct Utf8String
     }
 
     /// <summary>
-    /// Creates a new <see cref="Utf8String" />  from a given UTF-8 encoded byte buffer, starting at the specified index and with the specified length, without validating the UTF-8 encoding.
+    /// Creates a new <see cref="Utf8String" />  from a given UTF-8 encoded byte buffer.
     /// </summary>
     /// <param name="utf8Buffer"> Must be valid UTF-8 encoded bytes. </param>
     /// <returns></returns>
