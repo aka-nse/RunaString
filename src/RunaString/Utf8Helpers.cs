@@ -96,13 +96,25 @@ internal static class Utf8Helpers
     public static int GetHashCode(ReadOnlySpan<byte> utf8Buffer)
     {
         var hash = new HashCode();
-        while (utf8Buffer.Length > Vector<byte>.Count)
+        if (Vector256.IsHardwareAccelerated)
         {
-            var vector = Vector.LoadUnsafe(in utf8Buffer[0]);
-            hash.Add(vector);
-            utf8Buffer = utf8Buffer[Vector<byte>.Count..];
+            while (utf8Buffer.Length > Vector256<byte>.Count)
+            {
+                var vector = Vector256.LoadUnsafe(in utf8Buffer[0]);
+                hash.Add(vector);
+                utf8Buffer = utf8Buffer[Vector256<byte>.Count..];
+            }
         }
-        while(utf8Buffer.Length > sizeof(uint))
+        if (Vector128.IsHardwareAccelerated)
+        {
+            while (utf8Buffer.Length > Vector128<byte>.Count)
+            {
+                var vector = Vector128.LoadUnsafe(in utf8Buffer[0]);
+                hash.Add(vector);
+                utf8Buffer = utf8Buffer[Vector128<byte>.Count..];
+            }
+        }
+        while (utf8Buffer.Length > sizeof(uint))
         {
             var value = Unsafe.ReadUnaligned<uint>(ref MemoryMarshal.GetReference(utf8Buffer));
             hash.Add(value);
