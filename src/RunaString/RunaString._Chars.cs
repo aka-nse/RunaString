@@ -127,7 +127,7 @@ public readonly partial struct CharsString
     public override string ToString() => Source.ToString();
 
     /// <inheritdoc />
-    public override int GetHashCode() => InternalHelpers.GetHashCode(Source.Span);
+    public override int GetHashCode() => CharHelpers.GetHashCode(Source.Span);
 
     /// <inheritdoc />
     public int CompareTo(CharsString other) => Compare(this, other);
@@ -262,7 +262,7 @@ public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString
     public override string ToString() => Source.ToString();
 
     /// <inheritdoc />
-    public override int GetHashCode() => InternalHelpers.GetHashCode(Source);
+    public override int GetHashCode() => CharHelpers.GetHashCode(Source);
 
     /// <inheritdoc />
     public int CompareTo(CharsSpanString other) => Compare(this, other);

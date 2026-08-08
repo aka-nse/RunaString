@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace RunaString;
@@ -122,4 +123,13 @@ internal static class RuneHelpers
     }
 
 
+    public static int GetHashCode(ReadOnlySpan<Rune> runesBuffer)
+    {
+        var hash = new HashCode();
+        foreach (var x in MemoryMarshal.Cast<Rune, int>(runesBuffer))
+        {
+            hash.Add(x);
+        }
+        return hash.ToHashCode();
+    }
 }

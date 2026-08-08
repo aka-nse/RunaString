@@ -68,4 +68,16 @@ internal static class CharHelpers
 
         return chars.Length - countHighSurrogate(MemoryMarshal.Cast<char, ushort>(chars));
     }
+
+
+    public static int GetHashCode(ReadOnlySpan<char> charsBuffer)
+    {
+        var hash = new HashCode();
+        foreach (var x in MemoryMarshal.Cast<char, int>(charsBuffer))
+        {
+            hash.Add(x);
+        }
+        return hash.ToHashCode();
+    }
+
 }
