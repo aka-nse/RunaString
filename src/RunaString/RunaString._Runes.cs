@@ -75,7 +75,7 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
         RunesMemoryEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public int GetRuneCount() => InternalHelpers.GetRuneCount(GetEnumerator());
+    public int GetRuneCount() => Source.Length;
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) =>
@@ -172,7 +172,7 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
         RunesSpanEnumerator.Create(Source);
 
     /// <inheritdoc />
-    public int GetRuneCount() => InternalHelpers.GetRuneCount(GetEnumerator());
+    public int GetRuneCount() => Source.Length;
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) => false;
