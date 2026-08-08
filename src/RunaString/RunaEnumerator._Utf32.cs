@@ -18,7 +18,7 @@ public ref struct RunesSpanEnumerator
     private Rune _current = default;
 
     /// <inheritdoc />
-    public readonly RunesIndex SeekIndex => new(_runeIndex);
+    public readonly RunesIndex Index => new(_runeIndex);
 
     /// <inheritdoc />
     public readonly Rune Current => _current;
@@ -48,13 +48,6 @@ public ref struct RunesSpanEnumerator
     /// <inheritdoc />
     public bool MoveNext() =>
         Helpers.MoveNext(_buffer, ref _runeIndex, out _current);
-
-    /// <inheritdoc />
-    public RunesSpanEnumerator Seek(RunesIndex index) =>
-        new (_buffer)
-        {
-            _runeIndex = index.RuneIndex,
-        };
 }
 
 
@@ -73,7 +66,7 @@ public struct RunesMemoryEnumerator
     private Rune _current = default;
 
     /// <inheritdoc />
-    public readonly RunesIndex SeekIndex => new(_runeIndex);
+    public readonly RunesIndex Index => new(_runeIndex);
 
     /// <inheritdoc />
     public readonly Rune Current => _current;
@@ -103,13 +96,6 @@ public struct RunesMemoryEnumerator
     /// <inheritdoc />
     public bool MoveNext() =>
         Helpers.MoveNext(_buffer.Span, ref _runeIndex, out _current);
-
-    /// <inheritdoc />
-    public RunesMemoryEnumerator Seek(RunesIndex index) =>
-        new(_buffer)
-        {
-            _runeIndex = index.RuneIndex,
-        };
 }
 
 

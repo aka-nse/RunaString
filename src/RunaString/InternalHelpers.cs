@@ -113,7 +113,7 @@ internal static class InternalHelpers
                 throw new ArgumentOutOfRangeException(nameof(runeStart));
             }
         }
-        var startIndex = enumerator.SeekIndex;
+        var startIndex = enumerator.Index;
         for (var i = 0; i < runeLength; i++)
         {
             if (!enumerator.MoveNext())
@@ -121,7 +121,7 @@ internal static class InternalHelpers
                 throw new ArgumentOutOfRangeException(nameof(runeLength));
             }
         }
-        var endIndex = enumerator.SeekIndex;
+        var endIndex = enumerator.Index;
         return (startIndex, endIndex);
     }
 }

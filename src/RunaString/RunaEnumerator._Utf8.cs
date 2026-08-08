@@ -22,7 +22,7 @@ public ref struct Utf8SpanEnumerator
     internal readonly int NextByteIndex => _nextByteIndex;
 
     /// <inheritdoc />
-    public readonly Utf8Index SeekIndex => new(_currByteIndex, _nextRuneIndex - 1);
+    public readonly Utf8Index Index => new(_currByteIndex, _nextRuneIndex - 1);
 
     /// <inheritdoc />
     public readonly Rune Current => _current;
@@ -75,21 +75,6 @@ public ref struct Utf8SpanEnumerator
         _currByteIndex = _nextByteIndex;
         return Utf8Helpers.UnsafeTryGetRuneAndMoveNext(_utf8Buffer, ref _nextByteIndex, ref _nextRuneIndex, out _current);
     }
-
-    /// <inheritdoc />
-    public readonly Utf8SpanEnumerator Seek(Utf8Index index)
-    {
-        var byteIndex = index.ByteIndex;
-        var runeIndex = index.RuneIndex;
-        Utf8Helpers.UnsafeTryGetRuneAndMoveNext(_utf8Buffer, ref byteIndex, ref runeIndex, out var current);
-        return new(_utf8Buffer)
-        {
-            _currByteIndex = index.ByteIndex,
-            _nextByteIndex = byteIndex,
-            _nextRuneIndex = runeIndex,
-            _current = current,
-        };
-    }
 }
 
 
@@ -113,7 +98,7 @@ public struct Utf8MemoryEnumerator
     internal readonly int NextByteIndex => _nextByteIndex;
 
     /// <inheritdoc />
-    public readonly Utf8Index SeekIndex => new(_currByteIndex, _nextRuneIndex - 1);
+    public readonly Utf8Index Index => new(_currByteIndex, _nextRuneIndex - 1);
 
     /// <inheritdoc />
     public readonly Rune Current => _current;
@@ -165,20 +150,5 @@ public struct Utf8MemoryEnumerator
     {
         _currByteIndex = _nextByteIndex;
         return Utf8Helpers.UnsafeTryGetRuneAndMoveNext(_utf8Buffer.Span, ref _nextByteIndex, ref _nextRuneIndex, out _current);
-    }
-
-    /// <inheritdoc />
-    public readonly Utf8MemoryEnumerator Seek(Utf8Index index)
-    {
-        var byteIndex = index.ByteIndex;
-        var runeIndex = index.RuneIndex;
-        Utf8Helpers.UnsafeTryGetRuneAndMoveNext(_utf8Buffer.Span, ref byteIndex, ref runeIndex, out var current);
-        return new(_utf8Buffer)
-        {
-            _currByteIndex = index.ByteIndex,
-            _nextByteIndex = byteIndex,
-            _nextRuneIndex = runeIndex,
-            _current = current,
-        };
     }
 }
