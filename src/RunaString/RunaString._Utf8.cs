@@ -96,12 +96,6 @@ public readonly partial struct Utf8String
         return new(Buffer.Slice(byteStart, byteLength));
     }
 
-    internal readonly Utf8String DangerousSlice(int byteStart, int byteLength)
-    {
-        return new(Buffer.Slice(byteStart, byteLength));
-    }
-
-
     /// <inheritdoc />
     public bool TryGetRune(Utf8Index index, out Rune rune, out int codeUnitConsumed) =>
         FileHelpers.TryGetRune(Buffer.Span, index, out rune, out codeUnitConsumed);
