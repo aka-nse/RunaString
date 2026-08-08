@@ -77,7 +77,11 @@ public interface IRunaString<TSelf, TIndex>
     ///     When this method returns, contains the rune at the specified index,
     ///     if the index is valid; otherwise, the default value.
     /// </param>
-    /// <returns>True if the rune was successfully retrieved; otherwise, false.</returns>
+    /// <returns>
+    /// True if the rune was successfully retrieved;
+    /// otherwise false if the index reaches the end.
+    /// The result is undefined if invalid UTF-8 sequence or invalid index against scalar value boundary.
+    /// </returns>
     public bool TryGetRune(TIndex index, out Rune rune);
 
     /// <summary>
@@ -94,6 +98,11 @@ public interface IRunaString<TSelf, TIndex>
     /// <param name="index">The index of the rune to retrieve. This must be an index instance created from this string instance.</param>
     /// <param name="rune">When this method returns, contains the rune at the specified index, if the index is valid; otherwise, the default value.</param>
     /// <param name="codeUnitConsumed">When this method returns, contains the number of code units consumed to decode the rune, if the index is valid; otherwise, zero.</param>
+    /// <returns>
+    /// True if the rune was successfully retrieved;
+    /// otherwise false if the index reaches the end.
+    /// The result is undefined if invalid UTF-8 sequence or invalid index against scalar value boundary.
+    /// </returns>
     public bool TryGetRune(TIndex index, out Rune rune, out int codeUnitConsumed);
 
     /// <summary>

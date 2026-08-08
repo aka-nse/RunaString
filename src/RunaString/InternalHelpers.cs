@@ -99,25 +99,6 @@ internal static class InternalHelpers
         return count;
     }
 
-    public static int GetHashCode(ReadOnlySpan<char> charsBuffer)
-    {
-        var hash = new HashCode();
-        foreach (var x in MemoryMarshal.Cast<char, int>(charsBuffer))
-        {
-            hash.Add(x);
-        }
-        return hash.ToHashCode();
-    }
-
-    public static int GetHashCode(ReadOnlySpan<Rune> runesBuffer)
-    {
-        var hash = new HashCode();
-        foreach (var x in MemoryMarshal.Cast<Rune, int>(runesBuffer))
-        {
-            hash.Add(x);
-        }
-        return hash.ToHashCode();
-    }
 
     public static (TIndex start, TIndex end) GetSliceIndex<TString, TEnumerator, TIndex>(TString str, int runeStart, int runeLength)
         where TString : IRunaString<TString, TEnumerator, TIndex>, allows ref struct
@@ -132,7 +113,7 @@ internal static class InternalHelpers
                 throw new ArgumentOutOfRangeException(nameof(runeStart));
             }
         }
-        var startIndex = enumerator.SeekIndex;
+        var startIndex = enumerator.Index;
         for (var i = 0; i < runeLength; i++)
         {
             if (!enumerator.MoveNext())
@@ -140,7 +121,7 @@ internal static class InternalHelpers
                 throw new ArgumentOutOfRangeException(nameof(runeLength));
             }
         }
-        var endIndex = enumerator.SeekIndex;
+        var endIndex = enumerator.Index;
         return (startIndex, endIndex);
     }
 }

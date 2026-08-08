@@ -32,14 +32,7 @@ public interface IRunaEnumerator<TSelf, TIndex> : IRunaEnumerator<TSelf>
     /// <summary>
     /// Gets the seek index that represents the current position of the enumerator in the source buffer.
     /// </summary>
-    public TIndex SeekIndex { get; }
-
-    /// <summary>
-    /// Returns a new enumerator that is positioned at the specified seek index in the source buffer.
-    /// </summary>
-    /// <param name="index"></param>
-    /// <returns></returns>
-    public TSelf Seek(TIndex index);
+    public TIndex Index { get; }
 }
 
 

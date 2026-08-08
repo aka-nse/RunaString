@@ -15,11 +15,18 @@ namespace RunaString;
 /// </remarks>
 internal static class Utf8Helpers
 {
+    private static readonly Vector256<byte> _continuationByteMask256 = Vector256.Create((byte)0xC0);
+    private static readonly Vector128<byte> _continuationByteMask128 = Vector128.Create((byte)0xC0);
+    private static readonly Vector256<byte> _continuationBytePattern256 = Vector256.Create((byte)0x80);
+    private static readonly Vector128<byte> _continuationBytePattern128 = Vector128.Create((byte)0x80);
+
+
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool IsContinuationByte(byte b)
     {
         return (b & 0xC0) == 0x80;
     }
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static int GetBytesConsumed(byte utf8CharHead)
@@ -48,10 +55,7 @@ internal static class Utf8Helpers
         }
     }
 
-    private static readonly Vector256<byte> _continuationByteMask256 = Vector256.Create((byte)0xC0);
-    private static readonly Vector128<byte> _continuationByteMask128 = Vector128.Create((byte)0xC0);
-    private static readonly Vector256<byte> _continuationBytePattern256 = Vector256.Create((byte)0x80);
-    private static readonly Vector128<byte> _continuationBytePattern128 = Vector128.Create((byte)0x80);
+
     public static int CalculateContinuationByteCount(Vector256<byte> vector)
     {
         var masked = Vector256.Equals(
@@ -61,6 +65,8 @@ internal static class Utf8Helpers
                     _continuationBytePattern256);
         return BitOperations.PopCount(Vector256.ExtractMostSignificantBits(masked));
     }
+
+
     public static int CalculateContinuationByteCount(Vector128<byte> vector)
     {
         var masked = Vector128.Equals(
@@ -70,6 +76,7 @@ internal static class Utf8Helpers
                     _continuationBytePattern128);
         return BitOperations.PopCount(Vector128.ExtractMostSignificantBits(masked));
     }
+
 
     public static void ValidateUtf8(ReadOnlySpan<byte> utf8Buffer)
     {
@@ -81,18 +88,33 @@ internal static class Utf8Helpers
         }
     }
 
+
     public static string ToString(ReadOnlySpan<byte> utf8Buffer) =>
         Encoding.UTF8.GetString(utf8Buffer);
+
 
     public static int GetHashCode(ReadOnlySpan<byte> utf8Buffer)
     {
         var hash = new HashCode();
-        foreach (var x in MemoryMarshal.Cast<byte, int>(utf8Buffer))
+        while (utf8Buffer.Length > Vector<byte>.Count)
         {
-            hash.Add(x);
+            var vector = Vector.LoadUnsafe(in utf8Buffer[0]);
+            hash.Add(vector);
+            utf8Buffer = utf8Buffer[Vector<byte>.Count..];
+        }
+        while(utf8Buffer.Length > sizeof(uint))
+        {
+            var value = Unsafe.ReadUnaligned<uint>(ref MemoryMarshal.GetReference(utf8Buffer));
+            hash.Add(value);
+            utf8Buffer = utf8Buffer[sizeof(uint)..];
+        }
+        foreach (var b in utf8Buffer)
+        {
+            hash.Add(b);
         }
         return hash.ToHashCode();
     }
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static int GetNextByteIndex(ReadOnlySpan<byte> utf8Buffer, int currentByteIndex)

@@ -9,6 +9,8 @@ internal static class TestHelpers
     public static readonly ImmutableArray<string> CommonTestStrings = [
             "",
             "Hello, world!",
+            "Good morning, world!",
+            "Good night, world!",
             "The quick brown fox jumps over the lazy dog",
             "CRLF\r\nTab\tEnd",
             "Ångström façade Noël",

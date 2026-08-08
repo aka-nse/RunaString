@@ -23,7 +23,7 @@ public ref struct CharsSpanEnumerator
     internal readonly int NextCharIndex => _nextCharIndex;
 
     /// <inheritdoc />
-    public readonly CharsIndex SeekIndex => new(_currCharIndex, _runeIndex);
+    public readonly CharsIndex Index => new(_currCharIndex, _runeIndex);
 
     /// <inheritdoc />
     public readonly Rune Current => _current;
@@ -55,15 +55,6 @@ public ref struct CharsSpanEnumerator
         _currCharIndex = _nextCharIndex;
         return Helpers.MoveNext(_buffer, ref _nextCharIndex, ref _runeIndex, out _current);
     }
-
-    /// <inheritdoc />
-    public CharsSpanEnumerator Seek(CharsIndex index) =>
-        new(_buffer)
-        {
-            _currCharIndex = index.CharIndex,
-            _nextCharIndex = Helpers.GetNextCharIndex(_buffer, index.CharIndex),
-            _runeIndex = index.RuneIndex,
-        };
 }
 
 
@@ -84,7 +75,7 @@ public struct CharsMemoryEnumerator
     private readonly ReadOnlyMemory<char> _buffer;
 
     /// <inheritdoc />
-    public readonly CharsIndex SeekIndex => new(_currCharIndex, _runeIndex);
+    public readonly CharsIndex Index => new(_currCharIndex, _runeIndex);
 
     /// <inheritdoc />
     public readonly Rune Current => _current;
@@ -116,15 +107,6 @@ public struct CharsMemoryEnumerator
         _currCharIndex = _nextCharIndex;
         return Helpers.MoveNext(_buffer.Span, ref _nextCharIndex, ref _runeIndex, out _current);
     }
-
-    /// <inheritdoc />
-    public CharsMemoryEnumerator Seek(CharsIndex index) =>
-        new(_buffer)
-        {
-            _currCharIndex = index.CharIndex,
-            _nextCharIndex = Helpers.GetNextCharIndex(_buffer.Span, index.CharIndex),
-            _runeIndex = index.RuneIndex,
-        };
 }
 
 

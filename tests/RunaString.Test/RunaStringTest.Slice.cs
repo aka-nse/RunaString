@@ -67,7 +67,7 @@ public partial class RunaStringTest
                 }
                 ++i;
             }
-            var actual = value.Slice(startEnumerator.SeekIndex, endEnumerator.SeekIndex).ToString();
+            var actual = value.Slice(startEnumerator.Index, endEnumerator.Index).ToString();
             Assert.Equal(expected, actual);
         }
     }

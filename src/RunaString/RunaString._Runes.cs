@@ -1,6 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace RunaString;
@@ -99,7 +97,7 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
     }
 
     /// <inheritdoc />
-    public override int GetHashCode() => InternalHelpers.GetHashCode(Source.Span);
+    public override int GetHashCode() => RuneHelpers.GetHashCode(Source.Span);
 
     /// <inheritdoc />
     public int CompareTo(RunesString other) => Compare(this, other);
@@ -195,7 +193,7 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
     }
 
     /// <inheritdoc />
-    public override int GetHashCode() => InternalHelpers.GetHashCode(Source);
+    public override int GetHashCode() => RuneHelpers.GetHashCode(Source);
 
     /// <inheritdoc />
     public int CompareTo(RunesSpanString other) => Compare(this, other);

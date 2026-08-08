@@ -96,12 +96,6 @@ public readonly partial struct Utf8String
         return new(Buffer.Slice(byteStart, byteLength));
     }
 
-    internal readonly Utf8String DangerousSlice(int byteStart, int byteLength)
-    {
-        return new(Buffer.Slice(byteStart, byteLength));
-    }
-
-
     /// <inheritdoc />
     public bool TryGetRune(Utf8Index index, out Rune rune, out int codeUnitConsumed) =>
         FileHelpers.TryGetRune(Buffer.Span, index, out rune, out codeUnitConsumed);
@@ -314,7 +308,7 @@ public abstract partial class Utf8Comparer
     private sealed class Default_ : Utf8Comparer
     {
         public override int Compare(Utf8SpanString x, Utf8SpanString y) =>
-            InternalHelpers.Compare<Utf8SpanString, Utf8SpanEnumerator>(x, y);
+            Utf8Helpers.Compare(x.Buffer, y.Buffer);
 
         public override bool Equals(Utf8SpanString x, Utf8SpanString y) =>
             InternalHelpers.Equals(x.Buffer, y.Buffer);
