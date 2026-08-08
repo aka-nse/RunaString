@@ -308,7 +308,7 @@ public abstract partial class Utf8Comparer
     private sealed class Default_ : Utf8Comparer
     {
         public override int Compare(Utf8SpanString x, Utf8SpanString y) =>
-            InternalHelpers.Compare<Utf8SpanString, Utf8SpanEnumerator>(x, y);
+            Utf8Helpers.Compare(x.Buffer, y.Buffer);
 
         public override bool Equals(Utf8SpanString x, Utf8SpanString y) =>
             InternalHelpers.Equals(x.Buffer, y.Buffer);
