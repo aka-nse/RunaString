@@ -397,6 +397,10 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+# merge tools auto generated files
+*.bak
+*.orig
+
 # Project extensions
 .dotnet/
 .CodeCoverage/
