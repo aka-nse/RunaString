@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 using System.Text;
 
 namespace RunaString;
@@ -126,9 +126,27 @@ internal static class RuneHelpers
     public static int GetHashCode(ReadOnlySpan<Rune> runesBuffer)
     {
         var hash = new HashCode();
-        foreach (var x in MemoryMarshal.Cast<Rune, int>(runesBuffer))
+        if (Vector256.IsHardwareAccelerated)
         {
-            hash.Add(x);
+            while (runesBuffer.Length > Vector256<byte>.Count)
+            {
+                var vector = Vector256.LoadUnsafe(in runesBuffer[0]);
+                hash.Add(vector);
+                runesBuffer = runesBuffer[Vector256<byte>.Count..];
+            }
+        }
+        if (Vector128.IsHardwareAccelerated)
+        {
+            while (runesBuffer.Length > Vector128<byte>.Count)
+            {
+                var vector = Vector128.LoadUnsafe(in runesBuffer[0]);
+                hash.Add(vector);
+                runesBuffer = runesBuffer[Vector128<byte>.Count..];
+            }
+        }
+        foreach (var c in runesBuffer)
+        {
+            hash.Add(c);
         }
         return hash.ToHashCode();
     }

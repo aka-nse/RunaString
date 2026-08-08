@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 
@@ -73,9 +74,27 @@ internal static class CharHelpers
     public static int GetHashCode(ReadOnlySpan<char> charsBuffer)
     {
         var hash = new HashCode();
-        foreach (var x in MemoryMarshal.Cast<char, int>(charsBuffer))
+        if (Vector256.IsHardwareAccelerated)
         {
-            hash.Add(x);
+            while (charsBuffer.Length > Vector256<byte>.Count)
+            {
+                var vector = Vector256.LoadUnsafe(in charsBuffer[0]);
+                hash.Add(vector);
+                charsBuffer = charsBuffer[Vector256<byte>.Count..];
+            }
+        }
+        if (Vector128.IsHardwareAccelerated)
+        {
+            while (charsBuffer.Length > Vector128<byte>.Count)
+            {
+                var vector = Vector128.LoadUnsafe(in charsBuffer[0]);
+                hash.Add(vector);
+                charsBuffer = charsBuffer[Vector128<byte>.Count..];
+            }
+        }
+        foreach (var c in charsBuffer)
+        {
+            hash.Add(c);
         }
         return hash.ToHashCode();
     }
