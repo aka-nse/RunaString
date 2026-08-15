@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.ComponentModel;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -17,11 +18,28 @@ namespace RunaString;
 [InterpolatedStringHandler]
 public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedCount, IFormatProvider? formatProvider)
 {
+    internal const int StackBufferSize = 256;
+    internal const int HeapBufferSize = 2048;
+
     private readonly int _literalLength = literalLength;
     private readonly int _formattedCount = formattedCount;
     private readonly IFormatProvider? _formatProvider = formatProvider;
     private byte[] _buffer = ArrayPool<byte>.Shared.Rent(literalLength + formattedCount * 10);
     private int _length = 0;
+
+
+    /// <summary>
+    /// This constructor is not supported and will throw a NotSupportedException.
+    /// Use the constructor with parameters instead.
+    /// </summary>
+    /// <exception cref="NotSupportedException"></exception>
+    [Obsolete("Don't use default constructor", true)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public RunaUtf8InterpolationHandler()
+        : this(0, 0, null)
+    {
+        throw new NotSupportedException("Do not use default constructor.");
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RunaUtf8InterpolationHandler"/> struct with the specified literal length and formatted count.
@@ -93,7 +111,7 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
             Encoding.UTF8.GetBytes(s, _buffer.AsSpan(_length, bytesCount));
             _buffer.AsSpan(_length + bytesCount, spaceSize).Fill((byte)' ');
         }
-        _length  = newLength;
+        _length = newLength;
     }
 
     private void AppendWithPad(scoped ReadOnlySpan<byte> bytes, int spaceSize, bool padLeft)
@@ -153,6 +171,7 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
         AppendCore(s, alignment);
     }
 
+
     /// <inheritdoc cref="AppendFormatted{T}(T, int, string?, OverloadResolutionMarker?)"/>
     [OverloadResolutionPriority(2)]
     public void AppendFormatted<T>(
@@ -163,16 +182,34 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
         where T : ISpanFormattable
     {
         InternalHelpers.NoUse(marker);
-        var tmp = (stackalloc char[256]);
-        if (value.TryFormat(tmp, out var charsWritten, format, _formatProvider))
+        var stackBuffer = (stackalloc char[StackBufferSize / sizeof(char)]);
+        if (value.TryFormat(stackBuffer, out var charsWritten, format, _formatProvider))
         {
-            AppendCore(tmp.Slice(0, charsWritten), alignment);
+            AppendCore(stackBuffer.Slice(0, charsWritten), alignment);
+            return;
         }
-        else
+
+        var heapBuffer = default(char[]);
+        try
         {
-            AppendFormatted(value, alignment, format, (OverloadResolutionMarker.AssignableFrom<IFormattable>?)null);
+            heapBuffer = ArrayPool<char>.Shared.Rent(HeapBufferSize / sizeof(char));
+            if (value.TryFormat(heapBuffer, out charsWritten, format, _formatProvider))
+            {
+                AppendCore(heapBuffer.AsSpan(0, charsWritten), alignment);
+                return;
+            }
         }
+        finally
+        {
+            if (heapBuffer is { })
+            {
+                ArrayPool<char>.Shared.Return(heapBuffer);
+            }
+        }
+
+        AppendFormatted(value, alignment, format, (OverloadResolutionMarker.AssignableFrom<IFormattable>?)null);
     }
+
 
     /// <inheritdoc cref="AppendFormatted{T}(T, int, string?, OverloadResolutionMarker?)"/>
     [OverloadResolutionPriority(3)]
@@ -184,16 +221,38 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
         where T : IUtf8SpanFormattable
     {
         InternalHelpers.NoUse(marker);
-        var tmp = (stackalloc byte[512]);
-        if (value.TryFormat(tmp, out var bytesWritten, format, _formatProvider))
+        var stackBuffer = (stackalloc byte[StackBufferSize]);
+        if (value.TryFormat(stackBuffer, out var bytesWritten, format, _formatProvider))
         {
-            AppendCore(tmp.Slice(0, bytesWritten), alignment);
+            AppendCore(stackBuffer.Slice(0, bytesWritten), alignment);
             return;
         }
-        else
+
+        var heapBuffer = default(byte[]);
+        try
         {
-            AppendFormatted(value, alignment, format, (OverloadResolutionMarker.AssignableFrom<IFormattable>?)null);
+            heapBuffer = ArrayPool<byte>.Shared.Rent(HeapBufferSize);
+            if (value.TryFormat(heapBuffer, out bytesWritten, format, _formatProvider))
+            {
+                AppendCore(heapBuffer.AsSpan(0, bytesWritten), alignment);
+                return;
+            }
         }
+        finally
+        {
+            if(heapBuffer is { })
+            {
+                ArrayPool<byte>.Shared.Return(heapBuffer);
+            }
+        }
+
+        if(value is IFormattable formattable)
+        {
+            AppendFormatted(formattable, alignment, format);
+            return;
+        }
+
+        AppendFormatted(value, alignment, format, (OverloadResolutionMarker?)null);
     }
 
     /// <summary>

@@ -1,140 +1,169 @@
-using System.Diagnostics;
 using System.Text;
 
 namespace RunaString.Test;
 
-public class RunaUtf8InterpolationHandlerTest
+public partial class RunaUtf8InterpolationHandlerTest
 {
     [Fact]
-    public void Literal()
+    public void AppendLiteral()
     {
-        RunaUtf8InterpolationHandler handler = $"Hello, world!";
+        var handler = new RunaUtf8InterpolationHandler(256, 0);
+        handler.AppendLiteral("Hello, world!");
         var st = handler.MoveToUtf8String().ToString();
         Assert.Equal("Hello, world!", st);
     }
 
     [Fact]
-    public void FormatCommon()
+    public void AppendFormatted_Common()
     {
-        RunaUtf8InterpolationHandler handler = $"{new TestCommon()}";
+        var handler = new RunaUtf8InterpolationHandler(0, 1);
+        handler.AppendFormatted(new TestCommon("Hello, world!"));
         var st = handler.MoveToUtf8String().ToString();
-        var expectedMethod = typeof(RunaUtf8InterpolationHandler)
-            .GetMethods()
-            .Where(static m => m.Name == nameof(RunaUtf8InterpolationHandler.AppendFormatted))
-            .First(static m => m.GetParameters().Last().ParameterType == typeof(OverloadResolutionMarker));
-        Assert.Equal($"{nameof(TestCommon)}.{nameof(ToString)}[caller={expectedMethod}]", st);
+        Assert.Equal("ToString(): Hello, world!", st);
     }
 
     [Fact]
-    public void FormatFormattable()
+    public void AppendFormatted_Formattable()
     {
-        RunaUtf8InterpolationHandler handler = $"{new TestFormattable()}";
+        var handler = new RunaUtf8InterpolationHandler(0, 1);
+        handler.AppendFormatted(new TestFormattable("Hello, world!"));
         var st = handler.MoveToUtf8String().ToString();
-        var expectedMethod = typeof(RunaUtf8InterpolationHandler)
-            .GetMethods()
-            .Where(static m => m.Name == nameof(RunaUtf8InterpolationHandler.AppendFormatted))
-            .First(static m => m.GetParameters().Last().ParameterType == typeof(OverloadResolutionMarker.AssignableFrom<IFormattable>));
-        Assert.Equal($"{nameof(TestFormattable)}.{nameof(ToString)}[caller={expectedMethod}]", st);
+        Assert.Equal("ToString(string, IFormatProvider): Hello, world!", st);
     }
 
     [Fact]
-    public void FormatSpanFormattable()
+    public void AppendFormatted_SpanFormattable_StackBuffer()
     {
-        RunaUtf8InterpolationHandler handler = $"{new TestSpanFormattable()}";
+        var handler = new RunaUtf8InterpolationHandler(0, 1);
+        handler.AppendFormatted(new TestSpanFormattable("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize / sizeof(char) - 1));
         var st = handler.MoveToUtf8String().ToString();
-        var expectedMethod = typeof(RunaUtf8InterpolationHandler)
-            .GetMethods()
-            .Where(static m => m.Name == nameof(RunaUtf8InterpolationHandler.AppendFormatted))
-            .First(static m => m.GetParameters().Last().ParameterType == typeof(OverloadResolutionMarker.AssignableFrom<ISpanFormattable>));
-        Assert.Equal($"{nameof(TestSpanFormattable)}.{nameof(ToString)}[caller={expectedMethod}]", st);
+        Assert.Equal("TryFormat(Span<char>, out int, ReadOnlySpan<char>, IFormatProvider): Hello, world!", st);
     }
 
     [Fact]
-    public void FormatUtf8SpanFormattable()
+    public void AppendFormatted_SpanFormattable_HeapBuffer()
     {
-        RunaUtf8InterpolationHandler handler = $"{new TestUtf8SpanFormattable()}";
+        var handler = new RunaUtf8InterpolationHandler(0, 1);
+        handler.AppendFormatted(new TestSpanFormattable("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize / sizeof(char) + 1));
         var st = handler.MoveToUtf8String().ToString();
-        var expectedMethod = typeof(RunaUtf8InterpolationHandler)
-            .GetMethods()
-            .Where(static m => m.Name == nameof(RunaUtf8InterpolationHandler.AppendFormatted))
-            .First(static m => m.GetParameters().Last().ParameterType == typeof(OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>));
-        Assert.Equal($"{nameof(TestUtf8SpanFormattable)}.{nameof(ToString)}[caller={expectedMethod}]", st);
+        Assert.Equal("TryFormat(Span<char>, out int, ReadOnlySpan<char>, IFormatProvider): Hello, world!", st);
+    }
+
+    [Fact]
+    public void AppendFormatted_SpanFormattable_Fallback()
+    {
+        var handler = new RunaUtf8InterpolationHandler(0, 1);
+        handler.AppendFormatted(new TestSpanFormattable("Hello, world!", RunaUtf8InterpolationHandler.HeapBufferSize / sizeof(char) + 1));
+        var st = handler.MoveToUtf8String().ToString();
+        Assert.Equal("ToString(string, IFormatProvider): Hello, world!", st);
+    }
+
+    [Fact]
+    public void AppendFormatted_Utf8SpanFormattable_StackBuffer()
+    {
+        var handler = new RunaUtf8InterpolationHandler(0, 1);
+        handler.AppendFormatted(new TestUtf8SpanFormattable("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize - 1));
+        var st = handler.MoveToUtf8String().ToString();
+        Assert.Equal("TryFormat(Span<byte>, out int, ReadOnlySpan<char>, IFormatProvider): Hello, world!", st);
+    }
+
+    [Fact]
+    public void AppendFormatted_Utf8SpanFormattable_HeapBuffer()
+    {
+        var handler = new RunaUtf8InterpolationHandler(0, 1);
+        handler.AppendFormatted(new TestUtf8SpanFormattable("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize + 1));
+        var st = handler.MoveToUtf8String().ToString();
+        Assert.Equal("TryFormat(Span<byte>, out int, ReadOnlySpan<char>, IFormatProvider): Hello, world!", st);
+    }
+
+    [Fact]
+    public void AppendFormatted_Utf8SpanFormattable_FallbackToFormattable()
+    {
+        var handler = new RunaUtf8InterpolationHandler(0, 1);
+        handler.AppendFormatted(new TestUtf8SpanFormattable("Hello, world!", RunaUtf8InterpolationHandler.HeapBufferSize + 1));
+        var st = handler.MoveToUtf8String().ToString();
+        Assert.Equal("ToString(string, IFormatProvider): Hello, world!", st);
+    }
+
+    [Fact]
+    public void AppendFormatted_Utf8SpanFormattable_FallbackToCommon()
+    {
+        var handler = new RunaUtf8InterpolationHandler(0, 1);
+        handler.AppendFormatted(new TestUtf8SpanFormattableWithoutIFormattable("Hello, world!", RunaUtf8InterpolationHandler.HeapBufferSize + 1));
+        var st = handler.MoveToUtf8String().ToString();
+        Assert.Equal("ToString(): Hello, world!", st);
     }
 }
 
 
-file abstract class TestBase
-{
-    protected static string GetResolvedAppendFormatted()
-    {
-        var trace = new StackTrace(0);
-        for (var i = 0; trace.GetFrame(i) is { } frame; ++i)
-        {
-            var method = frame.GetMethod();
-            if (method?.DeclaringType == typeof(RunaUtf8InterpolationHandler))
-            {
-                var caller = method.ToString();
-                return $"[caller={caller}]";
-            }
-        }
-        return "";
-    }
-}
-
-
-file class TestCommon : TestBase
+file class TestCommon(string formatResult)
 {
     public override string ToString() =>
-        $"{nameof(TestCommon)}.{nameof(ToString)}{GetResolvedAppendFormatted()}";
+        $"ToString(): {formatResult}";
 }
 
-
-file class TestFormattable : TestBase, IFormattable
+file class TestFormattable(string formatResult)
+    : IFormattable
 {
     public string ToString(string? format, IFormatProvider? formatProvider) =>
-        $"{nameof(TestFormattable)}.{nameof(ToString)}{GetResolvedAppendFormatted()}";
+        $"ToString(string, IFormatProvider): {formatResult}";
 }
 
-file class TestSpanFormattable : TestBase, ISpanFormattable
+file class TestSpanFormattable(string formatResult, int spanFormatRequirement)
+    : ISpanFormattable
 {
     public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? formatProvider)
     {
-        var s = $"{nameof(TestSpanFormattable)}.{nameof(TryFormat)}{GetResolvedAppendFormatted()}";
-        if (s.Length > destination.Length)
+        if (spanFormatRequirement > destination.Length)
         {
             charsWritten = 0;
             return false;
         }
+        var s = $"TryFormat(Span<char>, out int, ReadOnlySpan<char>, IFormatProvider): {formatResult}";
         s.AsSpan().CopyTo(destination);
         charsWritten = s.Length;
         return true;
     }
 
     public string ToString(string? format, IFormatProvider? formatProvider) =>
-        $"{nameof(TestSpanFormattable)}.{nameof(ToString)}{GetResolvedAppendFormatted()}";
+        $"ToString(string, IFormatProvider): {formatResult}";
 }
 
-file class TestUtf8SpanFormattable : TestBase, IUtf8SpanFormattable, ISpanFormattable
+file class TestUtf8SpanFormattable(string formatResult, int spanFormatRequirement)
+    : IFormattable, IUtf8SpanFormattable
 {
     public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
     {
-        var s = $"{nameof(TestUtf8SpanFormattable)}.{nameof(TryFormat)}{GetResolvedAppendFormatted()}";
-        return Encoding.UTF8.TryGetBytes(s, utf8Destination, out bytesWritten);
-    }
-
-    public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? formatProvider)
-    {
-        var s = $"{nameof(TestUtf8SpanFormattable)}.{nameof(TryFormat)}{GetResolvedAppendFormatted()}";
-        if (s.Length > destination.Length)
+        if (spanFormatRequirement > utf8Destination.Length)
         {
-            charsWritten = 0;
+            bytesWritten = 0;
             return false;
         }
-        s.AsSpan().CopyTo(destination);
-        charsWritten = s.Length;
+        var s = $"TryFormat(Span<byte>, out int, ReadOnlySpan<char>, IFormatProvider): {formatResult}";
+        bytesWritten = Encoding.UTF8.GetBytes(s.AsSpan(), utf8Destination);
         return true;
     }
 
     public string ToString(string? format, IFormatProvider? formatProvider) =>
-        $"{nameof(TestUtf8SpanFormattable)}.{nameof(ToString)}{GetResolvedAppendFormatted()}";
+        $"ToString(string, IFormatProvider): {formatResult}";
+}
+
+
+file class TestUtf8SpanFormattableWithoutIFormattable(string formatResult, int spanFormatRequirement)
+    : IUtf8SpanFormattable
+{
+    public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
+    {
+        if (spanFormatRequirement > utf8Destination.Length)
+        {
+            bytesWritten = 0;
+            return false;
+        }
+        var s = $"TryFormat(Span<byte>, out int, ReadOnlySpan<char>, IFormatProvider): {formatResult}";
+        bytesWritten = Encoding.UTF8.GetBytes(s.AsSpan(), utf8Destination);
+        return true;
+    }
+
+    public override string ToString() =>
+        $"ToString(): {formatResult}";
 }
