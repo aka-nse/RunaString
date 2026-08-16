@@ -43,6 +43,27 @@ public readonly partial struct Utf8String
     }
 
     /// <summary>
+    /// Creates a new <see cref="Utf8String" /> from a given UTF-8 encoded string using an interpolated string handler.
+    /// </summary>
+    /// <param name="handler"></param>
+    public static Utf8String FromFormat(RunaUtf8InterpolationHandler handler) =>
+        handler.MoveToUtf8String();
+
+    /// <summary>
+    /// Creates a new <see cref="Utf8String" /> from a given UTF-8 encoded string using an interpolated string handler.
+    /// </summary>
+    /// <param name="provider"></param>
+    /// <param name="handler"></param>
+    /// <returns></returns>
+    public static Utf8String FromFormat(
+        IFormatProvider? provider,
+        [InterpolatedStringHandlerArgument(nameof(provider))] RunaUtf8InterpolationHandler handler)
+    {
+        InternalHelpers.NoUse(provider);
+        return handler.MoveToUtf8String();
+    }
+
+    /// <summary>
     /// Creates a new <see cref="Utf8String" /> from a given UTF-8 encoded byte buffer.
     /// </summary>
     /// <param name="utf8Buffer"></param>
@@ -190,6 +211,27 @@ public readonly ref partial struct Utf8SpanString
     {
         _reference = ref reference;
         _length = length;
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="Utf8SpanString" /> from a given UTF-8 encoded string using an interpolated string handler.
+    /// </summary>
+    /// <param name="handler"></param>
+    public static Utf8SpanString FromFormat(RunaUtf8InterpolationHandler handler) =>
+        handler.MoveToUtf8SpanString();
+
+    /// <summary>
+    /// Creates a new <see cref="Utf8SpanString" /> from a given UTF-8 encoded string using an interpolated string handler.
+    /// </summary>
+    /// <param name="provider"></param>
+    /// <param name="handler"></param>
+    /// <returns></returns>
+    public static Utf8SpanString FromFormat(
+        IFormatProvider? provider,
+        [InterpolatedStringHandlerArgument(nameof(provider))] RunaUtf8InterpolationHandler handler)
+    {
+        InternalHelpers.NoUse(provider);
+        return handler.MoveToUtf8SpanString();
     }
 
     /// <summary>
