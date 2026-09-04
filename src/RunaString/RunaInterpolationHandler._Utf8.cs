@@ -90,8 +90,14 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
             return;
         }
 
-        var runeCount = CharHelpers.GetRuneCount(s);
         var xalign = Math.Abs(alignment);
+        if(CharHelpers.CountAsciiCharFromAhead(s) == s.Length && xalign < s.Length)
+        {
+            AppendAscii(s);
+            return;
+        }
+
+        var runeCount = CharHelpers.GetRuneCount(s);
         if (xalign < runeCount)
         {
             AppendWithoutPad(s);
@@ -182,47 +188,22 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void AppendWithoutPad(scoped ReadOnlySpan<char> s)
     {
-        var i = 0;
-        while (i < s.Length)
+        while (s.Length > 0)
         {
-            if (MemoryMarshal.Cast<char, byte>(s) is { Length: >= 8 } us)
+            var asciiLength = CharHelpers.CountAsciiCharFromAhead(s);
+            if (asciiLength > 0)
             {
-                unsafe
-                {
-                    if ((Unsafe.ReadUnaligned<ulong>(ref Unsafe.AsRef(in us[0])) & 0xFF80_FF80_FF80_FF80uL) == 0)
-                    {
-                        i += 8;
-                        continue;
-                    }
-                }
+                AppendAscii(s[..asciiLength]);
+                s = s[asciiLength..];
             }
 
-            if (char.IsAscii(s[i]))
+            var nonasciiLength = CharHelpers.CountNonAsciiCharFromAhead(s);
+            if (nonasciiLength > 0)
             {
-                ++i;
-                continue;
+                var bytesConsumed = Encoding.UTF8.GetBytes(s[..nonasciiLength], Destination);
+                s = s[nonasciiLength..];
+                _length += bytesConsumed;
             }
-            else if (i > 0)
-            {
-                AppendAscii(s[..i]);
-                s = s[i..];
-                i = 0;
-            }
-
-            // encode non-ASCII character to UTF-8
-            var rune = new Rune(s[0]);
-            if (!rune.TryEncodeToUtf8(Destination, out var bytesWritten))
-            {
-                ExtendDouble();
-                bytesWritten = rune.EncodeToUtf8(Destination);
-            }
-            _length += bytesWritten;
-            s = s[1..];
-        }
-
-        if (i > 0)
-        {
-            AppendAscii(s);
         }
     }
 
