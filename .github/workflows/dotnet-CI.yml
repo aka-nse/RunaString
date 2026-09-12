@@ -1,10 +1,11 @@
 name: .NET Core CI
 
 on:
-  push:
-    branches: [ "main", "develop" ]
   pull_request:
     branches: [ "main", "develop" ]
+
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
