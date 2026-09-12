@@ -84,12 +84,6 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
 
     private void AppendCore(scoped ReadOnlySpan<char> s, int alignment)
     {
-        if (alignment == 0)
-        {
-            AppendWithoutPad(s);
-            return;
-        }
-
         var xalign = Math.Abs(alignment);
         if(CharHelpers.CountAsciiCharFromAhead(s) == s.Length && xalign < s.Length)
         {
@@ -112,12 +106,6 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
 
     private void AppendCore(scoped ReadOnlySpan<byte> bytes, int alignment)
     {
-        if (alignment == 0)
-        {
-            AppendWithoutPad(bytes);
-            return;
-        }
-
         var runeCount = Utf8Helpers.GetRuneCount(bytes);
         var xalign = Math.Abs(alignment);
         if (xalign < runeCount)
@@ -200,6 +188,8 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
             var nonasciiLength = CharHelpers.CountNonAsciiCharFromAhead(s);
             if (nonasciiLength > 0)
             {
+                var length = Encoding.UTF8.GetByteCount(s[..nonasciiLength]);
+                ExtendIfNeed(length);
                 var bytesConsumed = Encoding.UTF8.GetBytes(s[..nonasciiLength], Destination);
                 s = s[nonasciiLength..];
                 _length += bytesConsumed;
@@ -407,11 +397,6 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
         where T : ISpanFormattable
     {
         InternalHelpers.NoUse(marker);
-        if (alignment == 0)
-        {
-            AppendFormatted(value, format, marker);
-            return;
-        }
 
         var stackBuffer = (stackalloc char[StackBufferSize / sizeof(char)]);
         if (value.TryFormat(stackBuffer, out var charsWritten, format, _formatProvider))

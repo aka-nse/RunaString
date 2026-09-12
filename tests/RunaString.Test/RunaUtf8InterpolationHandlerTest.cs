@@ -1,6 +1,7 @@
 namespace RunaString.Test;
 
 using System.Globalization;
+using System.Text;
 using static FileHelpers;
 
 public partial class RunaUtf8InterpolationHandlerTest
@@ -78,6 +79,7 @@ public partial class RunaUtf8InterpolationHandlerTest
         return data;
     }
 
+
     public static TheoryData<string, Utf8String> MemoryFormatWithProviderTestCases()
     {
         var data = new TheoryData<string, Utf8String>();
@@ -151,8 +153,6 @@ public partial class RunaUtf8InterpolationHandlerTest
 
         return data;
     }
-
-
 
 
     [Theory]

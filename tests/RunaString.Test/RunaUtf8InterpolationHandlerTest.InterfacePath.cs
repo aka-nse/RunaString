@@ -16,81 +16,158 @@ public partial class RunaUtf8InterpolationHandlerTest
             Assert.Equal("Hello, world!", st);
         }
 
+
         [Fact]
         public void AppendFormatted_Common()
         {
-            var handler = new RunaUtf8InterpolationHandler(0, 1);
-            TestCommon value = new("Hello, world!");
-            handler.AppendFormatted(value);
-            var st = handler.MoveToUtf8String().ToString();
-            Assert.Equal("Hello, world!", st);
-            Assert.Equal(TestCommon._ToString, value.LastCalledMember);
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestCommon value = new("Hello, world!");
+                handler.AppendFormatted(value);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestCommon._ToString, value.LastCalledMember);
+            }
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestCommon value = new("Hello, world!");
+                handler.AppendFormatted(value, 0);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestCommon._ToString, value.LastCalledMember);
+            }
         }
+
 
         [Fact]
         public void AppendFormatted_Formattable()
         {
-            var handler = new RunaUtf8InterpolationHandler(0, 1);
-            TestFormattable value = new("Hello, world!");
-            handler.AppendFormatted(value);
-            var st = handler.MoveToUtf8String().ToString();
-            Assert.Equal("Hello, world!", st);
-            Assert.Equal(TestFormattable._ToString, value.LastCalledMember);
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestFormattable value = new("Hello, world!");
+                handler.AppendFormatted(value);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestFormattable._ToString, value.LastCalledMember);
+            }
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestFormattable value = new("Hello, world!");
+                handler.AppendFormatted(value, 0);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestFormattable._ToString, value.LastCalledMember);
+            }
         }
+
 
         [Fact]
         public void AppendFormatted_SpanFormattable_StackBuffer()
         {
-            var handler = new RunaUtf8InterpolationHandler(0, 1);
-            TestSpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize / sizeof(char) - 1);
-            handler.AppendFormatted(value);
-            var st = handler.MoveToUtf8String().ToString();
-            Assert.Equal("Hello, world!", st);
-            Assert.Equal(TestSpanFormattable._TryFormat, value.LastCalledMember);
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestSpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize / sizeof(char) - 1);
+                handler.AppendFormatted(value);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestSpanFormattable._TryFormat, value.LastCalledMember);
+            }
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestSpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize / sizeof(char) - 1);
+                handler.AppendFormatted(value, 0);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestSpanFormattable._TryFormat, value.LastCalledMember);
+            }
         }
+
 
         [Fact]
         public void AppendFormatted_SpanFormattable_HeapBuffer()
         {
-            var handler = new RunaUtf8InterpolationHandler(0, 1);
-            TestSpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize / sizeof(char) + 1);
-            handler.AppendFormatted(value);
-            var st = handler.MoveToUtf8String().ToString();
-            Assert.Equal("Hello, world!", st);
-            Assert.Equal(TestSpanFormattable._TryFormat, value.LastCalledMember);
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestSpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize / sizeof(char) + 1);
+                handler.AppendFormatted(value);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestSpanFormattable._TryFormat, value.LastCalledMember);
+            }
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestSpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize / sizeof(char) + 1);
+                handler.AppendFormatted(value, 0);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestSpanFormattable._TryFormat, value.LastCalledMember);
+            }
         }
+
 
         [Fact]
         public void AppendFormatted_SpanFormattable_Fallback()
         {
-            var handler = new RunaUtf8InterpolationHandler(0, 1);
-            TestSpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.HeapBufferSize / sizeof(char) + 1);
-            handler.AppendFormatted(value);
-            var st = handler.MoveToUtf8String().ToString();
-            Assert.Equal("Hello, world!", st);
-            Assert.Equal(TestSpanFormattable._ToString, value.LastCalledMember);
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestSpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.HeapBufferSize / sizeof(char) + 1);
+                handler.AppendFormatted(value);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestSpanFormattable._ToString, value.LastCalledMember);
+            }
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestSpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.HeapBufferSize / sizeof(char) + 1);
+                handler.AppendFormatted(value, 0);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestSpanFormattable._ToString, value.LastCalledMember);
+            }
         }
+
 
         [Fact]
         public void AppendFormatted_Utf8SpanFormattable_StackBuffer()
         {
-            var handler = new RunaUtf8InterpolationHandler(0, 1);
-            TestUtf8SpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize - 1);
-            handler.AppendFormatted(value);
-            var st = handler.MoveToUtf8String().ToString();
-            Assert.Equal("Hello, world!", st);
-            Assert.Equal(TestUtf8SpanFormattable._TryFormat, value.LastCalledMember);
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestUtf8SpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize - 1);
+                handler.AppendFormatted(value);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestUtf8SpanFormattable._TryFormat, value.LastCalledMember);
+            }
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestUtf8SpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize - 1);
+                handler.AppendFormatted(value, 0);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestUtf8SpanFormattable._TryFormat, value.LastCalledMember);
+            }
         }
+
 
         [Fact]
         public void AppendFormatted_Utf8SpanFormattable_HeapBuffer()
         {
-            var handler = new RunaUtf8InterpolationHandler(0, 1);
-            TestUtf8SpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize + 1);
-            handler.AppendFormatted(value);
-            var st = handler.MoveToUtf8String().ToString();
-            Assert.Equal("Hello, world!", st);
-            Assert.Equal(TestUtf8SpanFormattable._TryFormat, value.LastCalledMember);
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestUtf8SpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize + 1);
+                handler.AppendFormatted(value);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestUtf8SpanFormattable._TryFormat, value.LastCalledMember);
+            }
+            {
+                var handler = new RunaUtf8InterpolationHandler(0, 1);
+                TestUtf8SpanFormattable value = new("Hello, world!", RunaUtf8InterpolationHandler.StackBufferSize + 1);
+                handler.AppendFormatted(value, 0);
+                var st = handler.MoveToUtf8String().ToString();
+                Assert.Equal("Hello, world!", st);
+                Assert.Equal(TestUtf8SpanFormattable._TryFormat, value.LastCalledMember);
+            }
         }
     }
 }
