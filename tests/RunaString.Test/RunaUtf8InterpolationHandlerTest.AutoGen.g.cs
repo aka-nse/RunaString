@@ -1,4 +1,4 @@
-#nullable enable
+ï»¿#nullable enable
 namespace RunaString.Test;
 
 using System.Globalization;
@@ -295,12 +295,12 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_CommonType_NoAlignment()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             marker: default(OverloadResolutionMarker));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -308,13 +308,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_CommonType_WithEnoughtAlignmentLeft()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             20,
             marker: default(OverloadResolutionMarker));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("           ‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("           ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -322,13 +322,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_CommonType_WithEnoughtAlignmentRight()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             -20,
             marker: default(OverloadResolutionMarker));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI           ", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼           ", st);
     }
 
 
@@ -336,13 +336,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_CommonType_WithNotEnoughtAlignmentLeft()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             5,
             marker: default(OverloadResolutionMarker));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -350,13 +350,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_CommonType_WithNotEnoughtAlignmentRight()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             -5,
             marker: default(OverloadResolutionMarker));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -364,12 +364,12 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_FormattableType_NoAlignment()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             marker: default(OverloadResolutionMarker.AssignableFrom<IFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -377,13 +377,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_FormattableType_WithEnoughtAlignmentLeft()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             20,
             marker: default(OverloadResolutionMarker.AssignableFrom<IFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("           ‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("           ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -391,13 +391,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_FormattableType_WithEnoughtAlignmentRight()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             -20,
             marker: default(OverloadResolutionMarker.AssignableFrom<IFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI           ", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼           ", st);
     }
 
 
@@ -405,13 +405,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_FormattableType_WithNotEnoughtAlignmentLeft()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             5,
             marker: default(OverloadResolutionMarker.AssignableFrom<IFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -419,13 +419,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_FormattableType_WithNotEnoughtAlignmentRight()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             -5,
             marker: default(OverloadResolutionMarker.AssignableFrom<IFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -433,12 +433,12 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_SpanFormattableType_NoAlignment()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             marker: default(OverloadResolutionMarker.AssignableFrom<ISpanFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -446,13 +446,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_SpanFormattableType_WithEnoughtAlignmentLeft()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             20,
             marker: default(OverloadResolutionMarker.AssignableFrom<ISpanFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("           ‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("           ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -460,13 +460,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_SpanFormattableType_WithEnoughtAlignmentRight()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             -20,
             marker: default(OverloadResolutionMarker.AssignableFrom<ISpanFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI           ", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼           ", st);
     }
 
 
@@ -474,13 +474,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_SpanFormattableType_WithNotEnoughtAlignmentLeft()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             5,
             marker: default(OverloadResolutionMarker.AssignableFrom<ISpanFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -488,13 +488,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_SpanFormattableType_WithNotEnoughtAlignmentRight()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             -5,
             marker: default(OverloadResolutionMarker.AssignableFrom<ISpanFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -502,12 +502,12 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_Utf8SpanFormattableType_NoAlignment()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             marker: default(OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -515,13 +515,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_Utf8SpanFormattableType_WithEnoughtAlignmentLeft()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             20,
             marker: default(OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("           ‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("           ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -529,13 +529,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_Utf8SpanFormattableType_WithEnoughtAlignmentRight()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             -20,
             marker: default(OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI           ", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼           ", st);
     }
 
 
@@ -543,13 +543,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_Utf8SpanFormattableType_WithNotEnoughtAlignmentLeft()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             5,
             marker: default(OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 
@@ -557,13 +557,13 @@ public partial class RunaUtf8InterpolationHandlerTest
     public void AppendFormatted_NonAscii_Utf8SpanFormattableType_WithNotEnoughtAlignmentRight()
     {
         var handler = new RunaUtf8InterpolationHandler(0, 1);
-        var value = new FormatTestClass("‚±‚ñ‚É‚¿‚ÍA¢ŠEI");
+        var value = new FormatTestClass("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼");
         handler.AppendFormatted(
             value,
             -5,
             marker: default(OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>));
         var st = handler.MoveToUtf8SpanString().ToString();
-        Assert.Equal("‚±‚ñ‚É‚¿‚ÍA¢ŠEI", st);
+        Assert.Equal("ã“ã‚“ã«ã¡ã¯ã€ä¸–ç•Œï¼", st);
     }
 
 

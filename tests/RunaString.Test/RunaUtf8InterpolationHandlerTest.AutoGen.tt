@@ -3,7 +3,7 @@
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
-<#@ output extension=".g.cs" #>
+<#@ output extension=".g.cs" encoding="utf-8" #>
 <#
 TestCase[] testCases = [
     new("Ascii_CommonType_NoAlignment"                              , "OverloadResolutionMarker"                                     , "Hello, world!", null, "Hello, world!"       ),
