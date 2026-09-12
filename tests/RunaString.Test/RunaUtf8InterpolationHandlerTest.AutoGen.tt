@@ -1,0 +1,138 @@
+<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".g.cs" encoding="utf-8" #>
+<#
+TestCase[] testCases = [
+    new("Ascii_CommonType_NoAlignment"                              , "OverloadResolutionMarker"                                     , "Hello, world!", null, "Hello, world!"       ),
+    new("Ascii_CommonType_WithEnoughtAlignmentLeft"                 , "OverloadResolutionMarker"                                     , "Hello, world!",   20, "       Hello, world!"),
+    new("Ascii_CommonType_WithEnoughtAlignmentRight"                , "OverloadResolutionMarker"                                     , "Hello, world!",  -20, "Hello, world!       "),
+    new("Ascii_CommonType_WithNotEnoughtAlignmentLeft"              , "OverloadResolutionMarker"                                     , "Hello, world!",    5, "Hello, world!"       ),
+    new("Ascii_CommonType_WithNotEnoughtAlignmentRight"             , "OverloadResolutionMarker"                                     , "Hello, world!",  - 5, "Hello, world!"       ),
+    new("Ascii_FormattableType_NoAlignment"                         , "OverloadResolutionMarker.AssignableFrom<IFormattable>"        , "Hello, world!", null, "Hello, world!"       ),
+    new("Ascii_FormattableType_WithEnoughtAlignmentLeft"            , "OverloadResolutionMarker.AssignableFrom<IFormattable>"        , "Hello, world!",   20, "       Hello, world!"),
+    new("Ascii_FormattableType_WithEnoughtAlignmentRight"           , "OverloadResolutionMarker.AssignableFrom<IFormattable>"        , "Hello, world!",  -20, "Hello, world!       "),
+    new("Ascii_FormattableType_WithNotEnoughtAlignmentLeft"         , "OverloadResolutionMarker.AssignableFrom<IFormattable>"        , "Hello, world!",    5, "Hello, world!"       ),
+    new("Ascii_FormattableType_WithNotEnoughtAlignmentRight"        , "OverloadResolutionMarker.AssignableFrom<IFormattable>"        , "Hello, world!",  - 5, "Hello, world!"       ),
+    new("Ascii_SpanFormattableType_NoAlignment"                     , "OverloadResolutionMarker.AssignableFrom<ISpanFormattable>"    , "Hello, world!", null, "Hello, world!"       ),
+    new("Ascii_SpanFormattableType_WithEnoughtAlignmentLeft"        , "OverloadResolutionMarker.AssignableFrom<ISpanFormattable>"    , "Hello, world!",   20, "       Hello, world!"),
+    new("Ascii_SpanFormattableType_WithEnoughtAlignmentRight"       , "OverloadResolutionMarker.AssignableFrom<ISpanFormattable>"    , "Hello, world!",  -20, "Hello, world!       "),
+    new("Ascii_SpanFormattableType_WithNotEnoughtAlignmentLeft"     , "OverloadResolutionMarker.AssignableFrom<ISpanFormattable>"    , "Hello, world!",    5, "Hello, world!"       ),
+    new("Ascii_SpanFormattableType_WithNotEnoughtAlignmentRight"    , "OverloadResolutionMarker.AssignableFrom<ISpanFormattable>"    , "Hello, world!",  - 5, "Hello, world!"       ),
+    new("Ascii_Utf8SpanFormattableType_NoAlignment"                 , "OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>", "Hello, world!", null, "Hello, world!"       ),
+    new("Ascii_Utf8SpanFormattableType_WithEnoughtAlignmentLeft"    , "OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>", "Hello, world!",   20, "       Hello, world!"),
+    new("Ascii_Utf8SpanFormattableType_WithEnoughtAlignmentRight"   , "OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>", "Hello, world!",  -20, "Hello, world!       "),
+    new("Ascii_Utf8SpanFormattableType_WithNotEnoughtAlignmentLeft" , "OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>", "Hello, world!",    5, "Hello, world!"       ),
+    new("Ascii_Utf8SpanFormattableType_WithNotEnoughtAlignmentRight", "OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>", "Hello, world!",  - 5, "Hello, world!"       ),
+    new("NonAscii_CommonType_NoAlignment"                              , "OverloadResolutionMarker"                                     , "こんにちは、世界！", null, "こんにちは、世界！"           ),
+    new("NonAscii_CommonType_WithEnoughtAlignmentLeft"                 , "OverloadResolutionMarker"                                     , "こんにちは、世界！",   20, "           こんにちは、世界！"),
+    new("NonAscii_CommonType_WithEnoughtAlignmentRight"                , "OverloadResolutionMarker"                                     , "こんにちは、世界！",  -20, "こんにちは、世界！           "),
+    new("NonAscii_CommonType_WithNotEnoughtAlignmentLeft"              , "OverloadResolutionMarker"                                     , "こんにちは、世界！",    5, "こんにちは、世界！"           ),
+    new("NonAscii_CommonType_WithNotEnoughtAlignmentRight"             , "OverloadResolutionMarker"                                     , "こんにちは、世界！",  - 5, "こんにちは、世界！"           ),
+    new("NonAscii_FormattableType_NoAlignment"                         , "OverloadResolutionMarker.AssignableFrom<IFormattable>"        , "こんにちは、世界！", null, "こんにちは、世界！"           ),
+    new("NonAscii_FormattableType_WithEnoughtAlignmentLeft"            , "OverloadResolutionMarker.AssignableFrom<IFormattable>"        , "こんにちは、世界！",   20, "           こんにちは、世界！"),
+    new("NonAscii_FormattableType_WithEnoughtAlignmentRight"           , "OverloadResolutionMarker.AssignableFrom<IFormattable>"        , "こんにちは、世界！",  -20, "こんにちは、世界！           "),
+    new("NonAscii_FormattableType_WithNotEnoughtAlignmentLeft"         , "OverloadResolutionMarker.AssignableFrom<IFormattable>"        , "こんにちは、世界！",    5, "こんにちは、世界！"           ),
+    new("NonAscii_FormattableType_WithNotEnoughtAlignmentRight"        , "OverloadResolutionMarker.AssignableFrom<IFormattable>"        , "こんにちは、世界！",  - 5, "こんにちは、世界！"           ),
+    new("NonAscii_SpanFormattableType_NoAlignment"                     , "OverloadResolutionMarker.AssignableFrom<ISpanFormattable>"    , "こんにちは、世界！", null, "こんにちは、世界！"           ),
+    new("NonAscii_SpanFormattableType_WithEnoughtAlignmentLeft"        , "OverloadResolutionMarker.AssignableFrom<ISpanFormattable>"    , "こんにちは、世界！",   20, "           こんにちは、世界！"),
+    new("NonAscii_SpanFormattableType_WithEnoughtAlignmentRight"       , "OverloadResolutionMarker.AssignableFrom<ISpanFormattable>"    , "こんにちは、世界！",  -20, "こんにちは、世界！           "),
+    new("NonAscii_SpanFormattableType_WithNotEnoughtAlignmentLeft"     , "OverloadResolutionMarker.AssignableFrom<ISpanFormattable>"    , "こんにちは、世界！",    5, "こんにちは、世界！"           ),
+    new("NonAscii_SpanFormattableType_WithNotEnoughtAlignmentRight"    , "OverloadResolutionMarker.AssignableFrom<ISpanFormattable>"    , "こんにちは、世界！",  - 5, "こんにちは、世界！"           ),
+    new("NonAscii_Utf8SpanFormattableType_NoAlignment"                 , "OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>", "こんにちは、世界！", null, "こんにちは、世界！"           ),
+    new("NonAscii_Utf8SpanFormattableType_WithEnoughtAlignmentLeft"    , "OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>", "こんにちは、世界！",   20, "           こんにちは、世界！"),
+    new("NonAscii_Utf8SpanFormattableType_WithEnoughtAlignmentRight"   , "OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>", "こんにちは、世界！",  -20, "こんにちは、世界！           "),
+    new("NonAscii_Utf8SpanFormattableType_WithNotEnoughtAlignmentLeft" , "OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>", "こんにちは、世界！",    5, "こんにちは、世界！"           ),
+    new("NonAscii_Utf8SpanFormattableType_WithNotEnoughtAlignmentRight", "OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>", "こんにちは、世界！",  - 5, "こんにちは、世界！"           ),
+];
+#>
+#nullable enable
+namespace RunaString.Test;
+
+using System.Globalization;
+using System.Text;
+
+public partial class RunaUtf8InterpolationHandlerTest
+{
+    [Fact]
+    public void AppendLiteral()
+    {
+        var handler = new RunaUtf8InterpolationHandler(0, 1);
+        handler.AppendLiteral("Hello, world!");
+        var st = handler.MoveToUtf8String().ToString();
+        Assert.Equal("Hello, world!", st);
+    }
+
+<#
+    foreach(var testCase in testCases)
+{
+    GenerateFact(testCase);
+}#>
+}
+
+
+file class FormatTestClass(string value)
+    : IFormattable, ISpanFormattable, IUtf8SpanFormattable
+{
+    public override string ToString() => value;
+
+    public string ToString(string? format, IFormatProvider? formatProvider) =>
+        value;
+
+    public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
+    {
+        if(destination.Length < value.Length)
+        {
+            charsWritten = 0;
+            return false;
+        }
+        value.CopyTo(destination);
+        charsWritten = value.Length;
+        return true;
+    }
+
+    public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider) =>
+        Encoding.UTF8.TryGetBytes(value, utf8Destination, out bytesWritten);
+}
+
+<#+
+    public void GenerateFact(TestCase testCase)
+    {
+#>
+    [Fact]
+    public void AppendFormatted_<#=testCase.OverloadName#>()
+    {
+        var handler = new RunaUtf8InterpolationHandler(0, 1);
+        var value = new FormatTestClass("<#=testCase.Value#>");
+        handler.AppendFormatted(
+            value,
+<#+ if(testCase.Alignment.HasValue) { #>
+            <#=testCase.Alignment.Value#>,
+<#+ } #>
+            marker: default(<#=testCase.MarkerTypeName#>));
+        var st = handler.MoveToUtf8SpanString().ToString();
+        Assert.Equal("<#=testCase.Expected#>", st);
+    }
+
+
+<#+
+    }
+
+
+public class TestCase(
+    string overloadName,
+    string markerTypeName,
+    string value,
+    int? alignment,
+    string expected)
+{
+    public string OverloadName { get; } = overloadName;
+    public string MarkerTypeName { get; } = markerTypeName;
+    public string Value { get; } = value;
+    public int? Alignment { get; } = alignment;
+    public string Expected { get; } = expected;
+}
+
+#>

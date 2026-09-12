@@ -1,7 +1,10 @@
 using System.Buffers;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 using System.Text;
 
 namespace RunaString;
@@ -27,6 +30,8 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
     private byte[] _buffer = ArrayPool<byte>.Shared.Rent(literalLength + formattedCount * 10);
     private int _length = 0;
 
+    private readonly Span<byte> Destination => _buffer.AsSpan(_length);
+
 
     /// <summary>
     /// This constructor is not supported and will throw a NotSupportedException.
@@ -41,6 +46,7 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
         throw new NotSupportedException("Do not use default constructor.");
     }
 
+
     /// <summary>
     /// Initializes a new instance of the <see cref="RunaUtf8InterpolationHandler"/> struct with the specified literal length and formatted count.
     /// </summary>
@@ -51,45 +57,60 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
     {
     }
 
-    private void ReserveIfNeed(int requiredLength)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void ExtendDouble() => Extend(2 * _buffer.Length);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void Extend(int requiredLength)
     {
-        if (_buffer.Length < requiredLength)
+        Debug.Assert(_buffer.Length < requiredLength);
+        requiredLength = (int)BitOperations.RoundUpToPowerOf2((uint)requiredLength);
+        var newBuffer = ArrayPool<byte>.Shared.Rent(requiredLength);
+        _buffer.AsSpan(0, _length).CopyTo(newBuffer);
+        (_buffer, newBuffer) = (newBuffer, _buffer);
+        ArrayPool<byte>.Shared.Return(newBuffer);
+    }
+
+
+    private void ExtendIfNeed(int appendLength)
+    {
+        var newLength = _length + appendLength;
+        if (_buffer.Length < newLength)
         {
-            requiredLength = (int)BitOperations.RoundUpToPowerOf2((uint)requiredLength);
-            var newBuffer = ArrayPool<byte>.Shared.Rent(requiredLength);
-            _buffer.AsSpan(0, _length).CopyTo(newBuffer);
-            (_buffer, newBuffer) = (newBuffer, _buffer);
-            ArrayPool<byte>.Shared.Return(newBuffer);
+            Extend(newLength);
         }
     }
+
 
     private void AppendCore(scoped ReadOnlySpan<char> s, int alignment)
     {
-        var bytesCount = Encoding.UTF8.GetByteCount(s);
-        var runeCount = CharHelpers.GetRuneCount(s);
         var xalign = Math.Abs(alignment);
+        if(CharHelpers.CountAsciiCharFromAhead(s) == s.Length && xalign < s.Length)
+        {
+            AppendAscii(s);
+            return;
+        }
+
+        var runeCount = CharHelpers.GetRuneCount(s);
         if (xalign < runeCount)
         {
-            ReserveIfNeed(_length + bytesCount);
-            Encoding.UTF8.GetBytes(s, _buffer.AsSpan(_length));
-            _length += bytesCount;
+            AppendWithoutPad(s);
         }
         else
         {
-            AppendWithPadCore(s, bytesCount, xalign - runeCount, alignment > 0);
+            var bytesCount = Encoding.UTF8.GetByteCount(s);
+            AppendWithPad(s, bytesCount, xalign - runeCount, alignment > 0);
         }
     }
 
+
     private void AppendCore(scoped ReadOnlySpan<byte> bytes, int alignment)
     {
-        var bytesWritten = bytes.Length;
         var runeCount = Utf8Helpers.GetRuneCount(bytes);
         var xalign = Math.Abs(alignment);
         if (xalign < runeCount)
         {
-            ReserveIfNeed(_length + bytesWritten);
-            bytes.CopyTo(_buffer.AsSpan(_length));
-            _length += bytesWritten;
+            AppendWithoutPad(bytes);
         }
         else
         {
@@ -97,45 +118,161 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
         }
     }
 
-    private void AppendWithPadCore(scoped ReadOnlySpan<char> s, int bytesCount, int spaceSize, bool padLeft)
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void AppendAscii(scoped ReadOnlySpan<char> s)
     {
-        var newLength = _length + bytesCount + spaceSize;
-        ReserveIfNeed(newLength);
+        var length = s.Length;
+        var us = MemoryMarshal.Cast<char, ushort>(s);
+        ExtendIfNeed(length);
+        var dest = Destination;
+        if (Vector256.IsHardwareAccelerated)
+        {
+            while (us.Length > 2 * Vector256<ushort>.Count)
+            {
+                var v1 = Vector256.LoadUnsafe(in us[0]);
+                us = us[Vector256<ushort>.Count..];
+                var v2 = Vector256.LoadUnsafe(in us[0]);
+                us = us[Vector256<ushort>.Count..];
+                var vdst = Vector256.Narrow(v1, v2);
+                vdst.CopyTo(dest);
+                dest = dest[Vector256<byte>.Count..];
+            }
+        }
+        if (Vector128.IsHardwareAccelerated)
+        {
+            while (us.Length > 2 * Vector128<ushort>.Count)
+            {
+                var v1 = Vector128.LoadUnsafe(in us[0]);
+                us = us[Vector128<ushort>.Count..];
+                var v2 = Vector128.LoadUnsafe(in us[0]);
+                us = us[Vector128<ushort>.Count..];
+                var vdst = Vector128.Narrow(v1, v2);
+                vdst.CopyTo(dest);
+                dest = dest[Vector128<byte>.Count..];
+            }
+        }
+        if (Vector64.IsHardwareAccelerated)
+        {
+            while (us.Length > 2 * Vector64<ushort>.Count)
+            {
+                var v1 = Vector64.LoadUnsafe(in us[0]);
+                us = us[Vector64<ushort>.Count..];
+                var v2 = Vector64.LoadUnsafe(in us[0]);
+                us = us[Vector64<ushort>.Count..];
+                var vdst = Vector64.Narrow(v1, v2);
+                vdst.CopyTo(dest);
+                dest = dest[Vector64<byte>.Count..];
+            }
+        }
+        for (var i = 0; i < us.Length; i++)
+        {
+            dest[i] = (byte)us[i];
+        }
+        _length += length;
+    }
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void AppendWithoutPad(scoped ReadOnlySpan<char> s)
+    {
+        while (s.Length > 0)
+        {
+            var asciiLength = CharHelpers.CountAsciiCharFromAhead(s);
+            if (asciiLength > 0)
+            {
+                AppendAscii(s[..asciiLength]);
+                s = s[asciiLength..];
+            }
+
+            var nonasciiLength = CharHelpers.CountNonAsciiCharFromAhead(s);
+            if (nonasciiLength > 0)
+            {
+                var length = Encoding.UTF8.GetByteCount(s[..nonasciiLength]);
+                ExtendIfNeed(length);
+                var bytesConsumed = Encoding.UTF8.GetBytes(s[..nonasciiLength], Destination);
+                s = s[nonasciiLength..];
+                _length += bytesConsumed;
+            }
+        }
+    }
+
+
+    private void AppendWithoutPad(scoped ReadOnlySpan<byte> bytes)
+    {
+        ExtendIfNeed(bytes.Length);
+        bytes.CopyTo(Destination);
+        _length += bytes.Length;
+    }
+
+
+    private void AppendWithPad(scoped ReadOnlySpan<char> s, int bytesCount, int spaceSize, bool padLeft)
+    {
+        var appendLength = bytesCount + spaceSize;
+        ExtendIfNeed(appendLength);
+        var dest = Destination;
         if (padLeft)
         {
-            _buffer.AsSpan(_length, spaceSize).Fill((byte)' ');
-            Encoding.UTF8.GetBytes(s, _buffer.AsSpan(_length + spaceSize));
+            dest[..spaceSize].Fill((byte)' ');
+            Encoding.UTF8.GetBytes(s, dest[spaceSize..]);
         }
         else
         {
-            Encoding.UTF8.GetBytes(s, _buffer.AsSpan(_length, bytesCount));
-            _buffer.AsSpan(_length + bytesCount, spaceSize).Fill((byte)' ');
+            Encoding.UTF8.GetBytes(s, dest[..bytesCount]);
+            dest[bytesCount..].Fill((byte)' ');
         }
-        _length = newLength;
+        _length += appendLength;
     }
+
 
     private void AppendWithPad(scoped ReadOnlySpan<byte> bytes, int spaceSize, bool padLeft)
     {
-        var newLength = _length + bytes.Length + spaceSize;
-        ReserveIfNeed(newLength);
+        var appendLength = bytes.Length + spaceSize;
+        ExtendIfNeed(appendLength);
+        var dest = Destination;
         if (padLeft)
         {
-            _buffer.AsSpan(_length, spaceSize).Fill((byte)' ');
-            bytes.CopyTo(_buffer.AsSpan(_length + spaceSize));
+            dest[..spaceSize].Fill((byte)' ');
+            bytes.CopyTo(dest[spaceSize..]);
         }
         else
         {
-            bytes.CopyTo(_buffer.AsSpan(_length));
-            _buffer.AsSpan(_length + bytes.Length, spaceSize).Fill((byte)' ');
+            bytes.CopyTo(dest[..bytes.Length]);
+            dest[bytes.Length..].Fill((byte)' ');
         }
-        _length = newLength;
+        _length += appendLength;
     }
+
 
     /// <summary>
     /// Appends a literal string to the UTF-8 encoded string being built.
     /// </summary>
     /// <param name="s"></param>
-    public void AppendLiteral(string s) => AppendCore(s, 0);
+    public void AppendLiteral(string s) => AppendWithoutPad(s);
+
+
+    /// <inheritdoc cref="AppendFormatted{T}(T, int, string?, OverloadResolutionMarker?)"/>
+    [OverloadResolutionPriority(0)]
+    public void AppendFormatted<T>(
+        T value,
+        string? format = null,
+        OverloadResolutionMarker? marker = null)
+    {
+        InternalHelpers.NoUse(marker);
+        string s;
+        if (_formatProvider is not ICustomFormatter)
+        {
+            s = value?.ToString() ?? "";
+        }
+        else
+        {
+            s = format is { }
+                ? string.Format(_formatProvider, $"{{0:{format}}}", value)
+                : string.Format(_formatProvider, "{0}", value);
+        }
+        AppendWithoutPad(s);
+    }
+
 
     /// <summary>
     /// Appends a formatted value to the UTF-8 encoded string being built.
@@ -148,27 +285,67 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
     [OverloadResolutionPriority(0)]
     public void AppendFormatted<T>(
         T value,
-        int alignment = 0,
+        int alignment,
         string? format = null,
         OverloadResolutionMarker? marker = null)
     {
         InternalHelpers.NoUse(marker);
-        var s = string.Format(_formatProvider, $"{{0{(format != null ? $":{format}" : "")}}}", value);
-        AppendCore(s, alignment);
+        string s;
+        if (_formatProvider is not ICustomFormatter)
+        {
+            s = value?.ToString() ?? "";
+        }
+        else
+        {
+            s = format is { }
+                ? string.Format(_formatProvider, $"{{0:{format}}}", value)
+                : string.Format(_formatProvider, "{0}", value);
+        }
+
+        if (alignment == 0)
+        {
+            AppendWithoutPad(s);
+        }
+        else
+        {
+            AppendCore(s, alignment);
+        }
     }
+
 
     /// <inheritdoc cref="AppendFormatted{T}(T, int, string?, OverloadResolutionMarker?)"/>
     [OverloadResolutionPriority(1)]
     public void AppendFormatted<T>(
         T value,
-        int alignment = 0,
         string? format = null,
         OverloadResolutionMarker.AssignableFrom<IFormattable>? marker = null)
         where T : IFormattable
     {
         InternalHelpers.NoUse(marker);
         var s = value.ToString(format, _formatProvider);
-        AppendCore(s, alignment);
+        AppendWithoutPad(s);
+    }
+
+
+    /// <inheritdoc cref="AppendFormatted{T}(T, int, string?, OverloadResolutionMarker?)"/>
+    [OverloadResolutionPriority(1)]
+    public void AppendFormatted<T>(
+        T value,
+        int alignment,
+        string? format = null,
+        OverloadResolutionMarker.AssignableFrom<IFormattable>? marker = null)
+        where T : IFormattable
+    {
+        InternalHelpers.NoUse(marker);
+        var s = value.ToString(format, _formatProvider);
+        if (alignment == 0)
+        {
+            AppendWithoutPad(s);
+        }
+        else
+        {
+            AppendCore(s, alignment);
+        }
     }
 
 
@@ -176,12 +353,51 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
     [OverloadResolutionPriority(2)]
     public void AppendFormatted<T>(
         T value,
-        int alignment = 0,
         string? format = null,
         OverloadResolutionMarker.AssignableFrom<ISpanFormattable>? marker = null)
         where T : ISpanFormattable
     {
         InternalHelpers.NoUse(marker);
+        var stackBuffer = (stackalloc char[StackBufferSize / sizeof(char)]);
+        if (value.TryFormat(stackBuffer, out var charsWritten, format, _formatProvider))
+        {
+            AppendWithoutPad(stackBuffer.Slice(0, charsWritten));
+            return;
+        }
+
+        var heapBuffer = default(char[]);
+        try
+        {
+            heapBuffer = ArrayPool<char>.Shared.Rent(HeapBufferSize / sizeof(char));
+            if (value.TryFormat(heapBuffer, out charsWritten, format, _formatProvider))
+            {
+                AppendWithoutPad(heapBuffer.AsSpan(0, charsWritten));
+                return;
+            }
+        }
+        finally
+        {
+            if (heapBuffer is { })
+            {
+                ArrayPool<char>.Shared.Return(heapBuffer);
+            }
+        }
+
+        AppendFormatted(value, format, (OverloadResolutionMarker.AssignableFrom<IFormattable>?)null);
+    }
+
+
+    /// <inheritdoc cref="AppendFormatted{T}(T, int, string?, OverloadResolutionMarker?)"/>
+    [OverloadResolutionPriority(2)]
+    public void AppendFormatted<T>(
+        T value,
+        int alignment,
+        string? format = null,
+        OverloadResolutionMarker.AssignableFrom<ISpanFormattable>? marker = null)
+        where T : ISpanFormattable
+    {
+        InternalHelpers.NoUse(marker);
+
         var stackBuffer = (stackalloc char[StackBufferSize / sizeof(char)]);
         if (value.TryFormat(stackBuffer, out var charsWritten, format, _formatProvider))
         {
@@ -215,7 +431,34 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
     [OverloadResolutionPriority(3)]
     public void AppendFormatted<T>(
         T value,
-        int alignment = 0,
+        string? format = null,
+        OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>? marker = null)
+        where T : IUtf8SpanFormattable
+    {
+        InternalHelpers.NoUse(marker);
+        var i = 0;
+        while (true)
+        {
+            if (value.TryFormat(Destination, out var bytesWritten, format, _formatProvider))
+            {
+                _length += bytesWritten;
+                return;
+            }
+            if (i >= 10)
+            {
+                throw new InvalidOperationException($"Failed to format the value of type {typeof(T)} after 10 attempts.");
+            }
+            i++;
+            ExtendDouble();
+        }
+    }
+
+
+    /// <inheritdoc cref="AppendFormatted{T}(T, int, string?, OverloadResolutionMarker?)"/>
+    [OverloadResolutionPriority(3)]
+    public void AppendFormatted<T>(
+        T value,
+        int alignment,
         string? format = null,
         OverloadResolutionMarker.AssignableFrom<IUtf8SpanFormattable>? marker = null)
         where T : IUtf8SpanFormattable
@@ -224,7 +467,7 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
         var stackBuffer = (stackalloc byte[StackBufferSize]);
         if (value.TryFormat(stackBuffer, out var bytesWritten, format, _formatProvider))
         {
-            AppendCore(stackBuffer.Slice(0, bytesWritten), alignment);
+            AppendCore(stackBuffer[..bytesWritten], alignment);
             return;
         }
 
@@ -240,13 +483,13 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
         }
         finally
         {
-            if(heapBuffer is { })
+            if (heapBuffer is { })
             {
                 ArrayPool<byte>.Shared.Return(heapBuffer);
             }
         }
 
-        if(value is IFormattable formattable)
+        if (value is IFormattable formattable)
         {
             AppendFormatted(formattable, alignment, format);
             return;
@@ -254,6 +497,7 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
 
         AppendFormatted(value, alignment, format, (OverloadResolutionMarker?)null);
     }
+
 
     /// <summary>
     /// Completes the construction of the UTF-8 encoded string and returns it as a Utf8String.
@@ -267,6 +511,7 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
         _buffer = [];
         return Utf8String.DangerousFromUtf8(memory);
     }
+
 
     /// <summary>
     /// Completes the construction of the UTF-8 encoded string and returns it as a Utf8SpanString.

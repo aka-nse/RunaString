@@ -32,6 +32,123 @@ internal static class CharHelpers
     private static readonly Vector128<ushort> _highSurrogateMin128 = Vector128.Create((ushort)0xD800);
     private static readonly Vector128<ushort> _highSurrogateMax128 = Vector128.Create((ushort)0xDBFF);
 
+    private static readonly Vector256<ushort> _nonAsciiBit256 = Vector256.Create((ushort)0xFF80);
+    private static readonly Vector128<ushort> _nonAsciiBit128 = Vector128.Create((ushort)0xFF80);
+
+
+    public static int CountAsciiCharFromAhead(scoped ReadOnlySpan<char> s)
+    {
+        var i = 0;
+        var us = MemoryMarshal.Cast<char, ushort>(s);
+        if(Vector256.IsHardwareAccelerated)
+        {
+            while (us.Length - i >= Vector256<ushort>.Count)
+            {
+                var v = Vector256.LoadUnsafe(in us[i]);
+                var isNonAscii = Vector256.BitwiseAnd(v, _nonAsciiBit256);
+                if (!Vector256.EqualsAll(isNonAscii, Vector256<ushort>.Zero))
+                {
+                    break;
+                }
+                i += Vector256<ushort>.Count;
+            }
+        }
+        if(Vector128.IsHardwareAccelerated)
+        {
+            while (us.Length - i >= Vector128<ushort>.Count)
+            {
+                var v = Vector128.LoadUnsafe(in us[i]);
+                var isNonAscii = Vector128.BitwiseAnd(v, _nonAsciiBit128);
+                if (!Vector128.EqualsAll(isNonAscii, Vector128<ushort>.Zero))
+                {
+                    break;
+                }
+                i += Vector128<ushort>.Count;
+            }
+        }
+        while(us.Length - i >= sizeof(ulong) / sizeof(ushort))
+        {
+            unsafe
+            {
+                var uss = MemoryMarshal.Cast<ushort, byte>(us[i..]);
+                var t = Unsafe.ReadUnaligned<ulong>(ref Unsafe.AsRef(in uss[0])) & 0xFF80_FF80_FF80_FF80uL;
+                if (t != 0)
+                {
+                    break;
+                }
+                i += sizeof(ulong) / sizeof(ushort);
+            }
+        }
+        while (i < s.Length)
+        {
+            if (!char.IsAscii(s[i]))
+            {
+                break;
+            }
+
+            ++i;
+        }
+        return i;
+    }
+
+
+    public static int CountNonAsciiCharFromAhead(scoped ReadOnlySpan<char> s)
+    {
+        var i = 0;
+        var us = MemoryMarshal.Cast<char, ushort>(s);
+        if(Vector256.IsHardwareAccelerated)
+        {
+            while (us.Length - i >= Vector256<ushort>.Count)
+            {
+                var v = Vector256.LoadUnsafe(in us[i]);
+                var isNonAscii = Vector256.BitwiseAnd(v, _nonAsciiBit256);
+                if (Vector256.EqualsAny(isNonAscii, Vector256<ushort>.Zero))
+                {
+                    break;
+                }
+                i += Vector256<ushort>.Count;
+            }
+        }
+        if (Vector128.IsHardwareAccelerated)
+        {
+            while (us.Length - i >= Vector128<ushort>.Count)
+            {
+                var v = Vector128.LoadUnsafe(in us[i]);
+                var isNonAscii = Vector128.BitwiseAnd(v, _nonAsciiBit128);
+                if (Vector128.EqualsAny(isNonAscii, Vector128<ushort>.Zero))
+                {
+                    break;
+                }
+                i += Vector128<ushort>.Count;
+            }
+        }
+        while(us.Length - i >= sizeof(ulong) / sizeof(ushort))
+        {
+            unsafe
+            {
+                var uss = MemoryMarshal.Cast<ushort, byte>(us[i..]);
+                var t = Unsafe.ReadUnaligned<ulong>(ref Unsafe.AsRef(in uss[0])) & 0xFF80_FF80_FF80_FF80uL;
+                var z = (t - 0x0001000100010001uL) & ~t & 0x0080008000800080uL;
+                if (z != 0)
+                {
+                    break;
+                }
+                i += sizeof(ulong) / sizeof(ushort);
+            }
+        }
+        while (i < s.Length)
+        {
+            if (char.IsAscii(s[i]))
+            {
+                break;
+            }
+
+            ++i;
+        }
+        return i;
+    }
+
+
     public static int GetRuneCount(ReadOnlySpan<char> chars)
     {
         static int countHighSurrogate(ReadOnlySpan<ushort> chars)
