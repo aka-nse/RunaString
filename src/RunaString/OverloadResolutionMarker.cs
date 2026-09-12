@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace RunaString;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace RunaString;
 /// </summary>
 public abstract class OverloadResolutionMarker
 {
+    [DebuggerHidden]
     private OverloadResolutionMarker() { }
 
     /// <summary>
@@ -13,6 +16,7 @@ public abstract class OverloadResolutionMarker
     /// </summary>
     public sealed class Class : OverloadResolutionMarker
     {
+        [DebuggerHidden]
         private Class() { }
     }
 
@@ -21,6 +25,7 @@ public abstract class OverloadResolutionMarker
     /// </summary>
     public sealed class Struct : OverloadResolutionMarker
     {
+        [DebuggerHidden]
         private Struct() { }
     };
 
@@ -30,6 +35,7 @@ public abstract class OverloadResolutionMarker
     /// <typeparam name="T"></typeparam>
     public sealed class AssignableFrom<T> : OverloadResolutionMarker
     {
+        [DebuggerHidden]
         private AssignableFrom() { }
     }
 
@@ -42,6 +48,7 @@ public abstract class OverloadResolutionMarker
         where T1 : OverloadResolutionMarker
         where T2 : OverloadResolutionMarker
     {
+        [DebuggerHidden]
         private Intersect() { }
     }
 }
