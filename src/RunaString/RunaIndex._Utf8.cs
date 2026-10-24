@@ -13,6 +13,9 @@ namespace RunaString;
 public readonly struct Utf8Index : IRunaIndex<Utf8Index>
 {
     /// <inheritdoc />
+    public static Utf8Index IncrementBegin { get; } = new(0, 0);
+
+    /// <inheritdoc />
     public static Utf8Index DecrementEnd { get; } = new(-1, -1);
 
     /// <summary></summary>

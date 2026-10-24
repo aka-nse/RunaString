@@ -13,6 +13,9 @@ namespace RunaString;
 public readonly struct CharsIndex : IRunaIndex<CharsIndex>
 {
     /// <inheritdoc />
+    public static CharsIndex IncrementBegin { get; } = new(0, 0);
+
+    /// <inheritdoc />
     public static CharsIndex DecrementEnd { get; } = new(-1, -1);
 
     /// <summary></summary>

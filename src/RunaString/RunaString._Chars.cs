@@ -105,8 +105,24 @@ public readonly partial struct CharsString
         FileHelpers.Increment(Source.Span, ref index);
 
     /// <inheritdoc />
+    public CharsIndex IncrementBegin => CharsIndex.IncrementBegin;
+
+    /// <inheritdoc />
+    public CharsIndex GetIncrementEnd() => new(Source.Length, GetRuneCount());
+
+    /// <inheritdoc />
     public CharsIndex Decrement(ref CharsIndex index) =>
         FileHelpers.Decrement(Source.Span, ref index);
+
+    /// <inheritdoc />
+    public CharsIndex DecrementEnd => CharsIndex.DecrementEnd;
+
+    /// <inheritdoc />
+    public CharsIndex GetDecrementBegin()
+    {
+        var index = new CharsIndex(Source.Length, GetRuneCount());
+        return Decrement(ref index);
+    }
 
     /// <inheritdoc />
     public bool IsInRange(CharsIndex index) =>
@@ -241,8 +257,24 @@ public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString
         FileHelpers.Increment(Source, ref index);
 
     /// <inheritdoc />
+    public CharsIndex IncrementBegin => CharsIndex.IncrementBegin;
+
+    /// <inheritdoc />
+    public CharsIndex GetIncrementEnd() => new(Source.Length, GetRuneCount());
+
+    /// <inheritdoc />
     public CharsIndex Decrement(ref CharsIndex index) =>
         FileHelpers.Decrement(Source, ref index);
+
+    /// <inheritdoc />
+    public CharsIndex DecrementEnd => CharsIndex.DecrementEnd;
+
+    /// <inheritdoc />
+    public CharsIndex GetDecrementBegin()
+    {
+        var index = new CharsIndex(Source.Length, GetRuneCount());
+        return Decrement(ref index);
+    }
 
     /// <inheritdoc />
     public bool IsInRange(CharsIndex index) =>

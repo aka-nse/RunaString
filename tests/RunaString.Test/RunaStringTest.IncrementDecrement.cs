@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace RunaString.Test;
 
 public partial class RunaStringTest
@@ -24,6 +26,9 @@ public partial class RunaStringTest
         }
         IncrementTestCore_False(memory, testCase.GetIndex(^1));
         IncrementTestCore_False(span, testCase.GetIndex(^1));
+
+        WholeIncrementTestCore(memory, memory.IncrementBegin, testCase.String);
+        WholeIncrementTestCore(span, span.IncrementBegin, testCase.String);
     }
 
     [Theory]
@@ -41,6 +46,9 @@ public partial class RunaStringTest
         }
         DecrementTestCore_False(memory, testCase.GetIndex(0));
         DecrementTestCore_False(span, testCase.GetIndex(0));
+
+        WholeDecrementTestCore(memory, memory.IncrementBegin, testCase.String);
+        WholeDecrementTestCore(span, span.IncrementBegin, testCase.String);
     }
 
     [Theory]
@@ -58,6 +66,10 @@ public partial class RunaStringTest
         }
         IncrementTestCore_False(memory, testCase.GetIndex(^1));
         IncrementTestCore_False(span, testCase.GetIndex(^1));
+
+
+        WholeIncrementTestCore(memory, memory.IncrementBegin, testCase.String);
+        WholeIncrementTestCore(span, span.IncrementBegin, testCase.String);
     }
 
 
@@ -76,6 +88,9 @@ public partial class RunaStringTest
         }
         DecrementTestCore_False(memory, testCase.GetIndex(0));
         DecrementTestCore_False(span, testCase.GetIndex(0));
+
+        WholeDecrementTestCore(memory, memory.IncrementBegin, testCase.String);
+        WholeDecrementTestCore(span, span.IncrementBegin, testCase.String);
     }
 
     [Theory]
@@ -93,6 +108,9 @@ public partial class RunaStringTest
         }
         IncrementTestCore_False(memory, testCase.GetIndex(^1));
         IncrementTestCore_False(span, testCase.GetIndex(^1));
+
+        WholeIncrementTestCore(memory, memory.IncrementBegin, testCase.String);
+        WholeIncrementTestCore(span, span.IncrementBegin, testCase.String);
     }
 
 
@@ -111,6 +129,9 @@ public partial class RunaStringTest
         }
         DecrementTestCore_False(memory, testCase.GetIndex(0));
         DecrementTestCore_False(span, testCase.GetIndex(0));
+
+        WholeDecrementTestCore(memory, memory.IncrementBegin, testCase.String);
+        WholeDecrementTestCore(span, span.IncrementBegin, testCase.String);
     }
 
 
@@ -144,5 +165,29 @@ public partial class RunaStringTest
     {
         input.Decrement(ref index);
         Assert.False(input.IsInRange(index));
+    }
+
+    private static void WholeIncrementTestCore<TStr, TIndex>(TStr input, TIndex _, string expected)
+        where TStr : IRunaString<TStr, TIndex>, allows ref struct
+        where TIndex : struct, IRunaIndex<TIndex>
+    {
+        var sb = new StringBuilder();
+        for(TIndex i = TIndex.IncrementBegin, end = input.GetIncrementEnd(); i != end; input.Increment(ref i))
+        {
+            sb.Append(input[i]);
+        }
+        Assert.Equal(expected, sb.ToString());
+    }
+
+    private static void WholeDecrementTestCore<TStr, TIndex>(TStr input, TIndex _, string expected)
+        where TStr : IRunaString<TStr, TIndex>, allows ref struct
+        where TIndex : struct, IRunaIndex<TIndex>
+    {
+        var sb = new StringBuilder();
+        for (TIndex i = TIndex.DecrementEnd, end = input.GetDecrementBegin(); i != end; input.Decrement(ref i))
+        {
+            sb.Append(input[i]);
+        }
+        Assert.Equal(new string([.. expected.Reverse()]), sb.ToString());
     }
 }
