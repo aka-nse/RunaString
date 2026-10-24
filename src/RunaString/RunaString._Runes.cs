@@ -61,8 +61,20 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
         FileHelpers.Increment(Source.Span, ref index);
 
     /// <inheritdoc />
+    public RunesIndex IncrementBegin => RunesIndex.IncrementBegin;
+
+    /// <inheritdoc />
+    public RunesIndex GetIncrementEnd() => new(Source.Length);
+
+    /// <inheritdoc />
     public RunesIndex Decrement(ref RunesIndex index) =>
         FileHelpers.Decrement(Source.Span, ref index);
+
+    /// <inheritdoc />
+    public RunesIndex DecrementEnd => RunesIndex.DecrementEnd;
+
+    /// <inheritdoc />
+    public RunesIndex GetDecrementBegin() => new(Source.Length - 1);
 
     /// <inheritdoc />
     public bool IsInRange(RunesIndex index) =>
@@ -158,8 +170,20 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
         FileHelpers.Increment(Source, ref index);
 
     /// <inheritdoc />
+    public RunesIndex IncrementBegin => RunesIndex.IncrementBegin;
+
+    /// <inheritdoc />
+    public RunesIndex GetIncrementEnd() => new(Source.Length);
+
+    /// <inheritdoc />
     public RunesIndex Decrement(ref RunesIndex index) =>
         FileHelpers.Decrement(Source, ref index);
+
+    /// <inheritdoc />
+    public RunesIndex DecrementEnd => RunesIndex.DecrementEnd;
+
+    /// <inheritdoc />
+    public RunesIndex GetDecrementBegin() => new(Source.Length - 1);
 
     /// <inheritdoc />
     public bool IsInRange(RunesIndex index) =>

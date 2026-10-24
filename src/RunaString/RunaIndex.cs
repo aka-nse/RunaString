@@ -19,7 +19,14 @@ public interface IRunaIndex<TSelf> : IRunaIndex, IEquatable<TSelf>, IComparable<
     where TSelf : IRunaIndex<TSelf>
 {
     /// <summary>
-    /// Gets a <typeparamref name="TSelf"/> instance that represents the stop value of decremental iteration.
+    /// <para>Gets a <typeparamref name="TSelf"/> instance that represents the initial value of incremental iteration.</para>
+    /// <para>(like <c>0</c> for <c>System.String</c>)</para>
+    /// </summary>
+    public abstract static TSelf IncrementBegin { get; }
+
+    /// <summary>
+    /// <para>Gets a <typeparamref name="TSelf"/> instance that represents the stop value of decremental iteration.</para>
+    /// <para>(like <c>-1</c> for <c>System.String</c>)</para>
     /// </summary>
     public abstract static TSelf DecrementEnd { get; }
 

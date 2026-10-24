@@ -118,6 +118,20 @@ public interface IRunaString<TSelf, TIndex>
     public TIndex Increment(ref TIndex index);
 
     /// <summary>
+    /// <para>Gets a <typeparamref name="TSelf"/> instance that represents the initial value of incremental iteration.</para>
+    /// <para>(like <c>0</c> for <c>System.String</c>)</para>
+    /// <para>The result is same as <see cref="IRunaIndex{TIndex}.IncrementBegin"/>. </para>
+    /// </summary>
+    public TIndex IncrementBegin { get; }
+
+    /// <summary>
+    /// <para>Gets a <typeparamref name="TSelf"/> instance that represents the stop value of incremental iteration.</para>
+    /// <para>(like <c>System.String.Length</c>)</para>
+    /// </summary>
+    /// <returns></returns>
+    public TIndex GetIncrementEnd();
+
+    /// <summary>
     /// Attempts to decrement the specified index to the previous position in the source buffer.
     /// </summary>
     /// <param name="index">The index to decrement. This must be an index instance created from this string instance.</param>
@@ -128,6 +142,20 @@ public interface IRunaString<TSelf, TIndex>
     /// Refer to <seealso cref="TryGetRune(TIndex, out Rune)"/>.
     /// </remarks>
     public TIndex Decrement(ref TIndex index);
+
+    /// <summary>
+    /// <para>Gets a <typeparamref name="TSelf"/> instance that represents the stop value of decremental iteration.</para>
+    /// <para>(like <c>-1</c> for <c>System.String</c>)</para>
+    /// <para>The result is same as <see cref="IRunaIndex{TIndex}.DecrementEnd"/>. </para>
+    /// </summary>
+    public TIndex DecrementEnd { get; }
+
+    /// <summary>
+    /// <para>Gets a <typeparamref name="TSelf"/> instance that represents the initial value of decremental iteration.</para>
+    /// <para>(like <c>System.String.Length - 1</c>)</para>
+    /// </summary>
+    /// <returns></returns>
+    public TIndex GetDecrementBegin();
 
     /// <summary>
     /// Determines whether the specified index is within the valid range of the source buffer.

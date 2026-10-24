@@ -13,6 +13,9 @@ namespace RunaString;
 public readonly struct RunesIndex : IRunaIndex<RunesIndex>
 {
     /// <inheritdoc />
+    public static RunesIndex IncrementBegin { get; } = new(0);
+
+    /// <inheritdoc />
     public static RunesIndex DecrementEnd { get; } = new(-1);
 
     /// <summary>
