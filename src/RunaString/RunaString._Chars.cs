@@ -105,8 +105,24 @@ public readonly partial struct CharsString
         FileHelpers.Increment(Source.Span, ref index);
 
     /// <inheritdoc />
+    public CharsIndex IncrementBegin => CharsIndex.IncrementBegin;
+
+    /// <inheritdoc />
+    public CharsIndex GetIncrementEnd() => new(Source.Length, GetRuneCount());
+
+    /// <inheritdoc />
     public CharsIndex Decrement(ref CharsIndex index) =>
         FileHelpers.Decrement(Source.Span, ref index);
+
+    /// <inheritdoc />
+    public CharsIndex DecrementEnd => CharsIndex.DecrementEnd;
+
+    /// <inheritdoc />
+    public CharsIndex GetDecrementBegin()
+    {
+        var index = new CharsIndex(Source.Length, GetRuneCount());
+        return Decrement(ref index);
+    }
 
     /// <inheritdoc />
     public bool IsInRange(CharsIndex index) =>
@@ -135,38 +151,18 @@ public readonly partial struct CharsString
     /// <inheritdoc />
     public bool Equals(CharsString other) => Equals(this, other);
 
-    /// <summary>
-    /// Determines whether two <see cref="CharsString" />  instances are equal by comparing their UTF-8 encoded byte sequences for equality.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static bool Equals(CharsString x, CharsString y) =>
         InternalHelpers.Equals(x.Source.Span, y.Source.Span);
 
-    /// <summary>
-    /// Compares two <see cref="CharsString" />  instances by comparing their UTF-8 encoded byte sequences in lexicographical order.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static int Compare(CharsString x, CharsString y) =>
         InternalHelpers.Compare<CharsString, CharsMemoryEnumerator>(x, y);
 
-    /// <summary>
-    /// Determines whether two <see cref="CharsString" />  instances are equal by comparing their UTF-8 encoded byte sequences for equality.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static bool operator ==(CharsString x, CharsString y) => Equals(x, y);
 
-    /// <summary>
-    /// Determines whether two <see cref="CharsString" />  instances are not equal by comparing their UTF-8 encoded byte sequences for inequality.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static bool operator !=(CharsString x, CharsString y) => !Equals(x, y);
 }
 
@@ -241,8 +237,24 @@ public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString
         FileHelpers.Increment(Source, ref index);
 
     /// <inheritdoc />
+    public CharsIndex IncrementBegin => CharsIndex.IncrementBegin;
+
+    /// <inheritdoc />
+    public CharsIndex GetIncrementEnd() => new(Source.Length, GetRuneCount());
+
+    /// <inheritdoc />
     public CharsIndex Decrement(ref CharsIndex index) =>
         FileHelpers.Decrement(Source, ref index);
+
+    /// <inheritdoc />
+    public CharsIndex DecrementEnd => CharsIndex.DecrementEnd;
+
+    /// <inheritdoc />
+    public CharsIndex GetDecrementBegin()
+    {
+        var index = new CharsIndex(Source.Length, GetRuneCount());
+        return Decrement(ref index);
+    }
 
     /// <inheritdoc />
     public bool IsInRange(CharsIndex index) =>
@@ -270,38 +282,18 @@ public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString
     /// <inheritdoc />
     public bool Equals(CharsSpanString other) => Equals(this, other);
 
-    /// <summary>
-    /// Determines whether two <see cref="CharsSpanString" />  instances are equal by comparing their UTF-8 encoded byte sequences for equality.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static bool Equals(CharsSpanString x, CharsSpanString y) =>
         InternalHelpers.Equals(x.Source, y.Source);
 
-    /// <summary>
-    /// Compares two <see cref="CharsSpanString" />  instances by comparing their UTF-8 encoded byte sequences in lexicographical order.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static int Compare(CharsSpanString x, CharsSpanString y) =>
         InternalHelpers.Compare<CharsSpanString, CharsSpanEnumerator>(x, y);
 
-    /// <summary>
-    /// Determines whether two <see cref="CharsSpanString" />  instances are equal by comparing their UTF-8 encoded byte sequences for equality.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static bool operator ==(CharsSpanString x, CharsSpanString y) => Equals(x, y);
 
-    /// <summary>
-    /// Determines whether two <see cref="CharsSpanString" />  instances are not equal by comparing their UTF-8 encoded byte sequences for inequality.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public static bool operator !=(CharsSpanString x, CharsSpanString y) => !Equals(x, y);
 
     /// <summary>

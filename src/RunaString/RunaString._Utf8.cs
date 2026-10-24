@@ -126,8 +126,24 @@ public readonly partial struct Utf8String
         FileHelpers.Increment(Buffer.Span, ref index);
 
     /// <inheritdoc />
+    public Utf8Index IncrementBegin => Utf8Index.IncrementBegin;
+
+    /// <inheritdoc />
+    public Utf8Index GetIncrementEnd() => new(Buffer.Length, GetRuneCount());
+
+    /// <inheritdoc />
     public Utf8Index Decrement(ref Utf8Index index) =>
         FileHelpers.Decrement(Buffer.Span, ref index);
+
+    /// <inheritdoc />
+    public Utf8Index DecrementEnd => Utf8Index.DecrementEnd;
+
+    /// <inheritdoc />
+    public Utf8Index GetDecrementBegin()
+    {
+        var index = new Utf8Index(Buffer.Length, GetRuneCount());
+        return Decrement(ref index);
+    }
 
     /// <inheritdoc />
     public bool IsInRange(Utf8Index index) =>
@@ -281,8 +297,24 @@ public readonly ref partial struct Utf8SpanString
         FileHelpers.Increment(Buffer, ref index);
 
     /// <inheritdoc />
+    public Utf8Index IncrementBegin => Utf8Index.IncrementBegin;
+
+    /// <inheritdoc />
+    public Utf8Index GetIncrementEnd() => new(Buffer.Length, GetRuneCount());
+
+    /// <inheritdoc />
     public Utf8Index Decrement(ref Utf8Index index) =>
         FileHelpers.Decrement(Buffer, ref index);
+
+    /// <inheritdoc />
+    public Utf8Index DecrementEnd => Utf8Index.DecrementEnd;
+
+    /// <inheritdoc />
+    public Utf8Index GetDecrementBegin()
+    {
+        var index = new Utf8Index(Buffer.Length, GetRuneCount());
+        return Decrement(ref index);
+    }
 
     /// <inheritdoc />
     public bool IsInRange(Utf8Index index) =>
