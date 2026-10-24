@@ -4,7 +4,7 @@ namespace RunaString.RegularExpressions;
 
 /// <summary></summary>
 [RegexCodeHashAnalyzer(
-    "Text/RegularExpressions/RegexParseException.cs",
+    "System/Text/RegularExpressions/RegexParseException.cs",
     "e65d012583cef731895c1653d46672f1e4559a4dcda774495508ac624aa23e45")]
 public sealed class RegexParseException : ArgumentException
 {

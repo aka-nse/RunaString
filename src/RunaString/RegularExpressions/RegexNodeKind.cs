@@ -1,7 +1,7 @@
 namespace RunaString.RegularExpressions;
 
 [RegexCodeHashAnalyzer(
-    "Text/RegularExpressions/RegexNodeKind.cs",
+    "System/Text/RegularExpressions/RegexNodeKind.cs",
     "fcd7b6d8ca48b1c5f9fe48e79e7f4688d9fafb91ad92f58a42b3ed4e1fbb3b40")]
 internal enum RegexNodeKind : byte
 {

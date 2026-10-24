@@ -3,10 +3,11 @@ using System.Text.RegularExpressions;
 namespace RunaString.RegularExpressions;
 
 [RegexCodeHashAnalyzer(
-    "Text/RegularExpressions/RegexInterpreterCode.cs",
+    "System/Text/RegularExpressions/RegexInterpreterCode.cs",
     "b82513811267fdbfe43c2f91c89199f3d603098268f22fb4867f6d8703bc10f9")]
-internal sealed class RegexInterpreterCode(RegexOptions options, int[] codes, string[] strings, int trackcount)
+internal sealed class RegexInterpreterCode(RegexFindOptimizations findOptimizations, RegexOptions options, int[] codes, string[] strings, int trackcount)
 {
+    public readonly RegexFindOptimizations FindOptimizations = findOptimizations;
     public readonly RegexOptions Options = options;
     public readonly int[] Codes = codes;
     public readonly string[] Strings = strings;

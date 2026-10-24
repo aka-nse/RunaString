@@ -27,11 +27,13 @@ public partial class RegexSourceGenerator : IIncrementalGenerator
                     Inherited = false, AllowMultiple = true)]
                 internal sealed class {{AttributeName}}(
                     string referenceSourceFile,
-                    string[] additionalUsings)
+                    string[]? additionalUsings = null,
+                    string[]? additionalPreprocessorSymbols = null)
                     : Attribute
                 {
                     public string ReferenceSourceFile { get; } = referenceSourceFile;
-                    public string[] AdditionalUsings => [.. additionalUsings];
+                    public string[] AdditionalUsings => [.. additionalUsings ?? []];
+                    public string[] AdditionalPreprocessorSymbols => [.. additionalPreprocessorSymbols ?? []];
                 }
 
                 """);
@@ -60,10 +62,19 @@ public partial class RegexSourceGenerator : IIncrementalGenerator
             {
                 var referenceSourceFile = ad.ConstructorArguments[0].Value?.ToString();
                 var additionalNamespaceUsings = ad.ConstructorArguments[1].Values
+                    .NullToEmpty()
                     .Select(v => v.Value?.ToString())
                     .OfType<string>()
                     .ToImmutableArray();
-                return new MigrationEntry(referenceSourceFile!, additionalNamespaceUsings);
+                var additionalPreprocessorSymbols = ad.ConstructorArguments[2].Values
+                    .NullToEmpty()
+                    .Select(v => v.Value?.ToString())
+                    .OfType<string>()
+                    .ToImmutableArray();
+                return new MigrationEntry(
+                    referenceSourceFile!,
+                    additionalNamespaceUsings,
+                    additionalPreprocessorSymbols);
             });
         return new MigrationInfo([.. attributeData]);
     }
@@ -77,7 +88,10 @@ public partial class RegexSourceGenerator : IIncrementalGenerator
         {
             var usings = entry.AdditionalNamespaceUsings
                 .Select(ns => SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(ns)));
-            var source = GetCompilationUnit(entry.ReferenceSourceFile.AsResourceName())
+            var preprocessorSymbols = string.Concat(entry.AdditionalPreprocessorSymbols.Select(static symbol => $"#define {symbol}\n"));
+            var source =
+                preprocessorSymbols +
+                GetCompilationUnit(entry.ReferenceSourceFile.AsResourceName())
                 .ReplaceNamespace()
                 .AppendPartialKeyword()
                 .WithLeadingTrivia(FileHelpers.NullableDirectiveTrivia)
@@ -100,7 +114,10 @@ public partial class RegexSourceGenerator : IIncrementalGenerator
     }
 
 
-    internal record MigrationEntry(string ReferenceSourceFile, ImmutableArray<string> AdditionalNamespaceUsings);
+    internal record MigrationEntry(
+        string ReferenceSourceFile,
+        ImmutableArray<string> AdditionalNamespaceUsings,
+        ImmutableArray<string> AdditionalPreprocessorSymbols);
 
 
     internal record MigrationInfo(ImmutableArray<MigrationEntry> Entries)
@@ -126,7 +143,15 @@ public partial class RegexSourceGenerator : IIncrementalGenerator
                 {
                     return false;
                 }
-                if (!x.Entries[i].AdditionalNamespaceUsings.SequenceEqual(y.Entries[i].AdditionalNamespaceUsings))
+                if (!Enumerable.SequenceEqual(
+                    x.Entries[i].AdditionalNamespaceUsings,
+                    y.Entries[i].AdditionalNamespaceUsings))
+                {
+                    return false;
+                }
+                if (!Enumerable.SequenceEqual(
+                    x.Entries[i].AdditionalPreprocessorSymbols,
+                    y.Entries[i].AdditionalPreprocessorSymbols))
                 {
                     return false;
                 }
@@ -174,6 +199,10 @@ file static class FileHelpers
                 SyntaxFactory.Token(SyntaxKind.EnableKeyword),
                 isActive: true)
             ));
+
+
+    public static ImmutableArray<T> NullToEmpty<T>(this ImmutableArray<T> source) =>
+        source.IsDefault ? [] : source;
 
 
     public static string AsResourceName(this string filePath)

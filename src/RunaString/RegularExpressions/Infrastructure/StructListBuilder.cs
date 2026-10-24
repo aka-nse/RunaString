@@ -3,8 +3,8 @@ namespace RunaString.RegularExpressions;
 #pragma warning restore IDE0130
 
 [RegexSourceMigration(
-    "Text/StructListBuilder.cs",
+    "System/Text/StructListBuilder.cs",
     ["System", "System.Text"])]
-internal partial struct StructListBuilder
+internal partial struct StructListBuilder<T>
 {
 }

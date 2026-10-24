@@ -2,7 +2,7 @@ namespace RunaString.RegularExpressions;
 
 
 [RegexSourceMigration(
-    "Text/RegularExpressions/RegexNode.cs",
+    "System/Text/RegularExpressions/RegexNode.cs",
     ["System", "System.Text", "System.Text.RegularExpressions"])]
 internal partial class RegexNode
 {

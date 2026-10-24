@@ -5,7 +5,7 @@ namespace RunaString.RegularExpressions;
 #pragma warning restore IDE0130
 
 [RegexCodeHashAnalyzer(
-    "Collections/HashtableExtensions.cs",
+    "System/Collections/HashtableExtensions.cs",
     "85de5d381d32677ffa190a8a1c99210ac2caaac26c5fc70c57a0eb6d893c6e61")]
 internal static class HashtableExtensions
 {

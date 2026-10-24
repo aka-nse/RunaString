@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace RunaString.RegularExpressions;
 
 [RegexCodeHashAnalyzer(
-    "Text/RegularExpressions/RegexTree.cs",
+    "System/Text/RegularExpressions/RegexTree.cs",
     "bd5a9983744a4a34af62d7e3a7c5aefb2deba78e2e7badc2d32074eedf50764e")]
 internal class RegexTree(
     RegexNode root,

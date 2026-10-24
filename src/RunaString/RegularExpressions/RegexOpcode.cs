@@ -1,7 +1,7 @@
 namespace RunaString.RegularExpressions;
 
 [RegexCodeHashAnalyzer(
-    "Text/RegularExpressions/RegexOpcode.cs",
+    "System/Text/RegularExpressions/RegexOpcode.cs",
     "0e4ed011b79dadf925123e17b982d3bfa5e9d89b40d601ec7e5a0ba033c0e60f")]
 internal enum RegexOpcode
 {

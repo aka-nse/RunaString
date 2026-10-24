@@ -4,7 +4,7 @@
 $Owner = "dotnet"
 $Repo = "runtime"
 $Branch = "main"
-$TargetPath = "src/libraries/System.Text.RegularExpressions/src/System"
+$TargetPath = "src/libraries/System.Text.RegularExpressions/src"
 $ResourceRoot = Join-Path -Path $PSScriptRoot -ChildPath "resources"
 
 # Configure PowerShell strict mode and error handling
