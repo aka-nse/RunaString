@@ -172,7 +172,7 @@ public partial class RunaStringTest
         where TIndex : struct, IRunaIndex<TIndex>
     {
         var sb = new StringBuilder();
-        for(TIndex i = TIndex.IncrementBegin, end = input.GetIncrementEnd(); i != end; input.Increment(ref i))
+        for(TIndex i = input.IncrementBegin, end = input.GetIncrementEnd(); i != end; input.Increment(ref i))
         {
             sb.Append(input[i]);
         }
@@ -184,10 +184,10 @@ public partial class RunaStringTest
         where TIndex : struct, IRunaIndex<TIndex>
     {
         var sb = new StringBuilder();
-        for (TIndex i = TIndex.DecrementEnd, end = input.GetDecrementBegin(); i != end; input.Decrement(ref i))
+        for (TIndex i = input.GetDecrementBegin(), end = input.DecrementEnd; i != end; input.Decrement(ref i))
         {
             sb.Append(input[i]);
         }
-        Assert.Equal(new string([.. expected.Reverse()]), sb.ToString());
+        Assert.Equal(string.Concat(expected.EnumerateRunes().Reverse()), sb.ToString());
     }
 }
