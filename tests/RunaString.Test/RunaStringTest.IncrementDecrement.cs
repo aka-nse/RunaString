@@ -137,7 +137,7 @@ public partial class RunaStringTest
 
     private static void IncrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, IRunaIndex<TIndex>
+        where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         Assert.Equal(expected, input.Increment(ref index));
         Assert.Equal(expected, index);
@@ -145,7 +145,7 @@ public partial class RunaStringTest
 
     private static void IncrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, IRunaIndex<TIndex>
+        where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         input.Increment(ref index);
         Assert.False(input.IsInRange(index));
@@ -153,7 +153,7 @@ public partial class RunaStringTest
 
     private static void DecrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, IRunaIndex<TIndex>
+        where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         Assert.Equal(expected, input.Decrement(ref index));
         Assert.Equal(expected, index);
@@ -161,7 +161,7 @@ public partial class RunaStringTest
 
     private static void DecrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, IRunaIndex<TIndex>
+        where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         input.Decrement(ref index);
         Assert.False(input.IsInRange(index));
@@ -169,7 +169,7 @@ public partial class RunaStringTest
 
     private static void WholeIncrementTestCore<TStr, TIndex>(TStr input, TIndex _, string expected)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, IRunaIndex<TIndex>
+        where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         var sb = new StringBuilder();
         for(TIndex i = input.IncrementBegin, end = input.GetIncrementEnd(); i != end; input.Increment(ref i))
@@ -181,7 +181,7 @@ public partial class RunaStringTest
 
     private static void WholeDecrementTestCore<TStr, TIndex>(TStr input, TIndex _, string expected)
         where TStr : IRunaString<TStr, TIndex>, allows ref struct
-        where TIndex : struct, IRunaIndex<TIndex>
+        where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         var sb = new StringBuilder();
         for (TIndex i = input.GetDecrementBegin(), end = input.DecrementEnd; i != end; input.Decrement(ref i))
