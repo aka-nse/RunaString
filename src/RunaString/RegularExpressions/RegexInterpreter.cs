@@ -46,7 +46,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
 
         if (runregex.RightToLeft)
         {
-            while (code.FindOptimizations.TryFindNextStartingPositionRightToLeft(text, ref runtextpos, runtextstart))
+            while (text.IsInRange(runtextpos))
             {
                 CheckTimeout();
 
@@ -61,16 +61,11 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                 runstackpos = runstack.Length;
                 runcrawlpos = runcrawl.Length;
                 text.Decrement(ref runtextpos);
-                if (!text.IsInRange(runtextpos))
-                {
-                    // Iteration has reached the end of the string, no more positions to check.
-                    return;
-                }
             }
         }
         else
         {
-            while (code.FindOptimizations.TryFindNextStartingPositionLeftToRight(text, ref runtextpos, runtextstart))
+            while (text.IsInRange(runtextpos))
             {
                 CheckTimeout();
 
@@ -85,11 +80,6 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                 runstackpos = runstack.Length;
                 runcrawlpos = runcrawl.Length;
                 text.Increment(ref runtextpos);
-                if(!text.IsInRange(runtextpos))
-                {
-                    // Iteration has reached the end of the string, no more positions to check.
-                    return;
-                }
             }
         }
     }

@@ -16,6 +16,7 @@ public partial class RegexSourceGenerator : IIncrementalGenerator
         context.RegisterPostInitializationOutput(static ctx =>
         {
             ctx.AddSource("RegexSourceMigrationAttribute.g.cs", $$"""
+                #nullable enable
                 using System;
                 
                 namespace {{NamespaceName}};
@@ -61,16 +62,8 @@ public partial class RegexSourceGenerator : IIncrementalGenerator
             .Select(static ad =>
             {
                 var referenceSourceFile = ad.ConstructorArguments[0].Value?.ToString();
-                var additionalNamespaceUsings = ad.ConstructorArguments[1].Values
-                    .NullToEmpty()
-                    .Select(v => v.Value?.ToString())
-                    .OfType<string>()
-                    .ToImmutableArray();
-                var additionalPreprocessorSymbols = ad.ConstructorArguments[2].Values
-                    .NullToEmpty()
-                    .Select(v => v.Value?.ToString())
-                    .OfType<string>()
-                    .ToImmutableArray();
+                var additionalNamespaceUsings = ad.ConstructorArguments[1].Values.GetStringArrayArgument();
+                var additionalPreprocessorSymbols = ad.ConstructorArguments[2].Values.GetStringArrayArgument();
                 return new MigrationEntry(
                     referenceSourceFile!,
                     additionalNamespaceUsings,
@@ -91,26 +84,15 @@ public partial class RegexSourceGenerator : IIncrementalGenerator
             var preprocessorSymbols = string.Concat(entry.AdditionalPreprocessorSymbols.Select(static symbol => $"#define {symbol}\n"));
             var source =
                 preprocessorSymbols +
-                GetCompilationUnit(entry.ReferenceSourceFile.AsResourceName())
-                .ReplaceNamespace()
+                InternalHelpers.GetCompilationUnit(entry.ReferenceSourceFile.AsResourceName())
+                .ReplaceNamespace("RunaString.RegularExpressions")
                 .AppendPartialKeyword()
-                .WithLeadingTrivia(FileHelpers.NullableDirectiveTrivia)
+                .WithLeadingTrivia(InternalHelpers.NullableDirectiveTrivia)
                 .AddUsings([.. usings])
                 .NormalizeWhitespace()
                 .ToFullString();
             context.AddSource($"{Path.GetFileNameWithoutExtension(entry.ReferenceSourceFile)}.g.cs", source);
         }
-    }
-
-
-    private static CompilationUnitSyntax GetCompilationUnit(string resourceName)
-    {
-        var assembly = typeof(RegexSourceGenerator).Assembly;
-        using var stream = assembly.GetManifestResourceStream($"{Constant.RegexResourcePrefix}{resourceName}");
-        using var sw = new StreamReader(stream!);
-        return SyntaxFactory.ParseCompilationUnit(
-            sw.ReadToEnd(),
-            options: FileHelpers.Options);
     }
 
 
@@ -182,70 +164,4 @@ public partial class RegexSourceGenerator : IIncrementalGenerator
             return (int)hash;
         }
     }
-}
-
-
-
-file static class FileHelpers
-{
-    public static readonly CSharpParseOptions Options = new(
-        LanguageVersion.CSharp14,
-        preprocessorSymbols: ["DEBUG"]);
-
-
-    public static readonly SyntaxTriviaList NullableDirectiveTrivia = SyntaxFactory.TriviaList(
-        SyntaxFactory.Trivia(
-            SyntaxFactory.NullableDirectiveTrivia(
-                SyntaxFactory.Token(SyntaxKind.EnableKeyword),
-                isActive: true)
-            ));
-
-
-    public static ImmutableArray<T> NullToEmpty<T>(this ImmutableArray<T> source) =>
-        source.IsDefault ? [] : source;
-
-
-    public static string AsResourceName(this string filePath)
-    {
-        return filePath
-            .Replace(Path.DirectorySeparatorChar, '.')
-            .Replace(Path.AltDirectorySeparatorChar, '.');
-    }
-
-
-    public static CompilationUnitSyntax ReplaceNamespace(this CompilationUnitSyntax cu)
-    {
-        var ns = cu
-            .DescendantNodes()
-            .OfType<BaseNamespaceDeclarationSyntax>()
-            .FirstOrDefault();
-        return ns switch
-        {
-            NamespaceDeclarationSyntax xns =>
-                cu.ReplaceNode(xns, xns.WithName(SyntaxFactory.ParseName("RunaString.RegularExpressions"))),
-            FileScopedNamespaceDeclarationSyntax fns =>
-                cu.ReplaceNode(fns, fns.WithName(SyntaxFactory.ParseName("RunaString.RegularExpressions"))),
-            _ => cu,
-        };
-    }
-
-
-    public static CompilationUnitSyntax AppendPartialKeyword(this CompilationUnitSyntax cu)
-    {
-        var targetTypes = cu
-            .DescendantNodes()
-            .OfType<TypeDeclarationSyntax>();
-        return cu.ReplaceNodes(
-            targetTypes,
-            static (_, targetType) =>
-            {
-                if(targetType.Modifiers.Any(SyntaxKind.PartialKeyword))
-                {
-                    return targetType;
-                }
-                return targetType.AddModifiers(_partialToken);
-            });
-    }
-    private static readonly SyntaxToken _partialToken = SyntaxFactory.Token(SyntaxKind.PartialKeyword);
-
 }

@@ -18,7 +18,7 @@ internal class RegexTree(
 {
     public readonly RegexOptions Options = options;
     public readonly RegexNode Root = root;
-    public readonly RegexFindOptimizations FindOptimizations = RegexFindOptimizations.Create(root, options);
+    public readonly object? FindOptimizations = null;  // Placeholder for automatic ingestion via source generators
     public readonly int CaptureCount = captureCount;
     public readonly CultureInfo? Culture = culture;
     public readonly string[]? Capturenames = captureNames;

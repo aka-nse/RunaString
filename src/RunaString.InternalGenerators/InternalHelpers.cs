@@ -1,4 +1,9 @@
+using System.Collections.Immutable;
 using System.Text;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RunaString.InternalGenerators.Regex;
 
 namespace RunaString.InternalGenerators;
 
@@ -54,4 +59,80 @@ internal static class InternalHelpers
             }
         }
     }
+
+
+    public static CompilationUnitSyntax GetCompilationUnit(string resourceName)
+    {
+        var assembly = typeof(RegexSourceGenerator).Assembly;
+        using var stream = assembly.GetManifestResourceStream($"{Constant.RegexResourcePrefix}{resourceName}");
+        using var sw = new StreamReader(stream!);
+        return SyntaxFactory.ParseCompilationUnit(
+            sw.ReadToEnd(),
+            options: _options);
+    }
+    private static readonly CSharpParseOptions _options = new(
+        LanguageVersion.CSharp14,
+        preprocessorSymbols: ["DEBUG"]);
+
+
+    public static CompilationUnitSyntax ReplaceNamespace(this CompilationUnitSyntax cu, string newNamespace)
+    {
+        var ns = cu
+            .DescendantNodes()
+            .OfType<BaseNamespaceDeclarationSyntax>()
+            .FirstOrDefault();
+        return ns switch
+        {
+            NamespaceDeclarationSyntax xns =>
+                cu.ReplaceNode(xns, xns.WithName(SyntaxFactory.ParseName(newNamespace))),
+            FileScopedNamespaceDeclarationSyntax fns =>
+                cu.ReplaceNode(fns, fns.WithName(SyntaxFactory.ParseName(newNamespace))),
+            _ => cu,
+        };
+    }
+    public static readonly SyntaxTriviaList NullableDirectiveTrivia = SyntaxFactory.TriviaList(
+        SyntaxFactory.Trivia(
+            SyntaxFactory.NullableDirectiveTrivia(
+                SyntaxFactory.Token(SyntaxKind.EnableKeyword),
+                isActive: true)
+            ));
+
+
+    public static ImmutableArray<T> NullToEmpty<T>(this ImmutableArray<T> source) =>
+        source.IsDefault ? [] : source;
+
+
+    public static string AsResourceName(this string filePath)
+    {
+        return filePath
+            .Replace(Path.DirectorySeparatorChar, '.')
+            .Replace(Path.AltDirectorySeparatorChar, '.');
+    }
+
+
+    public static CompilationUnitSyntax AppendPartialKeyword(this CompilationUnitSyntax cu)
+    {
+        var targetTypes = cu
+            .DescendantNodes()
+            .OfType<TypeDeclarationSyntax>();
+        return cu.ReplaceNodes(
+            targetTypes,
+            static (_, targetType) =>
+            {
+                if (targetType.Modifiers.Any(SyntaxKind.PartialKeyword))
+                {
+                    return targetType;
+                }
+                return targetType.AddModifiers(_partialToken);
+            });
+    }
+    private static readonly SyntaxToken _partialToken = SyntaxFactory.Token(SyntaxKind.PartialKeyword);
+
+
+    public static ImmutableArray<string> GetStringArrayArgument(this ImmutableArray<TypedConstant> args) =>
+        [.. args
+            .NullToEmpty()
+            .Select(static arg => arg.Value?.ToString())
+            .OfType<string>(),
+        ];
 }
