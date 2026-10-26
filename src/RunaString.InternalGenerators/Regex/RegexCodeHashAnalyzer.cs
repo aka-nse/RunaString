@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Data;
 using System.Security.Cryptography;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -25,7 +24,7 @@ public class RegexCodeHashAnalyzerGenerator : IIncrementalGenerator
                 | AttributeTargets.Struct
                 | AttributeTargets.Interface
                 | AttributeTargets.Enum,
-                Inherited = false, AllowMultiple = false)]
+                Inherited = false, AllowMultiple = true)]
             internal sealed class RegexCodeHashAnalyzerAttribute(string referenceSourceFile, string sha256) : Attribute
             {
                 public string ReferenceSourceFile { get; } = referenceSourceFile;

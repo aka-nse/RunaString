@@ -4,7 +4,7 @@ internal interface IRegexRunnerFactory
 {
     public RegexRunner<TString, TIndex> CreateInstance<TString, TIndex>()
         where TString : IRunaString<TString, TIndex>, allows ref struct
-        where TIndex : struct,IRunaIndex<TIndex>;
+        where TIndex : unmanaged,IRunaIndex<TIndex>;
 }
 
 [RegexCodeHashAnalyzer(
@@ -13,7 +13,7 @@ internal interface IRegexRunnerFactory
     )]
 internal abstract class RegexRunner<TString, TIndex>
         where TString : IRunaString<TString, TIndex>, allows ref struct
-        where TIndex : struct, IRunaIndex<TIndex>
+        where TIndex : unmanaged, IRunaIndex<TIndex>
 {
-    internal abstract void Scan(TString text);
+    public abstract void Scan(TString text);
 }

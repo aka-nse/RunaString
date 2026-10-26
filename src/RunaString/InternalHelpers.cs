@@ -103,7 +103,7 @@ internal static class InternalHelpers
     public static (TIndex start, TIndex end) GetSliceIndex<TString, TEnumerator, TIndex>(TString str, int runeStart, int runeLength)
         where TString : IRunaString<TString, TEnumerator, TIndex>, allows ref struct
         where TEnumerator : IRunaEnumerator<TEnumerator, TIndex>, allows ref struct
-        where TIndex : struct, IRunaIndex
+        where TIndex : unmanaged, IRunaIndex
     {
         var enumerator = str.GetEnumerator();
         for (var i = 0; i < runeStart; i++)
