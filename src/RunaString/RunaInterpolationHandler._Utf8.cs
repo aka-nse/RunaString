@@ -446,7 +446,7 @@ public ref struct RunaUtf8InterpolationHandler(int literalLength, int formattedC
             }
             if (i >= 10)
             {
-                throw new InvalidOperationException($"Failed to format the value of type {typeof(T)} after 10 attempts.");
+                Guard.ThrowInvalidOperation($"Failed to format the value of type {typeof(T)} after 10 attempts.");
             }
             i++;
             ExtendDouble();
