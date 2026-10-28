@@ -312,18 +312,12 @@ file static class FileHelpers
         var enumerator = str.GetEnumerator();
         for (var i = 0; i < runeStart; i++)
         {
-            if (!enumerator.MoveNext())
-            {
-                throw new ArgumentOutOfRangeException(nameof(runeStart));
-            }
+            Guard.ValidArgument(enumerator.MoveNext(), "The runeStart index is out of range.");
         }
         var startCharIndex = enumerator.NextCharIndex;
         for (var i = 0; i < runeLength; i++)
         {
-            if (!enumerator.MoveNext())
-            {
-                throw new ArgumentOutOfRangeException(nameof(runeLength));
-            }
+            Guard.ValidArgument(enumerator.MoveNext(), "The runeLength is out of range.");
         }
         var endCharIndex = enumerator.NextCharIndex;
         return (startCharIndex, endCharIndex - startCharIndex);

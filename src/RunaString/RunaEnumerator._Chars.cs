@@ -119,10 +119,7 @@ file static class Helpers
             return buffer.Length;
         }
         var status = Rune.DecodeFromUtf16(buffer.Slice(charIndex), out _, out var charsConsumed);
-        if (status != OperationStatus.Done)
-        {
-            throw new InvalidOperationException($"Invalid char sequence at char index {charIndex}");
-        }
+        Guard.ValidState(status == OperationStatus.Done, $"Invalid char sequence at char index {charIndex}");
         return charIndex + charsConsumed;
     }
 
@@ -138,10 +135,7 @@ file static class Helpers
             return false;
         }
         var status = Rune.DecodeFromUtf16(buffer.Slice(nextCharIndex), out current, out var charsConsumed);
-        if (status != OperationStatus.Done)
-        {
-            throw new InvalidOperationException($"Invalid char sequence at char index {nextCharIndex}");
-        }
+        Guard.ValidState(status == OperationStatus.Done, $"Invalid char sequence at char index {nextCharIndex}");
         nextCharIndex += charsConsumed;
         ++runeIndex;
         return true;

@@ -80,12 +80,7 @@ internal static class Utf8Helpers
 
     public static void ValidateUtf8(ReadOnlySpan<byte> utf8Buffer)
     {
-        if (!Utf8.IsValid(utf8Buffer))
-        {
-            throw new ArgumentException(
-                "The provided buffer is not a valid UTF-8 sequence.",
-                nameof(utf8Buffer));
-        }
+        Guard.ValidArgument(Utf8.IsValid(utf8Buffer), "The provided buffer is not a valid UTF-8 sequence.");
     }
 
 
@@ -203,11 +198,11 @@ internal static class Utf8Helpers
     {
         if (!TrySkipRunes(utf8Buffer, runeStart, out var byteIndex))
         {
-            throw new ArgumentOutOfRangeException(nameof(runeStart));
+            Guard.ThrowArgumentOutOfRange(nameof(runeStart));
         }
         if (!TrySkipRunes(utf8Buffer[byteIndex..], runeLength, out var byteLength))
         {
-            throw new ArgumentOutOfRangeException(nameof(runeLength));
+            Guard.ThrowArgumentOutOfRange(nameof(runeLength));
         }
         var end = byteIndex + byteLength;
         if (byteLength >= 1 && end < utf8Buffer.Length)
