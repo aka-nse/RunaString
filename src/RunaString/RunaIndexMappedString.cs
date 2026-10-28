@@ -17,11 +17,13 @@ public readonly ref struct RunaIndexMappedString<TString, TIndex>
 {
     private readonly TString _entity;
     private readonly ReadOnlySpan<TIndex> _indexMapping;
+    private readonly int _runeStart;
+    private readonly int _runeLength;
 
     /// <summary>
     /// Gets the number of runes.
     /// </summary>
-    public int Length => _indexMapping.Length;
+    public int Length => _runeLength;
 
     /// <summary>
     /// Gets the rune at the specified logical index.
@@ -32,16 +34,23 @@ public readonly ref struct RunaIndexMappedString<TString, TIndex>
     {
         get
         {
-            Guard.WithIn(runeIndex, _indexMapping.Length);
-            return _entity[_indexMapping[runeIndex]];
+            Guard.WithIn(runeIndex, _runeLength);
+            return _entity[_indexMapping[runeIndex + _runeStart]];
         }
     }
 
 
-    internal RunaIndexMappedString(TString entity, ReadOnlySpan<TIndex> indexMapping)
+    internal RunaIndexMappedString(TString entity, ReadOnlySpan<TIndex> indexMapping, int runeStart, int runeLength)
     {
         _entity = entity;
         _indexMapping = indexMapping;
+        _runeStart = runeStart;
+        _runeLength = runeLength;
+    }
+
+    internal RunaIndexMappedString(TString entity, ReadOnlySpan<TIndex> indexMapping)
+        : this(entity, indexMapping, 0, indexMapping.Length)
+    {
     }
 
     /// <summary>
@@ -56,6 +65,17 @@ public readonly ref struct RunaIndexMappedString<TString, TIndex>
     {
     }
 
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        for (var i = 0; i < _runeLength; ++i)
+        {
+            sb.Append(this[i]);
+        }
+        return sb.ToString();
+    }
+
     /// <summary>
     /// Creates a slice of the current value from the specified rune range.
     /// </summary>
@@ -64,11 +84,9 @@ public readonly ref struct RunaIndexMappedString<TString, TIndex>
     /// <returns>A new <see cref="RunaIndexMappedString{TString, TIndex}"/> representing the specified rune range.</returns>
     public RunaIndexMappedString<TString, TIndex> Slice(int runeStart, int runeLength)
     {
-        Guard.WithIn(runeStart, _indexMapping.Length);
-        Guard.WithIn(runeStart + runeLength, _indexMapping.Length);
-        var start = _indexMapping[runeStart];
-        var end = _indexMapping[runeStart + runeLength];
-        return new RunaIndexMappedString<TString, TIndex>(_entity.Slice(start, end), _indexMapping.Slice(runeStart, runeLength));
+        Guard.WithIn(_runeStart + runeStart, _indexMapping.Length);
+        Guard.WithIn(_runeStart + runeStart + runeLength, _runeLength + 1);
+        return new RunaIndexMappedString<TString, TIndex>(_entity, _indexMapping, _runeStart + runeStart, runeLength);
     }
 
     internal static bool TryGetIndexMapping(TString entity, Span<TIndex> buffer, out int consumed)
@@ -109,6 +127,18 @@ public readonly ref struct RunaIndexMappedString<TString, TIndex>
 /// span-based workflows.</remarks>
 public static class RunaIndexMappedString
 {
+    /// <summary>
+    /// Creates a new mapped string instance from the specified entity.
+    /// </summary>
+    /// <typeparam name="TString">The string entity type that implements IRunaString{TString, TIndex}.</typeparam>
+    /// <typeparam name="TIndex">The unmanaged index type that implements IRunaIndex{TIndex}.</typeparam>
+    /// <param name="entity">The source string entity to map.</param>
+    /// <returns>A new RunaIndexMappedString{TString, TIndex} that wraps the specified entity.</returns>
+    public static RunaIndexMappedString<TString, TIndex> Create<TString, TIndex>(TString entity)
+        where TString : IRunaString<TString, TIndex>
+        where TIndex : unmanaged, IRunaIndex<TIndex> =>
+        new(entity);
+
     /// <summary>
     /// Creates a <see cref="RunaIndexMappedString{TString, TIndex}"/> from the specified string and index buffer when
     /// index mapping can be generated.
