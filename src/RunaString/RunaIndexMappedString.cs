@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -84,7 +82,7 @@ public readonly ref struct RunaIndexMappedString<TString, TIndex>
     /// <returns>A new <see cref="RunaIndexMappedString{TString, TIndex}"/> representing the specified rune range.</returns>
     public RunaIndexMappedString<TString, TIndex> Slice(int runeStart, int runeLength)
     {
-        Guard.WithIn(_runeStart + runeStart, _indexMapping.Length);
+        Guard.WithIn(_runeStart + runeStart, _indexMapping.Length + 1);
         Guard.WithIn(_runeStart + runeStart + runeLength, _runeLength + 1);
         return new RunaIndexMappedString<TString, TIndex>(_entity, _indexMapping, _runeStart + runeStart, runeLength);
     }
