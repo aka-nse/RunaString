@@ -8,15 +8,6 @@
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
     </PropertyGroup>
-
-    <ItemGroup>
-      <None Include="RunaUtf8InterpolationHandlerTest.AutoGen.g.cs">
-        <DesignTime>True</DesignTime>
-        <AutoGen>True</AutoGen>
-        <DependentUpon>RunaUtf8InterpolationHandlerTest.AutoGen.tt</DependentUpon>
-      </None>
-    </ItemGroup>
-
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="10.0.1">
             <PrivateAssets>all</PrivateAssets>
@@ -39,22 +30,23 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="RunaUtf8InterpolationHandlerTest.AutoGen.tt">
-        <Generator>TextTemplatingFileGenerator</Generator>
-        <LastGenOutput>RunaUtf8InterpolationHandlerTest.AutoGen.g.cs</LastGenOutput>
-      </None>
+        <None Remove="TestResults/**/*" />
     </ItemGroup>
 
     <ItemGroup>
-      <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+        <None Update="RunaUtf8InterpolationHandlerTest.AutoGen.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>RunaUtf8InterpolationHandlerTest.AutoGen.g.cs</LastGenOutput>
+        </None>
+        <Compile Update="RunaUtf8InterpolationHandlerTest.AutoGen.g.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>RunaUtf8InterpolationHandlerTest.AutoGen.tt</DependentUpon>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="RunaUtf8InterpolationHandlerTest.AutoGen.g.cs">
-        <DesignTime>True</DesignTime>
-        <AutoGen>True</AutoGen>
-        <DependentUpon>RunaUtf8InterpolationHandlerTest.AutoGen.tt</DependentUpon>
-      </Compile>
+        <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
     </ItemGroup>
 
 </Project>
