@@ -14,14 +14,11 @@ internal static class CharHelpers
             if (char.IsHighSurrogate(span[i]))
             {
                 ++i;
-                if (i >= span.Length || !char.IsLowSurrogate(span[i]))
-                {
-                    throw new ArgumentException("The provided buffer contains an invalid UTF-16 sequence.");
-                }
+                Guard.ValidArgument(i < span.Length && char.IsLowSurrogate(span[i]), "The provided buffer contains an invalid UTF-16 sequence.");
             }
-            else if (char.IsLowSurrogate(span[i]))
+            else
             {
-                throw new ArgumentException("The provided buffer contains an invalid UTF-16 sequence.");
+                Guard.ValidArgument(!char.IsLowSurrogate(span[i]), "The provided buffer contains an invalid UTF-16 sequence.");
             }
         }
     }

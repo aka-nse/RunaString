@@ -107,18 +107,12 @@ internal static class InternalHelpers
         var enumerator = str.GetEnumerator();
         for (var i = 0; i < runeStart; i++)
         {
-            if (!enumerator.MoveNext())
-            {
-                throw new ArgumentOutOfRangeException(nameof(runeStart));
-            }
+            Guard.WithIn(enumerator.MoveNext(), nameof(runeStart));
         }
         var startIndex = enumerator.Index;
         for (var i = 0; i < runeLength; i++)
         {
-            if (!enumerator.MoveNext())
-            {
-                throw new ArgumentOutOfRangeException(nameof(runeLength));
-            }
+            Guard.WithIn(enumerator.MoveNext(), nameof(runeLength));
         }
         var endIndex = enumerator.Index;
         return (startIndex, endIndex);

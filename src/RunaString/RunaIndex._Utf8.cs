@@ -83,7 +83,7 @@ public readonly struct Utf8Index : IRunaIndex<Utf8Index>
         {
             (true, true) => -1,
             (false, false) => +1,
-            _ => throw new ArgumentException($"Inconsistent source hash codes: x and y may be from different source strings."),
+            _ => Guard.ThrowArgument<int>($"Inconsistent source hash codes: x and y may be from different source strings."),
         };
     }
 

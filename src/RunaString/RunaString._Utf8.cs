@@ -110,10 +110,7 @@ public readonly partial struct Utf8String
     {
         var byteStart = start.ByteIndex;
         var byteLength = end.ByteIndex - start.ByteIndex;
-        if (byteStart < 0 || (uint)(byteStart + byteLength) > (uint)Buffer.Length)
-        {
-            throw new ArgumentOutOfRangeException(nameof(start));
-        }
+        Guard.WithIn(byteStart >= 0 && (uint)(byteStart + byteLength) <= (uint)Buffer.Length, nameof(start), "The specified range is out of bounds.");
         return new(Buffer.Slice(byteStart, byteLength));
     }
 
@@ -281,10 +278,7 @@ public readonly ref partial struct Utf8SpanString
     {
         var byteStart = start.ByteIndex;
         var byteLength = end.ByteIndex - start.ByteIndex;
-        if (byteStart < 0 || (uint)(byteStart + byteLength) > (uint)_length)
-        {
-            throw new ArgumentOutOfRangeException(nameof(start));
-        }
+        Guard.WithIn(byteStart >= 0 && (uint)(byteStart + byteLength) <= (uint)_length, nameof(start), "The specified range is out of bounds.");
         return DangerousFromSpan(Buffer.Slice(byteStart, byteLength));
     }
 
