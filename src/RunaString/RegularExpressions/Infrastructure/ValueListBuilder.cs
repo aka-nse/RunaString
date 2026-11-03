@@ -67,11 +67,14 @@ internal ref struct ValueListBuilder<T>
         capacity = (int)BitOperations.RoundUpToPowerOf2((uint)capacity);
         var array = ArrayPool<T>.Shared.Rent(capacity);
         _span[0.._pos].CopyTo(array);
-        (_arrayToReturnToPool, array) = (array, _arrayToReturnToPool);
+
+        var previousArray = _arrayToReturnToPool;
+        _arrayToReturnToPool = array;
         _span = array;
-        if (array is not null)
+
+        if (previousArray is not null)
         {
-            ArrayPool<T>.Shared.Return(array);
+            ArrayPool<T>.Shared.Return(previousArray);
         }
     }
 

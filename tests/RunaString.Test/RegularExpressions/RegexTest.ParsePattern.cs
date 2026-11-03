@@ -1,7 +1,9 @@
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using RunaString.RegularExpressions;
 
@@ -176,93 +178,337 @@ public class RegexTest
             pattern,
             options,
             cultureInfo,
-            out var expectedOptions,
-            out var expectedCodes,
-            out var expectedStrings,
-            out var expectedStringsAsciiLookup,
-            out var expectedTrackCount);
+            out var expectedTree,
+            out var expectedCode);
 
-        Assert.Equal(expectedOptions, actualCode.Options);
-        Assert.Equal(expectedCodes, actualCode.Codes);
-        Assert.Equal(expectedStrings, actualCode.Strings);
-        Assert.Equal(
-                expectedStringsAsciiLookup,
-                actualCode.StringsAsciiLookup,
-                static (x, y) => (x, y) switch
-                {
-                    (null, null) => true,
-                    (null, _) => false,
-                    (_, null) => false,
-                    _ => Enumerable.SequenceEqual(x, y),
-                }
-            );
-        Assert.Equal(expectedTrackCount, actualCode.TrackCount);
+        Assert.True(Helpers.RegexTreeAccessor.Equals(expectedTree, actualTree));
+        Assert.True(Helpers.RegexInterpreterCodeAccessor.Equals(expectedCode, actualCode));
     }
 }
 
 
 file static class Helpers
 {
-    private static readonly Func<string, RegexOptions, CultureInfo?, object/*RegexInterpreterCode*/> _compileRegexPattern;
-    private static readonly FieldInfo _field_RegexInterpreterCode_Options;
-    private static readonly FieldInfo _field_RegexInterpreterCode_Codes;
-    private static readonly FieldInfo _field_RegexInterpreterCode_Strings;
-    private static readonly FieldInfo _field_RegexInterpreterCode_StringsAsciiLookup;
-    private static readonly FieldInfo _field_RegexInterpreterCode_TrackCount;
+    private const BindingFlags staticMemberFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+    private const BindingFlags instanceMemberFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+    private const string ns = "System.Text.RegularExpressions";
 
+    private static readonly Assembly Assembly = typeof(Regex).Assembly;
+
+    private static readonly Func<string, RegexOptions, CultureInfo?, object/*RegexTree*/> _RegexParser_Parse;
+    private static readonly Func<object/*RegexTree*/, object/*RegexInterpreterCode*/> _RegexWriter_Write;
+    
+#pragma warning disable format
+
+    public class RegexTreeAccessor(object instance)
+    {
+        private static readonly FieldInfo _field_Options;
+        private static readonly FieldInfo _field_Root;
+        private static readonly FieldInfo _field_CaptureCount;
+        private static readonly FieldInfo _field_Culture;
+        private static readonly FieldInfo _field_CaptureNames;
+        private static readonly FieldInfo _field_CaptureNameToNumberMapping;
+        private static readonly FieldInfo _field_CaptureNumberSparseMapping;
+
+        static RegexTreeAccessor()
+        {
+            var type_RegexTree = Assembly.GetType($"{ns}.RegexTree", throwOnError: true)!;
+            _field_Options                    = type_RegexTree.GetField("Options"                   , instanceMemberFlags)!;
+            _field_Root                       = type_RegexTree.GetField("Root"                      , instanceMemberFlags)!;
+            _field_CaptureCount               = type_RegexTree.GetField("CaptureCount"              , instanceMemberFlags)!;
+            _field_Culture                    = type_RegexTree.GetField("Culture"                   , instanceMemberFlags)!;
+            _field_CaptureNames               = type_RegexTree.GetField("CaptureNames"              , instanceMemberFlags)!;
+            _field_CaptureNameToNumberMapping = type_RegexTree.GetField("CaptureNameToNumberMapping", instanceMemberFlags)!;
+            _field_CaptureNumberSparseMapping = type_RegexTree.GetField("CaptureNumberSparseMapping", instanceMemberFlags)!;
+        }
+
+        public object Instance => instance;
+
+        public RegexOptions Options => (RegexOptions)_field_Options.GetValue(instance)!;
+
+        public RegexNodeAccessor Root => new (_field_Root.GetValue(instance)!);
+
+        public int CaptureCount => (int)_field_CaptureCount.GetValue(instance)!;
+
+        public CultureInfo? Culture => (CultureInfo?)_field_Culture.GetValue(instance);
+
+        public string[]? CaptureNames => (string[]?)_field_CaptureNames.GetValue(instance);
+
+        public Hashtable? CaptureNameToNumberMapping => (Hashtable?)_field_CaptureNameToNumberMapping.GetValue(instance);
+
+        public Hashtable? CaptureNumberSparseMapping => (Hashtable?)_field_CaptureNumberSparseMapping.GetValue(instance);
+
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            ToString(Root, sb, "");
+            return sb.ToString();
+        }
+
+
+        private static void ToString(RegexNodeAccessor node, StringBuilder sb, string indent)
+        {
+            sb.Append(indent);
+            sb.Append(node.Kind);
+            switch (node.Kind)
+            {
+            case RegexNodeKind.Set:
+                sb.Append(' ');
+                sb.Append(node.Str!);
+                break;
+            case RegexNodeKind.Multi:
+                sb.Append(' ');
+                sb.Append(node.Str!);
+                break;
+            case RegexNodeKind.One:
+                sb.Append(' ');
+                sb.Append(node.Ch);
+                break;
+            case RegexNodeKind.Notone:
+                sb.Append(' ');
+                sb.Append(node.Ch);
+                break;
+            case RegexNodeKind.Capture:
+            case RegexNodeKind.Backreference:
+                sb.Append(' ');
+                sb.Append(node.M);
+                break;
+            default:
+                break;
+            }
+            indent = indent + "  ";
+            foreach (var child in node.Children)
+            {
+                sb.AppendLine();
+                ToString(child, sb, indent);
+            }
+        }
+
+        public static bool Equals(RegexTreeAccessor? accessor, RegexTree? other)
+        {
+            switch((accessor, other))
+            {
+            case (null, null):
+                return true;
+            case (null, _):
+            case (_, null):
+                return false;
+            default:
+                break;
+            }
+            if (accessor.Options != other.Options) { return false; }
+            if (accessor.CaptureCount != other.CaptureCount) { return false; }
+            if (accessor.Culture != other.Culture) { return false; }
+            if (!Enumerable.SequenceEqual(accessor.CaptureNames ?? [], other.CaptureNames ?? [])) { return false; }
+            if(!Equals(accessor.CaptureNameToNumberMapping, other.CaptureNameToNumberMapping)) { return false; }
+            if(!Equals(accessor.CaptureNumberSparseMapping, other.CaptureNumberSparseMapping)) { return false; }
+
+            return true;
+        }
+
+        private static bool Equals<TKey, TValue>(Hashtable? x, IReadOnlyDictionary<TKey, TValue>? y)
+        {
+            switch((x, y))
+            {
+            case (null, null): return true;
+            case (null, _): return false;
+            case (_, null): return false;
+            default:
+                break;
+            }
+            if(x.Count != y.Count) { return false; }
+            foreach(var (key, value) in y)
+            {
+                if (!x.ContainsKey(key!)) { return false; }
+                if (!Equals(x[key!], value)) { return false; }
+            }
+            return true;
+        }
+    }
+
+
+    public class RegexNodeAccessor(object instance)
+    {
+        private static readonly FieldInfo _field_Children;
+        private static readonly FieldInfo _field_Options;
+        private static readonly PropertyInfo _property_Kind;
+        private static readonly PropertyInfo _property_Str;
+        private static readonly PropertyInfo _property_Ch;
+        private static readonly PropertyInfo _property_M;
+        private static readonly PropertyInfo _property_N;
+
+        static RegexNodeAccessor()
+        {
+            var type_RegexNode = Assembly.GetType($"{ns}.RegexNode", throwOnError: true)!;
+            _field_Children = type_RegexNode.GetField("Children", instanceMemberFlags)!;
+            _field_Options  = type_RegexNode.GetField("Options" , instanceMemberFlags)!;
+            _property_Kind = type_RegexNode.GetProperty("Kind", instanceMemberFlags)!;
+            _property_Str  = type_RegexNode.GetProperty("Str" , instanceMemberFlags)!;
+            _property_Ch   = type_RegexNode.GetProperty("Ch"  , instanceMemberFlags)!;
+            _property_M    = type_RegexNode.GetProperty("M"   , instanceMemberFlags)!;
+            _property_N    = type_RegexNode.GetProperty("N"   , instanceMemberFlags)!;
+        }
+
+        public object Instance => instance;
+
+        public IEnumerable<RegexNodeAccessor> Children
+        {
+            get
+            {
+                var children = _field_Children.GetValue(instance)!;
+                return children switch
+                {
+                    IList list => list.Cast<object>().Select(child => new RegexNodeAccessor(child)),
+                    object obj => [new RegexNodeAccessor(obj)],
+                    null => [],
+                };
+            }
+        }
+
+        public RegexOptions Options => (RegexOptions)_field_Options.GetValue(instance)!;
+
+        public RegexNodeKind Kind => (RegexNodeKind)Convert.ToInt32(_property_Kind.GetValue(instance)!);
+
+        public string? Str => (string?)_property_Str.GetValue(instance);
+
+        public char Ch => (char)_property_Ch.GetValue(instance)!;
+
+        public int M => (int)_property_M.GetValue(instance)!;
+
+        public int N => (int)_property_N.GetValue(instance)!;
+
+        public static bool Equals(RegexNodeAccessor? accessor, RegexNode? other)
+        {
+            switch ((accessor, other))
+            {
+            case (null, null):
+                return true;
+            case (null, _):
+            case (_, null):
+                return false;
+            default:
+                break;
+            }
+            if (accessor.Kind != other.Kind) { return false; }
+            if (accessor.Str != other.Str) { return false; }
+            if (accessor.Ch != other.Ch) { return false; }
+            if (accessor.M != other.M) { return false; }
+            if (accessor.N != other.N) { return false; }
+            if (accessor.Options != other.Options) { return false; }
+            var children = accessor.Children.ToArray();
+            if(children.Length != other.ChildCount()) { return false; }
+            for (int i = 0; i < children.Length; i++)
+            {
+                var accessorChild = children[i];
+                var otherChild = other.Child(i);
+                if (!Equals(accessorChild, otherChild)) { return false; }
+            }
+            return true;
+        }
+    }
+
+
+    public class RegexInterpreterCodeAccessor(object instance)
+    {
+        private static readonly FieldInfo _field_Options;
+        private static readonly FieldInfo _field_Codes;
+        private static readonly FieldInfo _field_Strings;
+        private static readonly FieldInfo _field_StringsAsciiLookup;
+        private static readonly FieldInfo _field_TrackCount;
+        static RegexInterpreterCodeAccessor()
+        {
+            var type_RegexInterpreterCode = Assembly.GetType($"{ns}.RegexInterpreterCode", throwOnError: true)!;
+            _field_Options = type_RegexInterpreterCode.GetField("Options", instanceMemberFlags)!;
+            _field_Codes = type_RegexInterpreterCode.GetField("Codes", instanceMemberFlags)!;
+            _field_Strings = type_RegexInterpreterCode.GetField("Strings", instanceMemberFlags)!;
+            _field_StringsAsciiLookup = type_RegexInterpreterCode.GetField("StringsAsciiLookup", instanceMemberFlags)!;
+            _field_TrackCount = type_RegexInterpreterCode.GetField("TrackCount", instanceMemberFlags)!;
+        }
+
+        public object Instance => instance;
+
+        public RegexOptions Options => (RegexOptions)_field_Options.GetValue(instance)!;
+
+        public int[] Codes => (int[])_field_Codes.GetValue(instance)!;
+
+        public string[] Strings => (string[])_field_Strings.GetValue(instance)!;
+
+        public uint[]?[] StringsAsciiLookup => (uint[]?[])_field_StringsAsciiLookup.GetValue(instance)!;
+
+        public int TrackCount => (int)_field_TrackCount.GetValue(instance)!;
+
+        public static bool Equals(RegexInterpreterCodeAccessor? accessor, RegexInterpreterCode? other)
+        {
+            switch((accessor, other))
+            {
+            case (null, null):
+                return true;
+            case (null, _):
+            case (_, null):
+                return false;
+            default:
+                break;
+            }
+            if(accessor.Options != other.Options) { return false; }
+            if (!Enumerable.SequenceEqual(accessor.Codes, other.Codes)) { return false; }
+            if (!Enumerable.SequenceEqual(accessor.Strings, other.Strings)) { return false; }
+            if(accessor.TrackCount != other.TrackCount) { return false; }
+            return Enumerable.Zip(
+                accessor.StringsAsciiLookup,
+                other.StringsAsciiLookup,
+                static (x, y) => (x, y) switch
+                {
+                    (null, null) => true,
+                    (null, _) => false,
+                    (_, null) => false,
+                    _ => Enumerable.SequenceEqual(x, y),
+                })
+                .All(static x => x);
+        }
+    }
+
+#pragma warning restore format
+    
     static Helpers()
     {
-        const BindingFlags staticMemberFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-        const BindingFlags instanceMemberFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-        const string ns = "System.Text.RegularExpressions";
         var assm = typeof(Regex).Assembly;
         var type_RegexTree = assm.GetType($"{ns}.RegexTree", throwOnError: true)!;
+        var type_RegexNode = assm.GetType($"{ns}.RegexNode", throwOnError: true)!;
         var type_RegexParser = assm.GetType($"{ns}.RegexParser", throwOnError: true)!;
         var type_RegexWriter = assm.GetType($"{ns}.RegexWriter", throwOnError: true)!;
         var type_RegexInterpreterCode = assm.GetType($"{ns}.RegexInterpreterCode", throwOnError: true)!;
 
         var method_RegexParser_Parse = type_RegexParser
             .GetMethod("Parse", staticMemberFlags, null, [typeof(string), typeof(RegexOptions), typeof(CultureInfo)], null)!;
-        var method_RegexWriter_Write = type_RegexWriter
-            .GetMethod("Write", staticMemberFlags, null, [type_RegexTree], null)!;
-
         {
             var arg0Expr = Expression.Parameter(typeof(string), "pattern");
             var arg1Expr = Expression.Parameter(typeof(RegexOptions), "options");
             var arg2Expr = Expression.Parameter(typeof(CultureInfo), "culture");
             var callParseExpr = Expression.Call(method_RegexParser_Parse, [arg0Expr, arg1Expr, arg2Expr]);
-            var callWriteExpr = Expression.Call(method_RegexWriter_Write, callParseExpr);
-            var lambdaExpr = Expression.Lambda<Func<string, RegexOptions, CultureInfo?, object>>(callWriteExpr, [arg0Expr, arg1Expr, arg2Expr]);
-            _compileRegexPattern = lambdaExpr.Compile();
+            var lambdaExpr = Expression.Lambda<Func<string, RegexOptions, CultureInfo?, object>>(callParseExpr, [arg0Expr, arg1Expr, arg2Expr]);
+            _RegexParser_Parse = lambdaExpr.Compile();
         }
 
-        _field_RegexInterpreterCode_Options = type_RegexInterpreterCode
-            .GetField("Options", instanceMemberFlags)!;
-        _field_RegexInterpreterCode_Codes = type_RegexInterpreterCode
-            .GetField("Codes", instanceMemberFlags)!;
-        _field_RegexInterpreterCode_Strings = type_RegexInterpreterCode
-            .GetField("Strings", instanceMemberFlags)!;
-        _field_RegexInterpreterCode_StringsAsciiLookup = type_RegexInterpreterCode
-            .GetField("StringsAsciiLookup", instanceMemberFlags)!;
-        _field_RegexInterpreterCode_TrackCount = type_RegexInterpreterCode
-            .GetField("TrackCount", instanceMemberFlags)!;
+        var method_RegexWriter_Write = type_RegexWriter
+            .GetMethod("Write", staticMemberFlags, null, [type_RegexTree], null)!;
+        {
+            var arg0Expr = Expression.Parameter(typeof(object), "typeErasuredTree");
+            var typedArg0Expr = Expression.Convert(arg0Expr, type_RegexTree);
+            var callWriteExpr = Expression.Call(method_RegexWriter_Write, [typedArg0Expr]);
+            var lambdaExpr = Expression.Lambda<Func<object, object>>(callWriteExpr, [arg0Expr]);
+            _RegexWriter_Write = lambdaExpr.Compile();
+        }
     }
 
     public static void GetExpectedInterpreterCode(
         string pattern,
         RegexOptions options,
         CultureInfo culture,
-        out RegexOptions expectedOptions,
-        out int[] expectedCodes,
-        out string[] expectedStrings,
-        out uint[]?[] expectedStringsAsciiLookup,
-        out int expectedTrackCount)
+        out RegexTreeAccessor tree,
+        out RegexInterpreterCodeAccessor code)
     {
-        var code = _compileRegexPattern(pattern, options, culture)!;
-        expectedOptions = (RegexOptions)_field_RegexInterpreterCode_Options.GetValue(code)!;
-        expectedCodes = (int[])_field_RegexInterpreterCode_Codes.GetValue(code)!;
-        expectedStrings = (string[])_field_RegexInterpreterCode_Strings.GetValue(code)!;
-        expectedStringsAsciiLookup = (uint[]?[])_field_RegexInterpreterCode_StringsAsciiLookup.GetValue(code)!;
-        expectedTrackCount = (int)_field_RegexInterpreterCode_TrackCount.GetValue(code)!;
+        tree = new(_RegexParser_Parse(pattern, options, culture)!);
+        code = new(_RegexWriter_Write(tree.Instance)!);
     }
 }

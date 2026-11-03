@@ -3,7 +3,7 @@
 # Script constant values
 $Owner = "dotnet"
 $Repo = "runtime"
-$Branch = "main"
+$Branch = "v10.0.14"
 $TargetPath = "src/libraries/System.Text.RegularExpressions/src"
 $ResourceRoot = Join-Path -Path $PSScriptRoot -ChildPath "resources"
 
