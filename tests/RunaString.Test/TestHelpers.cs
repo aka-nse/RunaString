@@ -6,6 +6,8 @@ namespace RunaString.Test;
 
 internal static class TestHelpers
 {
+    public const string PatternGuaranteedNotToBeContainedWithInCommonTestStrings = "♪";
+
     public static readonly ImmutableArray<string> CommonTestStrings = [
             "",
             "Hello, world!",
