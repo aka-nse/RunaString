@@ -86,11 +86,22 @@ public readonly partial struct CharsString
     public static CharsString DangerousFromChars(ReadOnlyMemory<char> source) => new(source);
 
     /// <inheritdoc />
+    public CharsString Slice(int runeStart)
+    {
+        var index = GetIndexByRuneIndex(runeStart);
+        return new(Source.Slice(index.CharIndex));
+    }
+
+    /// <inheritdoc />
     public CharsString Slice(int runeStart, int runeLength)
     {
         var (charIndex, charLength) = FileHelpers.GetSliceIndex(this, runeStart, runeLength);
         return new(Source.Slice(charIndex, charLength));
     }
+
+    /// <inheritdoc />
+    public CharsString Slice(CharsIndex start) =>
+        new(Source.Slice(start.CharIndex));
 
     /// <inheritdoc />
     public CharsString Slice(CharsIndex start, CharsIndex end) =>
@@ -125,6 +136,19 @@ public readonly partial struct CharsString
     }
 
     /// <inheritdoc />
+    public CharsIndex GetIndexByRuneIndex(int runeIndex)
+    {
+        for (CharsIndex i = IncrementBegin, end = GetIncrementEnd(); i != end; Increment(ref i))
+        {
+            if (i.RuneIndex == runeIndex)
+            {
+                return i;
+            }
+        }
+        return Guard.ThrowArgument<CharsIndex>(nameof(runeIndex), "The specified rune index is out of range.");
+    }
+
+    /// <inheritdoc />
     public bool IsInRange(CharsIndex index) =>
         FileHelpers.IsInRange(Source.Span, index);
 
@@ -134,6 +158,14 @@ public readonly partial struct CharsString
 
     /// <inheritdoc />
     public int GetRuneCount() => CharHelpers.GetRuneCount(Source.Span);
+
+    /// <inheritdoc />
+    public bool StartsWith(CharsString pattern) =>
+        MemoryExtensions.StartsWith(Source.Span, pattern.Source.Span);
+
+    /// <inheritdoc />
+    public bool EndsWith(CharsString pattern) =>
+        MemoryExtensions.EndsWith(Source.Span, pattern.Source.Span);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) =>
@@ -216,6 +248,12 @@ public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString
     /// </remarks>
     public static CharsSpanString DangerousFromChars(ReadOnlySpan<char> source) => new(source);
 
+    /// <inheritdoc />
+    public CharsSpanString Slice(int runeStart)
+    {
+        var index = GetIndexByRuneIndex(runeStart);
+        return new(Source.Slice(index.CharIndex));
+    }
 
     /// <inheritdoc />
     public CharsSpanString Slice(int runeStart, int runeLength)
@@ -223,6 +261,10 @@ public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString
         var (charIndex, charLength) = FileHelpers.GetSliceIndex(this, runeStart, runeLength);
         return new(Source.Slice(charIndex, charLength));
     }
+
+    /// <inheritdoc />
+    public CharsSpanString Slice(CharsIndex start) =>
+        new(Source.Slice(start.CharIndex));
 
     /// <inheritdoc />
     public CharsSpanString Slice(CharsIndex start, CharsIndex end) =>
@@ -257,6 +299,19 @@ public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString
     }
 
     /// <inheritdoc />
+    public CharsIndex GetIndexByRuneIndex(int runeIndex)
+    {
+        for (CharsIndex i = IncrementBegin, end = GetIncrementEnd(); i != end; Increment(ref i))
+        {
+            if (i.RuneIndex == runeIndex)
+            {
+                return i;
+            }
+        }
+        return Guard.ThrowArgument<CharsIndex>(nameof(runeIndex), "The specified rune index is out of range.");
+    }
+
+    /// <inheritdoc />
     public bool IsInRange(CharsIndex index) =>
         FileHelpers.IsInRange(Source, index);
 
@@ -266,6 +321,14 @@ public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString
 
     /// <inheritdoc />
     public int GetRuneCount() => CharHelpers.GetRuneCount(Source);
+
+    /// <inheritdoc />
+    public bool StartsWith(CharsSpanString pattern) =>
+        MemoryExtensions.StartsWith(Source, pattern.Source);
+
+    /// <inheritdoc />
+    public bool EndsWith(CharsSpanString pattern) =>
+        MemoryExtensions.EndsWith(Source, pattern.Source);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) => false;

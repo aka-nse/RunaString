@@ -99,10 +99,25 @@ public readonly partial struct Utf8String
         new (utf8Buffer);
 
     /// <inheritdoc />
+    public Utf8String Slice(int runeStart)
+    {
+        var index = GetIndexByRuneIndex(runeStart);
+        return new(Buffer.Slice(index.ByteIndex));
+    }
+
+    /// <inheritdoc />
     public Utf8String Slice(int runeStart, int runeLength)
     {
         var (byteIndex, byteLength) = Utf8Helpers.GetSliceIndex(Buffer.Span, runeStart, runeLength);
         return new(Buffer.Slice(byteIndex, byteLength));
+    }
+
+    /// <inheritdoc />
+    public Utf8String Slice(Utf8Index start)
+    {
+        var byteStart = start.ByteIndex;
+        Guard.WithIn((uint)(byteStart) <= (uint)Buffer.Length, nameof(start), "The specified range is out of bounds.");
+        return new(Buffer.Slice(byteStart));
     }
 
     /// <inheritdoc />
@@ -143,6 +158,19 @@ public readonly partial struct Utf8String
     }
 
     /// <inheritdoc />
+    public Utf8Index GetIndexByRuneIndex(int runeIndex)
+    {
+        for(Utf8Index i = IncrementBegin, end = GetIncrementEnd(); i != end; Increment(ref i))
+        {
+            if (i.RuneIndex == runeIndex)
+            {
+                return i;
+            }
+        }
+        return Guard.ThrowArgument<Utf8Index>(nameof(runeIndex), "The specified rune index is out of range.");
+    }
+
+    /// <inheritdoc />
     public bool IsInRange(Utf8Index index) =>
         FileHelpers.IsInRange(Buffer.Span, index);
 
@@ -151,6 +179,14 @@ public readonly partial struct Utf8String
 
     /// <inheritdoc />
     public int GetRuneCount() => Utf8Helpers.GetRuneCount(Buffer.Span);
+
+    /// <inheritdoc />
+    public bool StartsWith(Utf8String pattern) =>
+        MemoryExtensions.StartsWith(Buffer.Span, pattern.Buffer.Span);
+
+    /// <inheritdoc />
+    public bool EndsWith(Utf8String pattern) =>
+        MemoryExtensions.EndsWith(Buffer.Span, pattern.Buffer.Span);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) =>
@@ -267,10 +303,25 @@ public readonly ref partial struct Utf8SpanString
         new(in MemoryMarshal.GetReference(utf8Buffer), utf8Buffer.Length);
 
     /// <inheritdoc />
+    public Utf8SpanString Slice(int runeStart)
+    {
+        var index = GetIndexByRuneIndex(runeStart);
+        return DangerousFromSpan(Buffer.Slice(index.ByteIndex));
+    }
+
+    /// <inheritdoc />
     public Utf8SpanString Slice(int runeStart, int runeLength)
     {
         var (byteIndex, byteLength) = Utf8Helpers.GetSliceIndex(Buffer, runeStart, runeLength);
         return DangerousFromSpan(Buffer.Slice(byteIndex, byteLength));
+    }
+
+    /// <inheritdoc />
+    public Utf8SpanString Slice(Utf8Index start)
+    {
+        var byteStart = start.ByteIndex;
+        Guard.WithIn((uint)(byteStart) <= (uint)Buffer.Length, nameof(start), "The specified range is out of bounds.");
+        return DangerousFromSpan(Buffer.Slice(byteStart));
     }
 
     /// <inheritdoc />
@@ -311,6 +362,19 @@ public readonly ref partial struct Utf8SpanString
     }
 
     /// <inheritdoc />
+    public Utf8Index GetIndexByRuneIndex(int runeIndex)
+    {
+        for (Utf8Index i = IncrementBegin, end = GetIncrementEnd(); i != end; Increment(ref i))
+        {
+            if (i.RuneIndex == runeIndex)
+            {
+                return i;
+            }
+        }
+        return Guard.ThrowArgument<Utf8Index>(nameof(runeIndex), "The specified rune index is out of range.");
+    }
+
+    /// <inheritdoc />
     public bool IsInRange(Utf8Index index) =>
         FileHelpers.IsInRange(Buffer, index);
 
@@ -319,6 +383,14 @@ public readonly ref partial struct Utf8SpanString
 
     /// <inheritdoc />
     public int GetRuneCount() => Utf8Helpers.GetRuneCount(Buffer);
+
+    /// <inheritdoc />
+    public bool StartsWith(Utf8SpanString pattern) =>
+        MemoryExtensions.StartsWith(Buffer, pattern.Buffer);
+
+    /// <inheritdoc />
+    public bool EndsWith(Utf8SpanString pattern) =>
+        MemoryExtensions.EndsWith(Buffer, pattern.Buffer);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) => false;
