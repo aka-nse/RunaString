@@ -40,10 +40,30 @@ public interface IRunaString<TSelf, TIndex>
     /// Returns a new <typeparamref name="TSelf" /> that is a slice of the current string, starting at the specified rune index and with the specified rune length.
     /// </summary>
     /// <param name="runeStart"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public TSelf Slice(int runeStart);
+
+    /// <summary>
+    /// Returns a new <typeparamref name="TSelf" /> that is a slice of the current string, starting at the specified rune index and with the specified rune length.
+    /// </summary>
+    /// <param name="runeStart"></param>
     /// <param name="runeLength"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     public TSelf Slice(int runeStart, int runeLength);
+
+    /// <summary>
+    /// Creates a new enumerator that iterates over the runes in the specified range of the source.
+    /// </summary>
+    /// <param name="start"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException">
+    /// <para>Cannot slice between enumerators with different source buffers;</para>
+    /// <para>- or -</para>
+    /// <para>Start enumerator must be at an earlier position than end enumerator.</para>
+    /// </exception>
+    public TSelf Slice(TIndex start);
 
     /// <summary>
     /// Creates a new enumerator that iterates over the runes in the specified range of the source.
@@ -158,6 +178,14 @@ public interface IRunaString<TSelf, TIndex>
     public TIndex GetDecrementBegin();
 
     /// <summary>
+    /// Gets the index value that corresponds to the specified rune index.
+    /// </summary>
+    /// <param name="runeIndex">The zero-based index of the rune to locate.</param>
+    /// <returns>A value of type <c>TIndex</c> representing the index at the specified rune position.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the specified rune index is out of range.</exception>
+    public TIndex GetIndexByRuneIndex(int runeIndex);
+
+    /// <summary>
     /// Determines whether the specified index is within the valid range of the source buffer.
     /// </summary>
     /// <param name="index">The index to check.</param>
@@ -172,6 +200,22 @@ public interface IRunaString<TSelf, TIndex>
     /// </summary>
     /// <returns></returns>
     public int GetRuneCount();
+
+    /// <summary>
+    /// Determines whether the current value starts with the specified pattern using ordinal comparison.
+    /// </summary>
+    /// <param name="pattern">The pattern to compare with the beginning of the current value.</param>
+    /// <returns><see langword="true"/> if the current value starts with <paramref name="pattern"/>; otherwise, <see
+    /// langword="false"/>.</returns>
+    public bool StartsWith(TSelf pattern);
+
+    /// <summary>
+    /// Determines whether the current value ends with the specified pattern using ordinal comparison.
+    /// </summary>
+    /// <param name="pattern">The pattern to compare with the end of the current value.</param>
+    /// <returns><see langword="true"/> if the current value ends with <paramref name="pattern"/>; otherwise, <see
+    /// langword="false"/>.</returns>
+    public bool EndsWith(TSelf pattern);
 
     /// <summary>
     /// Determines whether two <see cref="Utf8SpanString" />  instances are equal by comparing their UTF-8 encoded byte sequences for equality.

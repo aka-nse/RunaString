@@ -45,8 +45,16 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
     public ReadOnlyMemory<Rune> Source { get; } = source;
 
     /// <inheritdoc />
+    public RunesString Slice(int runeStart) =>
+        new(Source.Slice(runeStart));
+
+    /// <inheritdoc />
     public RunesString Slice(int runeStart, int runeLength) =>
         new(Source.Slice(runeStart, runeLength));
+
+    /// <inheritdoc />
+    public RunesString Slice(RunesIndex start) =>
+        new(Source.Slice(start.RuneIndex));
 
     /// <inheritdoc />
     public RunesString Slice(RunesIndex start, RunesIndex end) =>
@@ -77,6 +85,9 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
     public RunesIndex GetDecrementBegin() => new(Source.Length - 1);
 
     /// <inheritdoc />
+    public RunesIndex GetIndexByRuneIndex(int runeIndex) => new(runeIndex);
+
+    /// <inheritdoc />
     public bool IsInRange(RunesIndex index) =>
         FileHelpers.IsInRange(Source.Span, index);
 
@@ -86,6 +97,14 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
 
     /// <inheritdoc />
     public int GetRuneCount() => Source.Length;
+
+    /// <inheritdoc />
+    public bool StartsWith(RunesString pattern) =>
+        MemoryExtensions.StartsWith(Source.Span, pattern.Source.Span);
+
+    /// <inheritdoc />
+    public bool EndsWith(RunesString pattern) =>
+        MemoryExtensions.EndsWith(Source.Span, pattern.Source.Span);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) =>
@@ -154,8 +173,16 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
     public ReadOnlySpan<Rune> Source { get; } = source;
 
     /// <inheritdoc />
+    public RunesSpanString Slice(int runeStart) =>
+        new(Source.Slice(runeStart));
+
+    /// <inheritdoc />
     public RunesSpanString Slice(int runeStart, int runeLength) =>
         new(Source.Slice(runeStart, runeLength));
+
+    /// <inheritdoc />
+    public RunesSpanString Slice(RunesIndex start) =>
+        new(Source.Slice(start.RuneIndex));
 
     /// <inheritdoc />
     public RunesSpanString Slice(RunesIndex start, RunesIndex end) =>
@@ -186,6 +213,9 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
     public RunesIndex GetDecrementBegin() => new(Source.Length - 1);
 
     /// <inheritdoc />
+    public RunesIndex GetIndexByRuneIndex(int runeIndex) => new(runeIndex);
+
+    /// <inheritdoc />
     public bool IsInRange(RunesIndex index) =>
         FileHelpers.IsInRange(Source, index);
 
@@ -195,6 +225,14 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
 
     /// <inheritdoc />
     public int GetRuneCount() => Source.Length;
+
+    /// <inheritdoc />
+    public bool StartsWith(RunesSpanString pattern) =>
+        MemoryExtensions.StartsWith(Source, pattern.Source);
+
+    /// <inheritdoc />
+    public bool EndsWith(RunesSpanString pattern) =>
+        MemoryExtensions.EndsWith(Source, pattern.Source);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) => false;
