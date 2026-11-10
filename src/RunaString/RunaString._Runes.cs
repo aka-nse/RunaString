@@ -33,12 +33,29 @@ partial class RunaString
 public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
     : IRunaString<RunesString, RunesMemoryEnumerator, RunesIndex>
 {
+    /// <inheritdoc />
+    public static RunesString FromRunes(ReadOnlySpan<Rune> runes) =>
+        new(runes.ToArray());
+
+    /// <inheritdoc />
+    public static RunesString FromString(ReadOnlySpan<char> str)
+    {
+        var runes = new Rune[CharHelpers.GetRuneCount(str)];
+        var count = 0;
+        foreach (var rune in str.EnumerateRunes())
+        {
+            runes[count++] = rune;
+        }
+        return new(runes);
+    }
+
     #region source generated members
 
     public partial Rune this[RunesIndex index] { get; }
     public partial bool TryGetRune(RunesIndex index, out Rune rune);
 
     #endregion
+
     /// <summary>
     /// Gets the source data as a read-only span of characters, which serves as the underlying buffer for enumerating Unicode runes in this enumerable.
     /// </summary>
@@ -160,6 +177,14 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
 public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
     : IRunaString<RunesSpanString, RunesSpanEnumerator, RunesIndex>
 {
+    /// <inheritdoc />
+    public static RunesSpanString FromRunes(ReadOnlySpan<Rune> runes) =>
+        new(runes);
+
+    /// <inheritdoc />
+    public static RunesSpanString FromString(ReadOnlySpan<char> str) =>
+        RunesString.FromString(str);
+
     #region source generated members
 
     public partial Rune this[RunesIndex index] { get; }
