@@ -34,14 +34,14 @@ public interface IRunaString<TSelf, TIndex>
     /// </summary>
     /// <param name="runes">The span of <see cref="Rune"/> values to convert.</param>
     /// <returns>A new instance representing the specified runes.</returns>
-    public static abstract TSelf FromRunes(ReadOnlySpan<Rune> runes);
+    public static abstract TSelf FromRunes(scoped ReadOnlySpan<Rune> runes);
 
     /// <summary>
     /// Creates an instance of the current type from a character span.
     /// </summary>
     /// <param name="str">A character span that contains the string representation of the value.</param>
     /// <returns>An instance of the current type created from the specified character span.</returns>
-    public static abstract TSelf FromString(ReadOnlySpan<char> str);
+    public static abstract TSelf FromString(scoped ReadOnlySpan<char> str);
 
     /// <summary>
     /// Gets the rune located at the specified index in the collection.
@@ -221,7 +221,7 @@ public interface IRunaString<TSelf, TIndex>
     /// <param name="pattern">The pattern to compare with the beginning of the current value.</param>
     /// <returns><see langword="true"/> if the current value starts with <paramref name="pattern"/>; otherwise, <see
     /// langword="false"/>.</returns>
-    public bool StartsWith(TSelf pattern);
+    public bool StartsWith(scoped TSelf pattern);
 
     /// <summary>
     /// Determines whether the current value ends with the specified pattern using ordinal comparison.
@@ -229,7 +229,7 @@ public interface IRunaString<TSelf, TIndex>
     /// <param name="pattern">The pattern to compare with the end of the current value.</param>
     /// <returns><see langword="true"/> if the current value ends with <paramref name="pattern"/>; otherwise, <see
     /// langword="false"/>.</returns>
-    public bool EndsWith(TSelf pattern);
+    public bool EndsWith(scoped TSelf pattern);
 
     /// <summary>
     /// Determines whether two <see cref="Utf8SpanString" />  instances are equal by comparing their UTF-8 encoded byte sequences for equality.
@@ -237,7 +237,7 @@ public interface IRunaString<TSelf, TIndex>
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public static abstract bool Equals(TSelf x, TSelf y);
+    public static abstract bool Equals(scoped TSelf x, scoped TSelf y);
 
     /// <summary>
     /// Compares two <typeparamref name="TSelf" />  instances by comparing in lexicographical order.
@@ -245,7 +245,7 @@ public interface IRunaString<TSelf, TIndex>
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public static abstract int Compare(TSelf x, TSelf y);
+    public static abstract int Compare(scoped TSelf x, scoped TSelf y);
 
     /// <summary>
     /// Determines whether two <typeparamref name="TSelf" />  instances are equal in lexicographical order.
@@ -253,7 +253,7 @@ public interface IRunaString<TSelf, TIndex>
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public static abstract bool operator ==(TSelf x, TSelf y);
+    public static abstract bool operator ==(scoped TSelf x, scoped TSelf y);
 
     /// <summary>
     /// Determines whether two <typeparamref name="TSelf" />  instances are not equal in lexicographical order.
@@ -261,7 +261,7 @@ public interface IRunaString<TSelf, TIndex>
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public static abstract bool operator !=(TSelf x, TSelf y);
+    public static abstract bool operator !=(scoped TSelf x, scoped TSelf y);
 }
 
 
