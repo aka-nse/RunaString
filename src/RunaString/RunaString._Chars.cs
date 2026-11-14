@@ -46,6 +46,34 @@ partial class RunaString
 public readonly partial struct CharsString
     : IRunaString<CharsString, CharsMemoryEnumerator, CharsIndex>
 {
+    /// <inheritdoc />
+    public static CharsString FromRunes(ReadOnlySpan<Rune> runes)
+    {
+        var charCount = 0;
+        foreach (var rune in runes)
+        {
+            charCount += rune.Utf16SequenceLength;
+        }
+
+        var chars = GC.AllocateUninitializedArray<char>(charCount);
+        var destination = chars.AsSpan();
+        var written = 0;
+
+        foreach(var rune in runes)
+        {
+            if(!rune.TryEncodeToUtf16(destination.Slice(written), out var writtenCount))
+            {
+                Guard.ThrowInvalidOperation("Failed to encode rune to UTF-16.");
+            }
+            written += writtenCount;
+        }
+        return new(chars);
+    }
+
+    /// <inheritdoc />
+    public static CharsString FromString(ReadOnlySpan<char> str) =>
+        new(str.ToArray());
+
     #region source generated members
 
     public partial Rune this[CharsIndex index] { get; }
@@ -210,6 +238,14 @@ public readonly partial struct CharsString
 [RunaString]
 public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString, CharsSpanEnumerator, CharsIndex>
 {
+    /// <inheritdoc />
+    public static CharsSpanString FromRunes(ReadOnlySpan<Rune> runes) =>
+        CharsString.FromRunes(runes);
+
+    /// <inheritdoc />
+    public static CharsSpanString FromString(ReadOnlySpan<char> str) =>
+        new(str);
+
     #region source generated members
 
     public partial Rune this[CharsIndex index] { get; }

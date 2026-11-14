@@ -30,6 +30,20 @@ public interface IRunaString<TSelf, TIndex>
     where TIndex : IRunaIndex
 {
     /// <summary>
+    /// Creates an instance of the implementing type from a sequence of Unicode scalar values.
+    /// </summary>
+    /// <param name="runes">The span of <see cref="Rune"/> values to convert.</param>
+    /// <returns>A new instance representing the specified runes.</returns>
+    public static abstract TSelf FromRunes(ReadOnlySpan<Rune> runes);
+
+    /// <summary>
+    /// Creates an instance of the current type from a character span.
+    /// </summary>
+    /// <param name="str">A character span that contains the string representation of the value.</param>
+    /// <returns>An instance of the current type created from the specified character span.</returns>
+    public static abstract TSelf FromString(ReadOnlySpan<char> str);
+
+    /// <summary>
     /// Gets the rune located at the specified index in the collection.
     /// </summary>
     /// <returns>The rune at the specified index.</returns>

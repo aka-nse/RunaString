@@ -20,8 +20,48 @@ public readonly partial struct Utf8String
     , IComparable<Utf8String>
     , IEquatable<Utf8String>
 {
-    #region source generated members
+    /// <inheritdoc />
+    public static Utf8String FromRunes(ReadOnlySpan<Rune> runes)
+    {
+        var byteCount = 0;
+        foreach (var rune in runes)
+        {
+            byteCount = checked(byteCount + rune.Utf8SequenceLength);
+        }
 
+        var bytes = GC.AllocateUninitializedArray<byte>(byteCount);
+        var destination = bytes.AsSpan();
+        var written = 0;
+
+        foreach (var rune in runes)
+        {
+            if (!rune.TryEncodeToUtf8(destination[written..], out var bytesWritten))
+            {
+                Guard.ThrowInvalidOperation("Failed to encode rune to UTF-8.");
+            }
+
+            written += bytesWritten;
+        }
+
+        return new Utf8String(bytes);
+    }
+
+    /// <inheritdoc />
+    public static Utf8String FromString(ReadOnlySpan<char> str)
+    {
+        var byteCount = Encoding.UTF8.GetByteCount(str);
+        if (byteCount == 0)
+        {
+            return new Utf8String(Array.Empty<byte>());
+        }
+
+        var bytes = GC.AllocateUninitializedArray<byte>(byteCount);
+        _ = Encoding.UTF8.GetBytes(str, bytes);
+        return new Utf8String(bytes);
+    }
+
+    #region source generated members
+        
     public partial Rune this[Utf8Index index] { get; }
     public partial bool TryGetRune(Utf8Index index, out Rune rune);
 
@@ -234,6 +274,14 @@ public readonly ref partial struct Utf8SpanString
     , IComparable<Utf8SpanString>
     , IEquatable<Utf8SpanString>
 {
+    /// <inheritdoc />
+    public static Utf8SpanString FromRunes(ReadOnlySpan<Rune> runes) =>
+        Utf8String.FromRunes(runes);
+
+    /// <inheritdoc />
+    public static Utf8SpanString FromString(ReadOnlySpan<char> str) =>
+        Utf8String.FromString(str);
+
     #region source generated members
 
     public partial Rune this[Utf8Index index] { get; }
