@@ -47,7 +47,7 @@ public readonly partial struct CharsString
     : IRunaString<CharsString, CharsMemoryEnumerator, CharsIndex>
 {
     /// <inheritdoc />
-    public static CharsString FromRunes(ReadOnlySpan<Rune> runes)
+    public static CharsString FromRunes(scoped ReadOnlySpan<Rune> runes)
     {
         var charCount = 0;
         foreach (var rune in runes)
@@ -71,7 +71,7 @@ public readonly partial struct CharsString
     }
 
     /// <inheritdoc />
-    public static CharsString FromString(ReadOnlySpan<char> str) =>
+    public static CharsString FromString(scoped ReadOnlySpan<char> str) =>
         new(str.ToArray());
 
     #region source generated members
@@ -239,12 +239,12 @@ public readonly partial struct CharsString
 public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString, CharsSpanEnumerator, CharsIndex>
 {
     /// <inheritdoc />
-    public static CharsSpanString FromRunes(ReadOnlySpan<Rune> runes) =>
+    public static CharsSpanString FromRunes(scoped ReadOnlySpan<Rune> runes) =>
         CharsString.FromRunes(runes);
 
     /// <inheritdoc />
-    public static CharsSpanString FromString(ReadOnlySpan<char> str) =>
-        new(str);
+    public static CharsSpanString FromString(scoped ReadOnlySpan<char> str) =>
+        CharsString.FromString(str);
 
     #region source generated members
 
@@ -359,11 +359,11 @@ public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString
     public int GetRuneCount() => CharHelpers.GetRuneCount(Source);
 
     /// <inheritdoc />
-    public bool StartsWith(CharsSpanString pattern) =>
+    public bool StartsWith(scoped CharsSpanString pattern) =>
         MemoryExtensions.StartsWith(Source, pattern.Source);
 
     /// <inheritdoc />
-    public bool EndsWith(CharsSpanString pattern) =>
+    public bool EndsWith(scoped CharsSpanString pattern) =>
         MemoryExtensions.EndsWith(Source, pattern.Source);
 
     /// <inheritdoc />
@@ -376,24 +376,24 @@ public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString
     public override int GetHashCode() => CharHelpers.GetHashCode(Source);
 
     /// <inheritdoc />
-    public int CompareTo(CharsSpanString other) => Compare(this, other);
+    public int CompareTo(scoped CharsSpanString other) => Compare(this, other);
 
     /// <inheritdoc />
-    public bool Equals(CharsSpanString other) => Equals(this, other);
+    public bool Equals(scoped CharsSpanString other) => Equals(this, other);
 
     /// <inheritdoc />
-    public static bool Equals(CharsSpanString x, CharsSpanString y) =>
+    public static bool Equals(scoped CharsSpanString x, scoped CharsSpanString y) =>
         InternalHelpers.Equals(x.Source, y.Source);
 
     /// <inheritdoc />
-    public static int Compare(CharsSpanString x, CharsSpanString y) =>
+    public static int Compare(scoped CharsSpanString x, scoped CharsSpanString y) =>
         InternalHelpers.Compare<CharsSpanString, CharsSpanEnumerator>(x, y);
 
     /// <inheritdoc />
-    public static bool operator ==(CharsSpanString x, CharsSpanString y) => Equals(x, y);
+    public static bool operator ==(scoped CharsSpanString x, scoped CharsSpanString y) => Equals(x, y);
 
     /// <inheritdoc />
-    public static bool operator !=(CharsSpanString x, CharsSpanString y) => !Equals(x, y);
+    public static bool operator !=(scoped CharsSpanString x, scoped CharsSpanString y) => !Equals(x, y);
 
     /// <summary>
     /// Defines an implicit conversion from <see cref="Utf8String" /> to <see cref="CharsSpanString" /> that creates a new <see cref="CharsSpanString" /> representing the UTF-8 encoded string.
@@ -406,7 +406,7 @@ public readonly ref partial struct CharsSpanString : IRunaString<CharsSpanString
 
 file static class FileHelpers
 {
-    public static (int charIndex, int charLength) GetSliceIndex(CharsSpanString str, int runeStart, int runeLength)
+    public static (int charIndex, int charLength) GetSliceIndex(scoped CharsSpanString str, int runeStart, int runeLength)
     {
         var enumerator = str.GetEnumerator();
         for (var i = 0; i < runeStart; i++)
@@ -422,13 +422,13 @@ file static class FileHelpers
         return (startCharIndex, endCharIndex - startCharIndex);
     }
 
-    public static bool TryGetRune(ReadOnlySpan<char> source, CharsIndex index, out Rune rune, out int codeUnitConsumed)
+    public static bool TryGetRune(scoped ReadOnlySpan<char> source, CharsIndex index, out Rune rune, out int codeUnitConsumed)
     {
         Rune.DecodeFromUtf16(source.Slice(index.CharIndex), out rune, out codeUnitConsumed);
         return codeUnitConsumed > 0;
     }
 
-    public static CharsIndex Increment(ReadOnlySpan<char> Source, ref CharsIndex index)
+    public static CharsIndex Increment(scoped ReadOnlySpan<char> Source, ref CharsIndex index)
     {
         if ((uint)index.CharIndex < (uint)Source.Length)
         {
@@ -439,7 +439,7 @@ file static class FileHelpers
         return index;
     }
 
-    public static CharsIndex Decrement(ReadOnlySpan<char> source, ref CharsIndex index)
+    public static CharsIndex Decrement(scoped ReadOnlySpan<char> source, ref CharsIndex index)
     {
         if (index.CharIndex <= 0)
         {
@@ -454,6 +454,6 @@ file static class FileHelpers
         return index = new(newCharIndex, newRuneIndex);
     }
 
-    public static bool IsInRange(ReadOnlySpan<char> source, CharsIndex index) =>
+    public static bool IsInRange(scoped ReadOnlySpan<char> source, CharsIndex index) =>
         (uint)index.CharIndex < (uint)source.Length;
 }

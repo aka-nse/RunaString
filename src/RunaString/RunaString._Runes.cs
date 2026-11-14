@@ -34,11 +34,11 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
     : IRunaString<RunesString, RunesMemoryEnumerator, RunesIndex>
 {
     /// <inheritdoc />
-    public static RunesString FromRunes(ReadOnlySpan<Rune> runes) =>
+    public static RunesString FromRunes(scoped ReadOnlySpan<Rune> runes) =>
         new(runes.ToArray());
 
     /// <inheritdoc />
-    public static RunesString FromString(ReadOnlySpan<char> str)
+    public static RunesString FromString(scoped ReadOnlySpan<char> str)
     {
         var runes = new Rune[CharHelpers.GetRuneCount(str)];
         var count = 0;
@@ -178,11 +178,11 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
     : IRunaString<RunesSpanString, RunesSpanEnumerator, RunesIndex>
 {
     /// <inheritdoc />
-    public static RunesSpanString FromRunes(ReadOnlySpan<Rune> runes) =>
-        new(runes);
+    public static RunesSpanString FromRunes(scoped ReadOnlySpan<Rune> runes) =>
+        RunesString.FromRunes(runes);
 
     /// <inheritdoc />
-    public static RunesSpanString FromString(ReadOnlySpan<char> str) =>
+    public static RunesSpanString FromString(scoped ReadOnlySpan<char> str) =>
         RunesString.FromString(str);
 
     #region source generated members
@@ -252,11 +252,11 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
     public int GetRuneCount() => Source.Length;
 
     /// <inheritdoc />
-    public bool StartsWith(RunesSpanString pattern) =>
+    public bool StartsWith(scoped RunesSpanString pattern) =>
         MemoryExtensions.StartsWith(Source, pattern.Source);
 
     /// <inheritdoc />
-    public bool EndsWith(RunesSpanString pattern) =>
+    public bool EndsWith(scoped RunesSpanString pattern) =>
         MemoryExtensions.EndsWith(Source, pattern.Source);
 
     /// <inheritdoc />
@@ -283,24 +283,24 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
     public override int GetHashCode() => RuneHelpers.GetHashCode(Source);
 
     /// <inheritdoc />
-    public int CompareTo(RunesSpanString other) => Compare(this, other);
+    public int CompareTo(scoped RunesSpanString other) => Compare(this, other);
 
     /// <inheritdoc />
-    public bool Equals(RunesSpanString other) => Equals(this, other);
+    public bool Equals(scoped RunesSpanString other) => Equals(this, other);
 
     /// <inheritdoc />
-    public static bool Equals(RunesSpanString x, RunesSpanString y) =>
+    public static bool Equals(scoped RunesSpanString x, scoped RunesSpanString y) =>
         InternalHelpers.Equals(x.Source, y.Source);
 
     /// <inheritdoc />
-    public static int Compare(RunesSpanString x, RunesSpanString y) =>
+    public static int Compare(scoped RunesSpanString x, scoped RunesSpanString y) =>
         InternalHelpers.Compare<RunesSpanString, RunesSpanEnumerator>(x, y);
 
     /// <inheritdoc />
-    public static bool operator ==(RunesSpanString x, RunesSpanString y) => Equals(x, y);
+    public static bool operator ==(scoped RunesSpanString x, scoped RunesSpanString y) => Equals(x, y);
 
     /// <inheritdoc />
-    public static bool operator !=(RunesSpanString x, RunesSpanString y) => !Equals(x, y);
+    public static bool operator !=(scoped RunesSpanString x, scoped RunesSpanString y) => !Equals(x, y);
 
     /// <summary>
     /// Defines an implicit conversion from <see cref="RunesString" /> to <see cref="RunesSpanString" /> that creates a new <see cref="RunesSpanString" /> representing the UTF-8 encoded string.
@@ -313,7 +313,7 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
 
 file static class FileHelpers
 {
-    public static bool TryGetRune(ReadOnlySpan<Rune> source, RunesIndex index, out Rune rune, out int codeUnitConsumed)
+    public static bool TryGetRune(scoped ReadOnlySpan<Rune> source, RunesIndex index, out Rune rune, out int codeUnitConsumed)
     {
         if ((uint)index.RuneIndex >= (uint)source.Length)
         {
@@ -326,7 +326,7 @@ file static class FileHelpers
         return true;
     }
 
-    public static RunesIndex Increment(ReadOnlySpan<Rune> source, ref RunesIndex index)
+    public static RunesIndex Increment(scoped ReadOnlySpan<Rune> source, ref RunesIndex index)
     {
         var newIndex = index.RuneIndex + 1;
         if (source.Length < newIndex)
@@ -336,7 +336,7 @@ file static class FileHelpers
         return index = new(newIndex);
     }
 
-    public static RunesIndex Decrement(ReadOnlySpan<Rune> source, ref RunesIndex index)
+    public static RunesIndex Decrement(scoped ReadOnlySpan<Rune> source, ref RunesIndex index)
     {
         InternalHelpers.NoUse(source);
 
@@ -347,6 +347,6 @@ file static class FileHelpers
         return index = new(index.RuneIndex - 1);
     }
 
-    public static bool IsInRange(ReadOnlySpan<Rune> source, RunesIndex index) =>
+    public static bool IsInRange(scoped ReadOnlySpan<Rune> source, RunesIndex index) =>
         (uint)index.RuneIndex < (uint)source.Length;
 }
