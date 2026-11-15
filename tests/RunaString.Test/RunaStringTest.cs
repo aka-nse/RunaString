@@ -3,9 +3,9 @@ namespace RunaString.Test;
 public partial class RunaStringTest
 {
     private static void EqualityTestCore_Equal<TString, TEnumerator, TIndex>(TString value1, TString value2)
-        where TString : struct, IRunaString<TString, TEnumerator, TIndex>, allows ref struct
+        where TString : struct, IRunaStringBase<TString, TIndex>, IRunaEnumerable<TString, TEnumerator>, allows ref struct
         where TEnumerator : struct, IRunaEnumerator<TEnumerator, TIndex>, allows ref struct
-        where TIndex : IRunaIndex
+        where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         Assert.Equal(value1.ToString(), value2.ToString());
         Assert.True(TString.Equals(value1, value2));
@@ -18,9 +18,9 @@ public partial class RunaStringTest
     }
 
     private static void EqualityTestCore_NotEqual<TString, TEnumerator, TIndex>(TString value1, TString value2)
-        where TString : struct, IRunaString<TString, TEnumerator, TIndex>, allows ref struct
+        where TString : struct, IRunaStringBase<TString, TIndex>, IRunaEnumerable<TString, TEnumerator>, allows ref struct
         where TEnumerator : struct, IRunaEnumerator<TEnumerator, TIndex>, allows ref struct
-        where TIndex : IRunaIndex
+        where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         Assert.NotEqual(value1.ToString(), value2.ToString());
         Assert.False(value1.Equals(value2));

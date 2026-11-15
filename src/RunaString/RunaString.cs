@@ -23,11 +23,11 @@ public interface IRunaEnumerable<TSelf, TEnumerator>
 }
 
 
-/// <inheritdoc cref="IRunaString{TSelf, TEnumerator, TIndex}" />
-public interface IRunaString<TSelf, TIndex>
+/// <inheritdoc cref="IRunaString{TSelf, TView, TEnumerator, TIndex}" />
+public interface IRunaStringBase<TSelf, TIndex>
     : IEquatable<TSelf>, IComparable<TSelf>
-    where TSelf : IRunaString<TSelf, TIndex>, allows ref struct
-    where TIndex : IRunaIndex
+    where TSelf : IRunaStringBase<TSelf, TIndex>, allows ref struct
+    where TIndex : unmanaged, IRunaIndex<TIndex>
 {
     /// <summary>
     /// Creates an instance of the implementing type from a sequence of Unicode scalar values.
@@ -49,6 +49,9 @@ public interface IRunaString<TSelf, TIndex>
     /// <returns>The rune at the specified index.</returns>
     /// <exception cref="ArgumentOutOfRangeException" />
     public Rune this[TIndex index] { get; }
+
+    /// <inheritdoc />
+    public string ToString();
 
     /// <summary>
     /// Returns a new <typeparamref name="TSelf" /> that is a slice of the current string, starting at the specified rune index and with the specified rune length.
@@ -206,30 +209,11 @@ public interface IRunaString<TSelf, TIndex>
     /// <returns>True if the index is within the valid range of this instance; otherwise, false.</returns>
     public bool IsInRange(TIndex index);
 
-    /// <inheritdoc />
-    public string ToString();
-
     /// <summary>
     /// Returns the number of Unicode code points (runes) in the UTF-8 encoded string.
     /// </summary>
     /// <returns></returns>
     public int GetRuneCount();
-
-    /// <summary>
-    /// Determines whether the current value starts with the specified pattern using ordinal comparison.
-    /// </summary>
-    /// <param name="pattern">The pattern to compare with the beginning of the current value.</param>
-    /// <returns><see langword="true"/> if the current value starts with <paramref name="pattern"/>; otherwise, <see
-    /// langword="false"/>.</returns>
-    public bool StartsWith(scoped TSelf pattern);
-
-    /// <summary>
-    /// Determines whether the current value ends with the specified pattern using ordinal comparison.
-    /// </summary>
-    /// <param name="pattern">The pattern to compare with the end of the current value.</param>
-    /// <returns><see langword="true"/> if the current value ends with <paramref name="pattern"/>; otherwise, <see
-    /// langword="false"/>.</returns>
-    public bool EndsWith(scoped TSelf pattern);
 
     /// <summary>
     /// Determines whether two <see cref="Utf8SpanString" />  instances are equal by comparing their UTF-8 encoded byte sequences for equality.
@@ -266,10 +250,81 @@ public interface IRunaString<TSelf, TIndex>
 
 
 /// <summary>
-/// Defines a contract for Unicode runes string with support for creating slices over a specified range of the source data.
+/// Represents a RunaString value that can be exposed as a view type and queried for ordinal prefix and suffix matches.
+/// </summary>
+/// <remarks>Uses a self-referential generic pattern to preserve strong typing across operations while exposing a
+/// non-owning view representation.</remarks>
+/// <typeparam name="TSelf">The concrete self type that implements the interface.</typeparam>
+/// <typeparam name="TView">The view type used to represent and compare the current value.</typeparam>
+/// <typeparam name="TIndex">The index type used by the string representation.</typeparam>
+public interface IRunaStringViewable<TSelf, TView, TIndex>
+    : IRunaStringBase<TSelf, TIndex>
+    where TSelf : IRunaStringViewable<TSelf, TView, TIndex>, allows ref struct
+    where TView : IRunaStringBase<TView, TIndex>, allows ref struct
+    where TIndex : unmanaged, IRunaIndex<TIndex>
+{
+    /// <summary>Gets the current value as <typeparamref name="TView"/>.</summary>
+    /// <returns>The current value represented as <typeparamref name="TView"/>.</returns>
+    public TView AsView();
+
+    /// <summary>
+    /// Finds the first occurrence of a pattern in the current view using code-unit indexing.
+    /// </summary>
+    /// <remarks>Indexing is based on code units, not Unicode scalar values or text elements.</remarks>
+    /// <param name="pattern">The sequence of code units to locate.</param>
+    /// <returns>The zero-based code-unit index of the first match, or -1 when no match is found.</returns>
+    public int CodeUnitIndexOf(scoped TView pattern);
+
+    /// <summary>
+    /// Determines whether the current value starts with the specified pattern using ordinal comparison.
+    /// </summary>
+    /// <param name="pattern">The pattern to compare with the beginning of the current value.</param>
+    /// <returns><see langword="true"/> if the current value starts with <paramref name="pattern"/>; otherwise, <see
+    /// langword="false"/>.</returns>
+    public bool StartsWith(scoped TView pattern);
+
+    /// <summary>
+    /// Determines whether the current value ends with the specified pattern using ordinal comparison.
+    /// </summary>
+    /// <param name="pattern">The pattern to compare with the end of the current value.</param>
+    /// <returns><see langword="true"/> if the current value ends with <paramref name="pattern"/>; otherwise, <see
+    /// langword="false"/>.</returns>
+    public bool EndsWith(scoped TView pattern);
+
+    /// <inheritdoc cref="IRunaStringBase{TSelf, TIndex}.Equals(TSelf, TSelf)" />
+    public static abstract bool Equals(scoped TSelf x, scoped TView y);
+
+    /// <inheritdoc cref="IRunaStringBase{TSelf, TIndex}.Equals(TSelf, TSelf)" />
+    public static virtual bool Equals(scoped TView x, scoped TSelf y) => TSelf.Equals(y, x);
+
+    /// <inheritdoc cref="IRunaStringBase{TSelf, TIndex}.Compare(TSelf, TSelf)" />
+    public static abstract int Compare(scoped TSelf x, scoped TView y);
+
+    /// <inheritdoc cref="IRunaStringBase{TSelf, TIndex}.Compare(TSelf, TSelf)" />
+    public static virtual int Compare(scoped TView x, scoped TSelf y) => -TSelf.Compare(y, x);
+
+    /// <inheritdoc cref="IRunaStringBase{TSelf, TIndex}.operator==(TSelf, TSelf)" />
+    public static abstract bool operator ==(scoped TSelf x, scoped TView y);
+
+    /// <inheritdoc cref="IRunaStringBase{TSelf, TIndex}.operator==(TSelf, TSelf)" />
+    public static abstract bool operator ==(scoped TView x, scoped TSelf y);
+
+    /// <inheritdoc cref="IRunaStringBase{TSelf, TIndex}.operator!=(TSelf, TSelf)" />
+    public static abstract bool operator !=(scoped TSelf x, scoped TView y);
+
+    /// <inheritdoc cref="IRunaStringBase{TSelf, TIndex}.operator!=(TSelf, TSelf)" />
+    public static abstract bool operator !=(scoped TView x, scoped TSelf y);
+}
+
+
+/// <summary>
+/// Full featured interface for RunaString types that supports enumeration, slicing, and index mapping.
 /// </summary>
 /// <typeparam name="TSelf">
 /// The type that implements this interface, enabling fluent method chaining and type safety for operations that return a new enumerator.
+/// </typeparam>
+/// <typeparam name="TView">
+/// The RunaString type exposed as the view representation.
 /// </typeparam>
 /// <typeparam name="TEnumerator">
 /// The type of the enumerator that iterates over the runes in the source buffer, which must implement the IRuneEnumerable interface to support slicing and range operations.
@@ -277,10 +332,14 @@ public interface IRunaString<TSelf, TIndex>
 /// <typeparam name="TIndex">
 /// The type used to index into the source data, which must implement the ISeekIndex interface to support seeking and range operations.
 /// </typeparam>
-public interface IRunaString<TSelf, TEnumerator, TIndex> : IRunaString<TSelf, TIndex>, IRunaEnumerable<TSelf, TEnumerator>
-    where TSelf : IRunaString<TSelf, TEnumerator, TIndex>, allows ref struct
+public interface IRunaString<TSelf, TView, TEnumerator, TIndex>
+    : IRunaStringBase<TSelf, TIndex>
+    , IRunaStringViewable<TSelf, TView, TIndex>
+    , IRunaEnumerable<TSelf, TEnumerator>
+    where TSelf : IRunaStringViewable<TSelf, TView, TIndex>, allows ref struct
+    where TView : IRunaStringBase<TView, TIndex>, allows ref struct
     where TEnumerator : IRunaEnumerator<TEnumerator>, allows ref struct
-    where TIndex : IRunaIndex
+    where TIndex : unmanaged, IRunaIndex<TIndex>
 {
 }
 

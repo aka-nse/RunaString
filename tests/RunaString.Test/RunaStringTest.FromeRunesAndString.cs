@@ -10,7 +10,7 @@ public partial class RunaStringTest
 
 
     private static void FromRunesCore<TString, TIndex>(ReadOnlySpan<Rune> runes, TString expected, TIndex _)
-        where TString : IRunaString<TString, TIndex>, allows ref struct
+        where TString : IRunaStringBase<TString, TIndex>, allows ref struct
         where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         var actual = TString.FromRunes(runes);
@@ -49,7 +49,7 @@ public partial class RunaStringTest
 
 
     private static void FromStringCore<TString, TIndex>(string str, TString expected, TIndex _)
-        where TString : IRunaString<TString, TIndex>, allows ref struct
+        where TString : IRunaStringBase<TString, TIndex>, allows ref struct
         where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         var actual = TString.FromString(str);
