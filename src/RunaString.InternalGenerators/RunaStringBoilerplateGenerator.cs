@@ -33,8 +33,8 @@ public class RunaStringBoilerplateGenerator : IIncrementalGenerator
     {
         var stringSymbol = (INamedTypeSymbol)context.TargetSymbol;
         var interfaceSymbol = stringSymbol.Interfaces.Single(static i => i.Name == "IRunaString");
-        var enumeratorSymbol = (INamedTypeSymbol)interfaceSymbol.TypeArguments[1];
-        var indexSymbol = (INamedTypeSymbol)interfaceSymbol.TypeArguments[2];
+        var enumeratorSymbol = (INamedTypeSymbol)interfaceSymbol.TypeArguments[2];
+        var indexSymbol = (INamedTypeSymbol)interfaceSymbol.TypeArguments[3];
         return new(
             stringSymbol.IsRefLikeType,
             stringSymbol.Name,

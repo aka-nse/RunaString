@@ -18,13 +18,11 @@ public readonly struct RunesIndex : IRunaIndex<RunesIndex>
     /// <inheritdoc />
     public static RunesIndex DecrementEnd { get; } = new(-1);
 
-    /// <summary>
-    /// A hash code that represents the source string from which this index was created.
-    /// </summary>
-    public long SourceHashCode { get; }
-
-    /// <summary></summary>
+    /// <inheritdoc />
     public int RuneIndex { get; }
+
+    /// <inheritdoc />
+    public int CodeUnitIndex => RuneIndex;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RunesIndex"/> struct with the specified byte index and rune position.

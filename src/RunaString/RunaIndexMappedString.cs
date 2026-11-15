@@ -8,9 +8,11 @@ namespace RunaString;
 /// This type provides O(1) random access by rune index.
 /// </summary>
 /// <typeparam name="TString"></typeparam>
+/// <typeparam name="TView"></typeparam>
 /// <typeparam name="TIndex"></typeparam>
-public readonly ref struct RunaIndexMappedString<TString, TIndex>
-    where TString : IRunaString<TString, TIndex>, allows ref struct
+public readonly ref struct RunaIndexMappedString<TString, TView, TIndex>
+    where TString : IRunaStringViewable<TString, TView, TIndex>, allows ref struct
+    where TView : IRunaStringBase<TView, TIndex>, allows ref struct
     where TIndex : unmanaged, IRunaIndex<TIndex>
 {
     private readonly TString _entity;
@@ -91,7 +93,7 @@ public readonly ref struct RunaIndexMappedString<TString, TIndex>
     {
         for (var i = 0; i < _indexMapping.Length; ++i)
         {
-            if (_entity.Slice(_indexMapping[i]).StartsWith(str))
+            if (_entity.Slice(_indexMapping[i]).StartsWith(str.AsView()))
             {
                 return i;
             }
@@ -104,12 +106,12 @@ public readonly ref struct RunaIndexMappedString<TString, TIndex>
     /// </summary>
     /// <param name="runeStart">Zero-based rune index where the slice starts.</param>
     /// <param name="runeLength">Number of runes to include in the slice.</param>
-    /// <returns>A new <see cref="RunaIndexMappedString{TString, TIndex}"/> representing the specified rune range.</returns>
-    public RunaIndexMappedString<TString, TIndex> Slice(int runeStart, int runeLength)
+    /// <returns>A new <see cref="RunaIndexMappedString{TString, TView, TIndex}"/> representing the specified rune range.</returns>
+    public RunaIndexMappedString<TString, TView, TIndex> Slice(int runeStart, int runeLength)
     {
         Guard.WithIn(_runeStart + runeStart, _indexMapping.Length + 1);
         Guard.WithIn(_runeStart + runeStart + runeLength, _runeLength + 1);
-        return new RunaIndexMappedString<TString, TIndex>(_entity, _indexMapping, _runeStart + runeStart, runeLength);
+        return new RunaIndexMappedString<TString, TView, TIndex>(_entity, _indexMapping, _runeStart + runeStart, runeLength);
     }
 
     internal static bool TryGetIndexMapping(TString entity, Span<TIndex> buffer, out int consumed)
@@ -156,35 +158,38 @@ public static class RunaIndexMappedString
     /// <typeparam name="TString">The string entity type that implements IRunaString{TString, TIndex}.</typeparam>
     /// <typeparam name="TIndex">The unmanaged index type that implements IRunaIndex{TIndex}.</typeparam>
     /// <param name="entity">The source string entity to map.</param>
-    /// <returns>A new RunaIndexMappedString{TString, TIndex} that wraps the specified entity.</returns>
-    public static RunaIndexMappedString<TString, TIndex> Create<TString, TIndex>(TString entity)
-        where TString : IRunaString<TString, TIndex>
+    /// <returns>A new RunaIndexMappedString{TString, TView, TIndex} that wraps the specified entity.</returns>
+    public static RunaIndexMappedString<TString, TView, TIndex> Create<TString, TView, TIndex>(TString entity)
+        where TString : IRunaStringViewable<TString, TView, TIndex>, allows ref struct
+        where TView : IRunaStringBase<TView, TIndex>, allows ref struct
         where TIndex : unmanaged, IRunaIndex<TIndex> =>
         new(entity);
 
     /// <summary>
-    /// Creates a <see cref="RunaIndexMappedString{TString, TIndex}"/> from the specified string and index buffer when
+    /// Creates a <see cref="RunaIndexMappedString{TString, TView, TIndex}"/> from the specified string and index buffer when
     /// index mapping can be generated.
     /// </summary>
     /// <remarks>Only the consumed portion of <paramref name="buffer"/> is included in the created mapped
     /// string.</remarks>
-    /// <typeparam name="TString">The string representation type that implements <see cref="IRunaString{TString, TIndex}"/>.</typeparam>
+    /// <typeparam name="TString">The string representation type that implements <see cref="IRunaStringViewable{TString, TView, TIndex}"/>.</typeparam>
+    /// <typeparam name="TView">The string view type that implements <see cref="IRunaStringBase{TView, TIndex}"/>.</typeparam>
     /// <typeparam name="TIndex">The unmanaged index type that implements <see cref="IRunaIndex{TIndex}"/>.</typeparam>
     /// <param name="entity">The source string value to map.</param>
     /// <param name="buffer">The destination buffer used to store the generated index mapping.</param>
     /// <param name="mappedString">When the method returns <see langword="true"/>, contains the created mapped string; otherwise, the default
     /// value.</param>
     /// <returns><see langword="true"/> if the index mapping is created successfully; otherwise, <see langword="false"/>.</returns>
-    public static bool TryCreate<TString, TIndex>(TString entity, Span<TIndex> buffer, out RunaIndexMappedString<TString, TIndex> mappedString)
-        where TString : IRunaString<TString, TIndex>
+    public static bool TryCreate<TString, TView, TIndex>(TString entity, Span<TIndex> buffer, out RunaIndexMappedString<TString, TView, TIndex> mappedString)
+        where TString : IRunaStringViewable<TString, TView, TIndex>, allows ref struct
+        where TView : IRunaStringBase<TView, TIndex>, allows ref struct
         where TIndex : unmanaged, IRunaIndex<TIndex>
     {
-        if(!RunaIndexMappedString<TString, TIndex>.TryGetIndexMapping(entity, buffer, out var consumed))
+        if(!RunaIndexMappedString<TString, TView, TIndex>.TryGetIndexMapping(entity, buffer, out var consumed))
         {
             mappedString = default;
             return false;
         }
-        mappedString = new RunaIndexMappedString<TString, TIndex>(entity, buffer[..consumed]);
+        mappedString = new RunaIndexMappedString<TString, TView, TIndex>(entity, buffer[..consumed]);
         return true;
     }
 }

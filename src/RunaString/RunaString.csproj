@@ -16,5 +16,10 @@
             <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
         </ProjectReference>
     </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="RegularExpressions/RegexInterpreter.cs" />
+        <Compile Remove="RegularExpressions/RegexInterpreter.Infrastructures.cs" />
+    </ItemGroup>
     
 </Project>

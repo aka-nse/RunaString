@@ -21,8 +21,11 @@ public readonly struct Utf8Index : IRunaIndex<Utf8Index>
     /// <summary></summary>
     public int ByteIndex { get; }
 
-    /// <summary></summary>
+    /// <inheritdoc />
     public int RuneIndex { get; }
+
+    /// <inheritdoc />
+    public int CodeUnitIndex => ByteIndex;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Utf8Index"/> struct with the specified byte index and rune position.

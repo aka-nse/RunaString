@@ -110,7 +110,7 @@ public class CharsStringTest
     }
 
     private static void ValidateCharsStringCore<TString, TEnumerator>(CharsTestCase testCase, TString value)
-        where TString : IRunaString<TString, TEnumerator, CharsIndex>, allows ref struct
+        where TString : IRunaStringBase<TString, CharsIndex>, IRunaEnumerable<TString, TEnumerator>, allows ref struct
         where TEnumerator : IRunaEnumerator<TEnumerator>, allows ref struct
     {
         var expectedRunes = testCase.String.EnumerateRunes().ToArray();

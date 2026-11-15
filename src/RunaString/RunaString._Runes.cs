@@ -31,101 +31,14 @@ partial class RunaString
 /// <param name="source"></param>
 [RunaString]
 public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
-    : IRunaString<RunesString, RunesMemoryEnumerator, RunesIndex>
+    : IRunaString<RunesString, RunesSpanString, RunesMemoryEnumerator, RunesIndex>
 {
-    /// <inheritdoc />
-    public static RunesString FromRunes(scoped ReadOnlySpan<Rune> runes) =>
-        new(runes.ToArray());
-
-    /// <inheritdoc />
-    public static RunesString FromString(scoped ReadOnlySpan<char> str)
-    {
-        var runes = new Rune[CharHelpers.GetRuneCount(str)];
-        var count = 0;
-        foreach (var rune in str.EnumerateRunes())
-        {
-            runes[count++] = rune;
-        }
-        return new(runes);
-    }
-
-    #region source generated members
-
-    public partial Rune this[RunesIndex index] { get; }
-    public partial bool TryGetRune(RunesIndex index, out Rune rune);
-
-    #endregion
+    #region base members
 
     /// <summary>
     /// Gets the source data as a read-only span of characters, which serves as the underlying buffer for enumerating Unicode runes in this enumerable.
     /// </summary>
     public ReadOnlyMemory<Rune> Source { get; } = source;
-
-    /// <inheritdoc />
-    public RunesString Slice(int runeStart) =>
-        new(Source.Slice(runeStart));
-
-    /// <inheritdoc />
-    public RunesString Slice(int runeStart, int runeLength) =>
-        new(Source.Slice(runeStart, runeLength));
-
-    /// <inheritdoc />
-    public RunesString Slice(RunesIndex start) =>
-        new(Source.Slice(start.RuneIndex));
-
-    /// <inheritdoc />
-    public RunesString Slice(RunesIndex start, RunesIndex end) =>
-        new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
-
-    /// <inheritdoc />
-    public bool TryGetRune(RunesIndex index, out Rune rune, out int codeUnitConsumed) =>
-        FileHelpers.TryGetRune(Source.Span, index, out rune, out codeUnitConsumed);
-
-    /// <inheritdoc />
-    public RunesIndex Increment(ref RunesIndex index) =>
-        FileHelpers.Increment(Source.Span, ref index);
-
-    /// <inheritdoc />
-    public RunesIndex IncrementBegin => RunesIndex.IncrementBegin;
-
-    /// <inheritdoc />
-    public RunesIndex GetIncrementEnd() => new(Source.Length);
-
-    /// <inheritdoc />
-    public RunesIndex Decrement(ref RunesIndex index) =>
-        FileHelpers.Decrement(Source.Span, ref index);
-
-    /// <inheritdoc />
-    public RunesIndex DecrementEnd => RunesIndex.DecrementEnd;
-
-    /// <inheritdoc />
-    public RunesIndex GetDecrementBegin() => new(Source.Length - 1);
-
-    /// <inheritdoc />
-    public RunesIndex GetIndexByRuneIndex(int runeIndex) => new(runeIndex);
-
-    /// <inheritdoc />
-    public bool IsInRange(RunesIndex index) =>
-        FileHelpers.IsInRange(Source.Span, index);
-
-    /// <inheritdoc />
-    public RunesMemoryEnumerator GetEnumerator() =>
-        RunesMemoryEnumerator.Create(Source);
-
-    /// <inheritdoc />
-    public int GetRuneCount() => Source.Length;
-
-    /// <inheritdoc />
-    public bool StartsWith(RunesString pattern) =>
-        MemoryExtensions.StartsWith(Source.Span, pattern.Source.Span);
-
-    /// <inheritdoc />
-    public bool EndsWith(RunesString pattern) =>
-        MemoryExtensions.EndsWith(Source.Span, pattern.Source.Span);
-
-    /// <inheritdoc />
-    public override bool Equals([NotNullWhen(true)] object? obj) =>
-        obj is Utf8String other && Equals(this, other);
 
     /// <inheritdoc />
     public override string ToString()
@@ -145,7 +58,127 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
     }
 
     /// <inheritdoc />
-    public override int GetHashCode() => RuneHelpers.GetHashCode(Source.Span);
+    public override int GetHashCode() =>
+        RuneHelpers.GetHashCode(Source.Span);
+
+    #region source generated members
+
+    public partial Rune this[RunesIndex index] { get; }
+    public partial bool TryGetRune(RunesIndex index, out Rune rune);
+
+    #endregion
+
+    #endregion
+
+    #region creation
+
+    /// <inheritdoc />
+    public static RunesString FromRunes(scoped ReadOnlySpan<Rune> runes) =>
+        new(runes.ToArray());
+
+    /// <inheritdoc />
+    public static RunesString FromString(scoped ReadOnlySpan<char> str)
+    {
+        var runes = new Rune[CharHelpers.GetRuneCount(str)];
+        var count = 0;
+        foreach (var rune in str.EnumerateRunes())
+        {
+            runes[count++] = rune;
+        }
+        return new(runes);
+    }
+
+    #endregion
+
+    #region slicing
+
+    /// <inheritdoc />
+    public RunesString Slice(int runeStart) =>
+        new(Source.Slice(runeStart));
+
+    /// <inheritdoc />
+    public RunesString Slice(int runeStart, int runeLength) =>
+        new(Source.Slice(runeStart, runeLength));
+
+    /// <inheritdoc />
+    public RunesString Slice(RunesIndex start) =>
+        new(Source.Slice(start.RuneIndex));
+
+    /// <inheritdoc />
+    public RunesString Slice(RunesIndex start, RunesIndex end) =>
+        new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
+
+    #endregion
+
+    #region enumerations
+
+    /// <inheritdoc />
+    public RunesIndex Increment(ref RunesIndex index) =>
+        ((RunesSpanString)this).Increment(ref index);
+
+    /// <inheritdoc />
+    public RunesIndex IncrementBegin =>
+        ((RunesSpanString)this).IncrementBegin;
+
+    /// <inheritdoc />
+    public RunesIndex GetIncrementEnd() =>
+        ((RunesSpanString)this).GetIncrementEnd();
+
+    /// <inheritdoc />
+    public RunesIndex Decrement(ref RunesIndex index) =>
+        ((RunesSpanString)this).Decrement(ref index);
+
+    /// <inheritdoc />
+    public RunesIndex DecrementEnd =>
+        ((RunesSpanString)this).DecrementEnd;
+
+    /// <inheritdoc />
+    public RunesIndex GetDecrementBegin() =>
+        ((RunesSpanString)this).GetDecrementBegin();
+
+    /// <inheritdoc />
+    public RunesMemoryEnumerator GetEnumerator() =>
+        RunesMemoryEnumerator.Create(Source);
+
+    #endregion
+
+    #region rune-base manipulations
+
+    /// <inheritdoc />
+    public bool TryGetRune(RunesIndex index, out Rune rune, out int codeUnitConsumed) =>
+        ((RunesSpanString)this).TryGetRune(index, out rune, out codeUnitConsumed);
+
+    /// <inheritdoc />
+    public RunesIndex GetIndexByRuneIndex(int runeIndex) =>
+        new(runeIndex);
+
+    /// <inheritdoc />
+    public bool IsInRange(RunesIndex index) =>
+        ((RunesSpanString)this).IsInRange(index);
+
+    /// <inheritdoc />
+    public int GetRuneCount() =>
+        Source.Length;
+
+    #endregion
+
+    #region comparison and equality
+
+    /// <inheritdoc />
+    public int CodeUnitIndexOf(RunesSpanString pattern) =>
+        ((RunesSpanString)this).CodeUnitIndexOf(pattern);
+
+    /// <inheritdoc />
+    public bool StartsWith(RunesSpanString pattern) =>
+        ((RunesSpanString)this).StartsWith(pattern);
+
+    /// <inheritdoc />
+    public bool EndsWith(RunesSpanString pattern) =>
+        ((RunesSpanString)this).EndsWith(pattern);
+
+    /// <inheritdoc />
+    public override bool Equals([NotNullWhen(true)] object? obj) =>
+        obj is Utf8String other && Equals(this, other);
 
     /// <inheritdoc />
     public int CompareTo(RunesString other) => Compare(this, other);
@@ -155,17 +188,60 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
 
     /// <inheritdoc />
     public static bool Equals(RunesString x, RunesString y) =>
-        InternalHelpers.Equals(x.Source.Span, y.Source.Span);
+        RunesSpanString.Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool Equals(RunesString x, RunesSpanString y) =>
+        RunesSpanString.Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool Equals(RunesSpanString x, RunesString y) =>
+        RunesSpanString.Equals(x, y);
 
     /// <inheritdoc />
     public static int Compare(RunesString x, RunesString y) =>
-        InternalHelpers.Compare<RunesString, RunesMemoryEnumerator>(x, y);
+        RunesSpanString.Compare(x, y);
 
     /// <inheritdoc />
-    public static bool operator ==(RunesString x, RunesString y) => Equals(x, y);
+    public static int Compare(RunesString x, RunesSpanString y) =>
+        RunesSpanString.Compare(x, y);
 
     /// <inheritdoc />
-    public static bool operator !=(RunesString x, RunesString y) => !Equals(x, y);
+    public static int Compare(RunesSpanString x, RunesString y) =>
+        RunesSpanString.Compare(x, y);
+
+    /// <inheritdoc />
+    public static bool operator ==(RunesString x, RunesString y) =>
+        Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator ==(RunesString x, RunesSpanString y) =>
+        Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator ==(RunesSpanString x, RunesString y) =>
+        Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator !=(RunesString x, RunesString y) =>
+        !Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator !=(RunesString x, RunesSpanString y) =>
+        !Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator !=(RunesSpanString x, RunesString y) =>
+        !Equals(x, y);
+
+    #endregion
+
+    #region type conversion
+
+    /// <inheritdoc />
+    public RunesSpanString AsView() => new(Source.Span);
+
+    #endregion
 }
 
 
@@ -175,92 +251,14 @@ public readonly partial struct RunesString(ReadOnlyMemory<Rune> source)
 /// <param name="source"></param>
 [RunaString]
 public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
-    : IRunaString<RunesSpanString, RunesSpanEnumerator, RunesIndex>
+    : IRunaString<RunesSpanString, RunesSpanString, RunesSpanEnumerator, RunesIndex>
 {
-    /// <inheritdoc />
-    public static RunesSpanString FromRunes(scoped ReadOnlySpan<Rune> runes) =>
-        RunesString.FromRunes(runes);
-
-    /// <inheritdoc />
-    public static RunesSpanString FromString(scoped ReadOnlySpan<char> str) =>
-        RunesString.FromString(str);
-
-    #region source generated members
-
-    public partial Rune this[RunesIndex index] { get; }
-    public partial bool TryGetRune(RunesIndex index, out Rune rune);
-
-    #endregion
+    #region base members
 
     /// <summary>
     /// Gets the source data as a read-only span of characters, which serves as the underlying buffer for enumerating Unicode runes in this enumerable.
     /// </summary>
     public ReadOnlySpan<Rune> Source { get; } = source;
-
-    /// <inheritdoc />
-    public RunesSpanString Slice(int runeStart) =>
-        new(Source.Slice(runeStart));
-
-    /// <inheritdoc />
-    public RunesSpanString Slice(int runeStart, int runeLength) =>
-        new(Source.Slice(runeStart, runeLength));
-
-    /// <inheritdoc />
-    public RunesSpanString Slice(RunesIndex start) =>
-        new(Source.Slice(start.RuneIndex));
-
-    /// <inheritdoc />
-    public RunesSpanString Slice(RunesIndex start, RunesIndex end) =>
-        new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
-
-    /// <inheritdoc />
-    public bool TryGetRune(RunesIndex index, out Rune rune, out int codeUnitConsumed) =>
-        FileHelpers.TryGetRune(Source, index, out rune, out codeUnitConsumed);
-
-    /// <inheritdoc />
-    public RunesIndex Increment(ref RunesIndex index) =>
-        FileHelpers.Increment(Source, ref index);
-
-    /// <inheritdoc />
-    public RunesIndex IncrementBegin => RunesIndex.IncrementBegin;
-
-    /// <inheritdoc />
-    public RunesIndex GetIncrementEnd() => new(Source.Length);
-
-    /// <inheritdoc />
-    public RunesIndex Decrement(ref RunesIndex index) =>
-        FileHelpers.Decrement(Source, ref index);
-
-    /// <inheritdoc />
-    public RunesIndex DecrementEnd => RunesIndex.DecrementEnd;
-
-    /// <inheritdoc />
-    public RunesIndex GetDecrementBegin() => new(Source.Length - 1);
-
-    /// <inheritdoc />
-    public RunesIndex GetIndexByRuneIndex(int runeIndex) => new(runeIndex);
-
-    /// <inheritdoc />
-    public bool IsInRange(RunesIndex index) =>
-        FileHelpers.IsInRange(Source, index);
-
-    /// <inheritdoc />
-    public RunesSpanEnumerator GetEnumerator() =>
-        RunesSpanEnumerator.Create(Source);
-
-    /// <inheritdoc />
-    public int GetRuneCount() => Source.Length;
-
-    /// <inheritdoc />
-    public bool StartsWith(scoped RunesSpanString pattern) =>
-        MemoryExtensions.StartsWith(Source, pattern.Source);
-
-    /// <inheritdoc />
-    public bool EndsWith(scoped RunesSpanString pattern) =>
-        MemoryExtensions.EndsWith(Source, pattern.Source);
-
-    /// <inheritdoc />
-    public override bool Equals([NotNullWhen(true)] object? obj) => false;
 
     /// <inheritdoc />
     public override string ToString()
@@ -282,6 +280,133 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
     /// <inheritdoc />
     public override int GetHashCode() => RuneHelpers.GetHashCode(Source);
 
+    #region source generated members
+
+    public partial Rune this[RunesIndex index] { get; }
+    public partial bool TryGetRune(RunesIndex index, out Rune rune);
+
+    #endregion
+
+    #endregion
+
+    #region creation
+
+    /// <inheritdoc />
+    public static RunesSpanString FromRunes(scoped ReadOnlySpan<Rune> runes) =>
+        RunesString.FromRunes(runes);
+
+    /// <inheritdoc />
+    public static RunesSpanString FromString(scoped ReadOnlySpan<char> str) =>
+        RunesString.FromString(str);
+
+    #endregion
+
+    #region slicing
+
+    /// <inheritdoc />
+    public RunesSpanString Slice(int runeStart) =>
+        new(Source.Slice(runeStart));
+
+    /// <inheritdoc />
+    public RunesSpanString Slice(int runeStart, int runeLength) =>
+        new(Source.Slice(runeStart, runeLength));
+
+    /// <inheritdoc />
+    public RunesSpanString Slice(RunesIndex start) =>
+        new(Source.Slice(start.RuneIndex));
+
+    /// <inheritdoc />
+    public RunesSpanString Slice(RunesIndex start, RunesIndex end) =>
+        new(Source.Slice(start.RuneIndex, end.RuneIndex - start.RuneIndex));
+
+    #endregion
+
+    #region enumerations
+
+    /// <inheritdoc />
+    public RunesIndex Increment(ref RunesIndex index)
+    {
+        var newIndex = index.RuneIndex + 1;
+        if (Source.Length < newIndex)
+        {
+            return index;
+        }
+        return index = new(newIndex);
+    }
+
+    /// <inheritdoc />
+    public RunesIndex IncrementBegin => RunesIndex.IncrementBegin;
+
+    /// <inheritdoc />
+    public RunesIndex GetIncrementEnd() => new(Source.Length);
+
+    /// <inheritdoc />
+    public RunesIndex Decrement(ref RunesIndex index)
+    {
+        if ((uint)index.RuneIndex <= 0)
+        {
+            return index = RunesIndex.DecrementEnd;
+        }
+        return index = new(index.RuneIndex - 1);
+    }
+
+    /// <inheritdoc />
+    public RunesIndex DecrementEnd => RunesIndex.DecrementEnd;
+
+    /// <inheritdoc />
+    public RunesIndex GetDecrementBegin() => new(Source.Length - 1);
+
+    /// <inheritdoc />
+    public RunesSpanEnumerator GetEnumerator() =>
+        RunesSpanEnumerator.Create(Source);
+
+    #endregion
+
+    #region rune-base manipulations
+
+    /// <inheritdoc />
+    public bool TryGetRune(RunesIndex index, out Rune rune, out int codeUnitConsumed)
+    {
+        if ((uint)index.RuneIndex >= (uint)Source.Length)
+        {
+            rune = default;
+            codeUnitConsumed = 0;
+            return false;
+        }
+        rune = Source[index.RuneIndex];
+        codeUnitConsumed = 1;
+        return true;
+    }
+
+    /// <inheritdoc />
+    public RunesIndex GetIndexByRuneIndex(int runeIndex) => new(runeIndex);
+
+    /// <inheritdoc />
+    public bool IsInRange(RunesIndex index) =>
+        (uint)index.RuneIndex < (uint)Source.Length;
+
+    /// <inheritdoc />
+    public int GetRuneCount() => Source.Length;
+
+    #endregion
+
+    #region comparison and equality
+
+    /// <inheritdoc />
+    public int CodeUnitIndexOf(scoped RunesSpanString pattern) =>
+        MemoryExtensions.IndexOf(Source, pattern.Source);
+
+    /// <inheritdoc />
+    public bool StartsWith(scoped RunesSpanString pattern) =>
+        MemoryExtensions.StartsWith(Source, pattern.Source);
+
+    /// <inheritdoc />
+    public bool EndsWith(scoped RunesSpanString pattern) =>
+        MemoryExtensions.EndsWith(Source, pattern.Source);
+
+    /// <inheritdoc />
+    public override bool Equals([NotNullWhen(true)] object? obj) => false;
+
     /// <inheritdoc />
     public int CompareTo(scoped RunesSpanString other) => Compare(this, other);
 
@@ -302,51 +427,19 @@ public readonly ref partial struct RunesSpanString(ReadOnlySpan<Rune> source)
     /// <inheritdoc />
     public static bool operator !=(scoped RunesSpanString x, scoped RunesSpanString y) => !Equals(x, y);
 
+    #endregion
+
+    #region conversion
+
+    /// <inheritdoc />
+    public RunesSpanString AsView() => this;
+
     /// <summary>
     /// Defines an implicit conversion from <see cref="RunesString" /> to <see cref="RunesSpanString" /> that creates a new <see cref="RunesSpanString" /> representing the UTF-8 encoded string.
     /// </summary>
     /// <param name="str"></param>
     public static implicit operator RunesSpanString(RunesString str) =>
         new(str.Source.Span);
-}
 
-
-file static class FileHelpers
-{
-    public static bool TryGetRune(scoped ReadOnlySpan<Rune> source, RunesIndex index, out Rune rune, out int codeUnitConsumed)
-    {
-        if ((uint)index.RuneIndex >= (uint)source.Length)
-        {
-            rune = default;
-            codeUnitConsumed = 0;
-            return false;
-        }
-        rune = source[index.RuneIndex];
-        codeUnitConsumed = 1;
-        return true;
-    }
-
-    public static RunesIndex Increment(scoped ReadOnlySpan<Rune> source, ref RunesIndex index)
-    {
-        var newIndex = index.RuneIndex + 1;
-        if (source.Length < newIndex)
-        {
-            return index;
-        }
-        return index = new(newIndex);
-    }
-
-    public static RunesIndex Decrement(scoped ReadOnlySpan<Rune> source, ref RunesIndex index)
-    {
-        InternalHelpers.NoUse(source);
-
-        if ((uint)index.RuneIndex <= 0)
-        {
-            return index = RunesIndex.DecrementEnd;
-        }
-        return index = new(index.RuneIndex - 1);
-    }
-
-    public static bool IsInRange(scoped ReadOnlySpan<Rune> source, RunesIndex index) =>
-        (uint)index.RuneIndex < (uint)source.Length;
+    #endregion
 }

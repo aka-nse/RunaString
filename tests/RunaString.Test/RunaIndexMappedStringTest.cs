@@ -78,7 +78,7 @@ public class RunaIndexMappedStringTest
         }
 
         var str = Utf8String.FromUtf8([.. Encoding.UTF8.GetBytes(input)]);
-        var mappedString = RunaIndexMappedString.Create<Utf8String, Utf8Index>(str);
+        var mappedString = RunaIndexMappedString.Create<Utf8String, Utf8SpanString, Utf8Index>(str);
 
         Assert.Equal(expectedLength, mappedString.Length);
         Assert.Equal(input, mappedString.ToString());

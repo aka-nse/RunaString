@@ -3,7 +3,7 @@ namespace RunaString.RegularExpressions;
 internal interface IRegexRunnerFactory
 {
     public RegexRunner<TString, TIndex> CreateInstance<TString, TIndex>()
-        where TString : IRunaString<TString, TIndex>, allows ref struct
+        where TString : IRunaStringBase<TString, TIndex>, allows ref struct
         where TIndex : unmanaged,IRunaIndex<TIndex>;
 }
 
@@ -12,7 +12,7 @@ internal interface IRegexRunnerFactory
     "" // "4c847e7482d3dc6f0158ba6671bc0aef9e872261b0785e2277c4520bb004a00d"
     )]
 internal abstract class RegexRunner<TString, TIndex>
-        where TString : IRunaString<TString, TIndex>, allows ref struct
+        where TString : IRunaStringBase<TString, TIndex>, allows ref struct
         where TIndex : unmanaged, IRunaIndex<TIndex>
 {
     public abstract void Scan(TString text);

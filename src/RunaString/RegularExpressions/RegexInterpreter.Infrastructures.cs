@@ -472,7 +472,7 @@ partial class RegexInterpreter<TString, TIndex>
 file static class Helpers
 {
     extension<TString, TIndex>(TString text)
-        where TString : IRunaString<TString, TIndex>, allows ref struct
+        where TString : IRunaStringBase<TString, TIndex>, allows ref struct
         where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         public TIndex Increment(TIndex index, int count)

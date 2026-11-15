@@ -27,9 +27,9 @@ public partial class RunaStringTest
         };
 
     private static void SliceStartTestCore<TString, TEnumerator, TIndex, TBuffer>(TString value, int start, string expected)
-        where TString : struct, IRunaString<TString, TEnumerator, TIndex>, allows ref struct
+        where TString : struct, IRunaStringBase<TString, TIndex>, IRunaEnumerable<TString, TEnumerator>, allows ref struct
         where TEnumerator : struct, IRunaEnumerator<TEnumerator, TIndex, TBuffer>, allows ref struct
-        where TIndex : IRunaIndex
+        where TIndex : unmanaged, IRunaIndex<TIndex>
         where TBuffer : struct, allows ref struct
     {
         {
@@ -134,9 +134,9 @@ public partial class RunaStringTest
         };
 
     private static void SliceStartEndTestCore<TString, TEnumerator, TIndex, TBuffer>(TString value, int start, int end, string expected)
-        where TString : struct, IRunaString<TString, TEnumerator, TIndex>, allows ref struct
+        where TString : struct, IRunaStringBase<TString, TIndex>, IRunaEnumerable<TString, TEnumerator>, allows ref struct
         where TEnumerator : struct, IRunaEnumerator<TEnumerator, TIndex, TBuffer>, allows ref struct
-        where TIndex : IRunaIndex
+        where TIndex : unmanaged, IRunaIndex<TIndex>
         where TBuffer : struct, allows ref struct
     {
         {

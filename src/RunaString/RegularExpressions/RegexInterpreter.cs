@@ -12,7 +12,7 @@ internal class RegexInterpreterFactory(RegexTree tree)
     private readonly CultureInfo? _culture = tree.Culture;
 
     public RegexRunner<TString, TIndex> CreateInstance<TString, TIndex>()
-        where TString : IRunaString<TString, TIndex>, allows ref struct
+        where TString : IRunaStringBase<TString, TIndex>, allows ref struct
         where TIndex : unmanaged, IRunaIndex<TIndex> =>
         new RegexInterpreter<TString, TIndex>(_code, _culture);
 }
@@ -28,7 +28,7 @@ internal class RegexInterpreterFactory(RegexTree tree)
     )]
 internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode code, CultureInfo? culture)
     : RegexRunner<TString, TIndex>
-    where TString : IRunaString<TString, TIndex>, allows ref struct
+    where TString : IRunaStringBase<TString, TIndex>, allows ref struct
     where TIndex : unmanaged, IRunaIndex<TIndex>
 {
 #pragma warning disable IDE1006

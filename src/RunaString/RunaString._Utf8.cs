@@ -16,10 +16,39 @@ namespace RunaString;
 /// </remarks>
 [RunaString]
 public readonly partial struct Utf8String
-    : IRunaString<Utf8String, Utf8MemoryEnumerator, Utf8Index>
+    : IRunaString<Utf8String, Utf8SpanString, Utf8MemoryEnumerator, Utf8Index>
     , IComparable<Utf8String>
     , IEquatable<Utf8String>
 {
+    #region base members
+
+    /// <summary>
+    /// Gets a read-only memory of bytes representing the UTF-8 encoded string.
+    /// </summary>
+    public ReadOnlyMemory<byte> Buffer { get; }
+
+    /// <summary>
+    /// Gets the length of the UTF-8 encoded string in bytes.
+    /// </summary>
+    public int BufferLength => Buffer.Length;
+
+    /// <inheritdoc />
+    public override string ToString() => Utf8Helpers.ToString(Buffer.Span);
+
+    /// <inheritdoc />
+    public override int GetHashCode() => Utf8Helpers.GetHashCode(Buffer.Span);
+
+    #region source generated members
+
+    public partial Rune this[Utf8Index index] { get; }
+    public partial bool TryGetRune(Utf8Index index, out Rune rune);
+
+    #endregion
+
+    #endregion
+
+    #region creation
+
     /// <inheritdoc />
     public static Utf8String FromRunes(scoped ReadOnlySpan<Rune> runes)
     {
@@ -60,22 +89,6 @@ public readonly partial struct Utf8String
         return new Utf8String(bytes);
     }
 
-    #region source generated members
-        
-    public partial Rune this[Utf8Index index] { get; }
-    public partial bool TryGetRune(Utf8Index index, out Rune rune);
-
-    #endregion
-
-    /// <summary>
-    /// Gets a read-only memory of bytes representing the UTF-8 encoded string.
-    /// </summary>
-    public ReadOnlyMemory<byte> Buffer { get; }
-
-    /// <summary>
-    /// Gets the length of the UTF-8 encoded string in bytes.
-    /// </summary>
-    public int BufferLength => Buffer.Length;
 
     private Utf8String(ReadOnlyMemory<byte> buffer)
     {
@@ -138,6 +151,10 @@ public readonly partial struct Utf8String
     public static Utf8String DangerousFromUtf8(ReadOnlyMemory<byte> utf8Buffer) =>
         new (utf8Buffer);
 
+    #endregion
+
+    #region slicing
+
     /// <inheritdoc />
     public Utf8String Slice(int runeStart)
     {
@@ -169,94 +186,142 @@ public readonly partial struct Utf8String
         return new(Buffer.Slice(byteStart, byteLength));
     }
 
-    /// <inheritdoc />
-    public bool TryGetRune(Utf8Index index, out Rune rune, out int codeUnitConsumed) =>
-        FileHelpers.TryGetRune(Buffer.Span, index, out rune, out codeUnitConsumed);
+    #endregion
+
+    #region enumerations
 
     /// <inheritdoc />
     public Utf8Index Increment(ref Utf8Index index) =>
-        FileHelpers.Increment(Buffer.Span, ref index);
+        ((Utf8SpanString)this).Increment(ref index);
 
     /// <inheritdoc />
-    public Utf8Index IncrementBegin => Utf8Index.IncrementBegin;
+    public Utf8Index IncrementBegin =>
+        ((Utf8SpanString)this).IncrementBegin;
 
     /// <inheritdoc />
-    public Utf8Index GetIncrementEnd() => new(Buffer.Length, GetRuneCount());
+    public Utf8Index GetIncrementEnd() =>
+        ((Utf8SpanString)this).GetIncrementEnd();
 
     /// <inheritdoc />
     public Utf8Index Decrement(ref Utf8Index index) =>
-        FileHelpers.Decrement(Buffer.Span, ref index);
+        ((Utf8SpanString)this).Decrement(ref index);
 
     /// <inheritdoc />
-    public Utf8Index DecrementEnd => Utf8Index.DecrementEnd;
+    public Utf8Index DecrementEnd =>
+        ((Utf8SpanString)this).DecrementEnd;
 
     /// <inheritdoc />
-    public Utf8Index GetDecrementBegin()
-    {
-        var index = new Utf8Index(Buffer.Length, GetRuneCount());
-        return Decrement(ref index);
-    }
+    public Utf8Index GetDecrementBegin() =>
+        ((Utf8SpanString)this).GetDecrementBegin();
 
     /// <inheritdoc />
-    public Utf8Index GetIndexByRuneIndex(int runeIndex)
-    {
-        for(Utf8Index i = IncrementBegin, end = GetIncrementEnd(); i != end; Increment(ref i))
-        {
-            if (i.RuneIndex == runeIndex)
-            {
-                return i;
-            }
-        }
-        return Guard.ThrowArgument<Utf8Index>(nameof(runeIndex), "The specified rune index is out of range.");
-    }
+    public Utf8MemoryEnumerator GetEnumerator() =>
+        new(this);
+
+    #endregion
+
+    #region rune-base manipulations
+
+    /// <inheritdoc />
+    public bool TryGetRune(Utf8Index index, out Rune rune, out int codeUnitConsumed) =>
+        ((Utf8SpanString)this).TryGetRune(index, out rune, out codeUnitConsumed);
+
+    /// <inheritdoc />
+    public Utf8Index GetIndexByRuneIndex(int runeIndex) =>
+        ((Utf8SpanString)this).GetIndexByRuneIndex(runeIndex);
 
     /// <inheritdoc />
     public bool IsInRange(Utf8Index index) =>
-        FileHelpers.IsInRange(Buffer.Span, index);
+        ((Utf8SpanString)this).IsInRange(index);
 
     /// <inheritdoc />
-    public Utf8MemoryEnumerator GetEnumerator() => new(this);
+    public int GetRuneCount() =>
+        ((Utf8SpanString)this).GetRuneCount();
+
+    #endregion
+
+    #region comparison and equality
 
     /// <inheritdoc />
-    public int GetRuneCount() => Utf8Helpers.GetRuneCount(Buffer.Span);
+    public int CodeUnitIndexOf(scoped Utf8SpanString pattern) =>
+        ((Utf8SpanString)this).CodeUnitIndexOf(pattern);
 
     /// <inheritdoc />
-    public bool StartsWith(Utf8String pattern) =>
-        MemoryExtensions.StartsWith(Buffer.Span, pattern.Buffer.Span);
+    public bool StartsWith(Utf8SpanString pattern) =>
+        ((Utf8SpanString)this).StartsWith(pattern);
 
     /// <inheritdoc />
-    public bool EndsWith(Utf8String pattern) =>
-        MemoryExtensions.EndsWith(Buffer.Span, pattern.Buffer.Span);
+    public bool EndsWith(Utf8SpanString pattern) =>
+        ((Utf8SpanString)this).EndsWith(pattern);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) =>
         obj is Utf8String other && Equals(this, other);
 
     /// <inheritdoc />
-    public override string ToString() => Utf8Helpers.ToString(Buffer.Span);
+    public int CompareTo(Utf8String other) =>
+        Compare(this, other);
 
     /// <inheritdoc />
-    public override int GetHashCode() => Utf8Helpers.GetHashCode(Buffer.Span);
-
-    /// <inheritdoc />
-    public int CompareTo(Utf8String other) => Compare(this, other);
-
-    /// <inheritdoc />
-    public bool Equals(Utf8String other) => Equals(this, other);
+    public bool Equals(Utf8String other) =>
+        Equals(this, other);
 
     /// <inheritdoc />
     public static bool Equals(Utf8String x, Utf8String y) =>
-        InternalHelpers.Equals(x.Buffer.Span, y.Buffer.Span);
+        Utf8SpanString.Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool Equals(Utf8String x, Utf8SpanString y) =>
+        Utf8SpanString.Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool Equals(Utf8SpanString x, Utf8String y) =>
+        Utf8SpanString.Equals(x, y);
 
     /// <inheritdoc />
     public static int Compare(Utf8String x, Utf8String y) =>
-        Utf8Helpers.Compare(x.Buffer.Span, y.Buffer.Span);
+        Utf8SpanString.Compare(x, y);
 
     /// <inheritdoc />
-    public static bool operator ==(Utf8String x, Utf8String y) => Equals(x, y);
+    public static int Compare(Utf8String x, Utf8SpanString y) =>
+        Utf8SpanString.Compare(x, y);
 
     /// <inheritdoc />
-    public static bool operator !=(Utf8String x, Utf8String y) => !Equals(x, y);
+    public static int Compare(Utf8SpanString x, Utf8String y) =>
+        Utf8SpanString.Compare(x, y);
+
+    /// <inheritdoc />
+    public static bool operator ==(Utf8String x, Utf8String y) =>
+        Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator ==(Utf8String x, Utf8SpanString y) =>
+        Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator ==(Utf8SpanString x, Utf8String y) =>
+        Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator !=(Utf8String x, Utf8String y) =>
+        !Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator !=(Utf8String x, Utf8SpanString y) =>
+        !Equals(x, y);
+
+    /// <inheritdoc />
+    public static bool operator !=(Utf8SpanString x, Utf8String y) =>
+        !Equals(x, y);
+
+    #endregion
+
+    #region type conversion
+
+    /// <inheritdoc />
+    public Utf8SpanString AsView() => this;
+
+    #endregion
 }
 
 
@@ -270,24 +335,11 @@ public readonly partial struct Utf8String
 /// </remarks>
 [RunaString]
 public readonly ref partial struct Utf8SpanString
-    : IRunaString<Utf8SpanString, Utf8SpanEnumerator, Utf8Index>
+    : IRunaString<Utf8SpanString, Utf8SpanString, Utf8SpanEnumerator, Utf8Index>
     , IComparable<Utf8SpanString>
     , IEquatable<Utf8SpanString>
 {
-    /// <inheritdoc />
-    public static Utf8SpanString FromRunes(scoped ReadOnlySpan<Rune> runes) =>
-        Utf8String.FromRunes(runes);
-
-    /// <inheritdoc />
-    public static Utf8SpanString FromString(scoped ReadOnlySpan<char> str) =>
-        Utf8String.FromString(str);
-
-    #region source generated members
-
-    public partial Rune this[Utf8Index index] { get; }
-    public partial bool TryGetRune(Utf8Index index, out Rune rune);
-
-    #endregion
+    #region base members
 
     private readonly ref readonly byte _reference;
 
@@ -303,6 +355,33 @@ public readonly ref partial struct Utf8SpanString
     /// Gets the length of the UTF-8 encoded string in bytes.
     /// </summary>
     public int BufferLength => _length;
+
+    /// <inheritdoc />
+    public override string ToString() => Utf8Helpers.ToString(Buffer);
+
+    /// <inheritdoc />
+    public override int GetHashCode() => Utf8Helpers.GetHashCode(Buffer);
+
+    #region source generated members
+
+    public partial Rune this[Utf8Index index] { get; }
+    public partial bool TryGetRune(Utf8Index index, out Rune rune);
+
+    #endregion
+
+    #endregion
+
+    #region creation
+
+    /// <inheritdoc />
+    public static Utf8SpanString FromRunes(scoped ReadOnlySpan<Rune> runes) =>
+        Utf8String.FromRunes(runes);
+
+    /// <inheritdoc />
+    public static Utf8SpanString FromString(scoped ReadOnlySpan<char> str) =>
+        Utf8String.FromString(str);
+
+
 
     private Utf8SpanString(in byte reference, int length)
     {
@@ -340,15 +419,21 @@ public readonly ref partial struct Utf8SpanString
         DangerousFromSpan(str.Buffer.Span);
 
     /// <summary>
-    /// Creates a new <see cref="Utf8SpanString" /> from a given UTF-8 encoded byte buffer, starting at the specified index and with the specified length, without validating the UTF-8 encoding.
+    /// Creates a new <see cref="Utf8SpanString" /> from a given UTF-8 encoded byte buffer,
+    /// starting at the specified index and with the specified length, without validating the UTF-8 encoding.
     /// </summary>
     /// <param name="utf8Buffer"> Must be valid UTF-8 encoded bytes. </param>
     /// <returns></returns>
     /// <remarks>
-    /// If an invalid UTF-8 byte sequence is input, the state of all members of this instance - as well as all members reachable via the return values ​​of those members - becomes undefined.
+    /// If an invalid UTF-8 byte sequence is input, the state of all members of this instance
+    /// - as well as all members reachable via the return values ​​of those members - becomes undefined.
     /// </remarks>
     public static Utf8SpanString DangerousFromSpan(ReadOnlySpan<byte> utf8Buffer) =>
         new(in MemoryMarshal.GetReference(utf8Buffer), utf8Buffer.Length);
+
+    #endregion
+
+    #region slicing
 
     /// <inheritdoc />
     public Utf8SpanString Slice(int runeStart)
@@ -368,7 +453,9 @@ public readonly ref partial struct Utf8SpanString
     public Utf8SpanString Slice(Utf8Index start)
     {
         var byteStart = start.ByteIndex;
-        Guard.WithIn((uint)(byteStart) <= (uint)Buffer.Length, nameof(start), "The specified range is out of bounds.");
+        Guard.WithIn(
+            (uint)(byteStart) <= (uint)Buffer.Length, nameof(start),
+            "The specified range is out of bounds.");
         return DangerousFromSpan(Buffer.Slice(byteStart));
     }
 
@@ -377,17 +464,27 @@ public readonly ref partial struct Utf8SpanString
     {
         var byteStart = start.ByteIndex;
         var byteLength = end.ByteIndex - start.ByteIndex;
-        Guard.WithIn(byteStart >= 0 && (uint)(byteStart + byteLength) <= (uint)_length, nameof(start), "The specified range is out of bounds.");
+        Guard.WithIn(
+            byteStart >= 0 && (uint)(byteStart + byteLength) <= (uint)_length, nameof(start),
+            "The specified range is out of bounds.");
         return DangerousFromSpan(Buffer.Slice(byteStart, byteLength));
     }
 
-    /// <inheritdoc />
-    public bool TryGetRune(Utf8Index index, out Rune rune, out int codeUnitConsumed) =>
-        FileHelpers.TryGetRune(Buffer, index, out rune, out codeUnitConsumed);
+    #endregion
+
+    #region enumerations
 
     /// <inheritdoc />
-    public Utf8Index Increment(ref Utf8Index index) =>
-        FileHelpers.Increment(Buffer, ref index);
+    public Utf8Index Increment(ref Utf8Index index)
+    {
+        if ((uint)index.ByteIndex < (uint)Buffer.Length)
+        {
+            var (byteIndex, runeIndex) = index;
+            Utf8Helpers.UnsafeTryGetRuneAndMoveNext(Buffer, ref byteIndex, ref runeIndex, out _);
+            index = new(byteIndex, runeIndex);
+        }
+        return index;
+    }
 
     /// <inheritdoc />
     public Utf8Index IncrementBegin => Utf8Index.IncrementBegin;
@@ -396,8 +493,24 @@ public readonly ref partial struct Utf8SpanString
     public Utf8Index GetIncrementEnd() => new(Buffer.Length, GetRuneCount());
 
     /// <inheritdoc />
-    public Utf8Index Decrement(ref Utf8Index index) =>
-        FileHelpers.Decrement(Buffer, ref index);
+    public Utf8Index Decrement(ref Utf8Index index)
+    {
+        if (index.ByteIndex <= 0)
+        {
+            return index = new(-1, -1);
+        }
+        var newByteIndex = index.ByteIndex - 1;
+        while (newByteIndex >= 0)
+        {
+            if (Buffer[newByteIndex] < 0x80 || Buffer[newByteIndex] >= 0xC0)
+            {
+                index = new(newByteIndex, index.RuneIndex - 1);
+                break;
+            }
+            --newByteIndex;
+        }
+        return index;
+    }
 
     /// <inheritdoc />
     public Utf8Index DecrementEnd => Utf8Index.DecrementEnd;
@@ -407,6 +520,22 @@ public readonly ref partial struct Utf8SpanString
     {
         var index = new Utf8Index(Buffer.Length, GetRuneCount());
         return Decrement(ref index);
+    }
+
+    /// <inheritdoc />
+    public Utf8SpanEnumerator GetEnumerator() => new(this);
+
+    #endregion
+
+    #region rune-base manipulations
+
+    /// <inheritdoc />
+    public bool TryGetRune(Utf8Index index, out Rune rune, out int codeUnitConsumed)
+    {
+        var (byteIndex, runeIndex) = index;
+        var result = Utf8Helpers.UnsafeTryGetRuneAndMoveNext(Buffer, ref byteIndex, ref runeIndex, out rune);
+        codeUnitConsumed = byteIndex - index.ByteIndex;
+        return result;
     }
 
     /// <inheritdoc />
@@ -424,13 +553,18 @@ public readonly ref partial struct Utf8SpanString
 
     /// <inheritdoc />
     public bool IsInRange(Utf8Index index) =>
-        FileHelpers.IsInRange(Buffer, index);
-
-    /// <inheritdoc />
-    public Utf8SpanEnumerator GetEnumerator() => new(this);
+        (uint)index.ByteIndex < (uint)Buffer.Length;
 
     /// <inheritdoc />
     public int GetRuneCount() => Utf8Helpers.GetRuneCount(Buffer);
+
+    #endregion
+
+    #region comparison and equality
+
+    /// <inheritdoc />
+    public int CodeUnitIndexOf(scoped Utf8SpanString pattern) =>
+        MemoryExtensions.IndexOf<byte>(Buffer, pattern.Buffer);
 
     /// <inheritdoc />
     public bool StartsWith(scoped Utf8SpanString pattern) =>
@@ -442,12 +576,6 @@ public readonly ref partial struct Utf8SpanString
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) => false;
-
-    /// <inheritdoc />
-    public override string ToString() => Utf8Helpers.ToString(Buffer);
-
-    /// <inheritdoc />
-    public override int GetHashCode() => Utf8Helpers.GetHashCode(Buffer);
 
     /// <inheritdoc />
     public int CompareTo(scoped Utf8SpanString other) => Compare(this, other);
@@ -469,14 +597,22 @@ public readonly ref partial struct Utf8SpanString
     /// <inheritdoc />
     public static bool operator !=(scoped Utf8SpanString x, scoped Utf8SpanString y) => !Equals(x, y);
 
+    #endregion
+
+    #region type conversions
+
+    /// <inheritdoc />
+    public Utf8SpanString AsView() => this;
+
     /// <summary>
     /// Defines an implicit conversion from <see cref="Utf8String" /> to <see cref="Utf8SpanString" /> that creates a new <see cref="Utf8SpanString" /> representing the UTF-8 encoded string.
     /// </summary>
     /// <param name="str"></param>
     public static implicit operator Utf8SpanString(Utf8String str) =>
         FromString(str);
-}
 
+    #endregion
+}
 
 
 /// <summary>
@@ -529,49 +665,4 @@ public abstract partial class Utf8Comparer
     /// <inheritdoc />
     public int GetHashCode([DisallowNull] Utf8String obj) =>
         GetHashCode((Utf8SpanString)obj);
-}
-
-
-file static class FileHelpers
-{
-    public static bool TryGetRune(scoped ReadOnlySpan<byte> buffer, Utf8Index index, out Rune rune, out int codeUnitConsumed)
-    {
-        var (byteIndex, runeIndex) = index;
-        var result = Utf8Helpers.UnsafeTryGetRuneAndMoveNext(buffer, ref byteIndex, ref runeIndex, out rune);
-        codeUnitConsumed = byteIndex - index.ByteIndex;
-        return result;
-    }
-
-    public static Utf8Index Increment(scoped ReadOnlySpan<byte> buffer, ref Utf8Index index)
-    {
-        if((uint)index.ByteIndex < (uint)buffer.Length)
-        {
-            var (byteIndex, runeIndex) = index;
-            Utf8Helpers.UnsafeTryGetRuneAndMoveNext(buffer, ref byteIndex, ref runeIndex, out _);
-            index = new(byteIndex, runeIndex);
-        }
-        return index;
-    }
-
-    public static Utf8Index Decrement(scoped ReadOnlySpan<byte> buffer, ref Utf8Index index)
-    {
-        if (index.ByteIndex <= 0)
-        {
-            return index = new(-1, -1);
-        }
-        var newByteIndex = index.ByteIndex - 1;
-        while (newByteIndex >= 0)
-        {
-            if (buffer[newByteIndex] < 0x80 || buffer[newByteIndex] >= 0xC0)
-            {
-                index = new(newByteIndex, index.RuneIndex - 1);
-                break;
-            }
-            --newByteIndex;
-        }
-        return index;
-    }
-
-    public static bool IsInRange(scoped ReadOnlySpan<byte> buffer, Utf8Index index) =>
-        (uint)index.ByteIndex < (uint)buffer.Length;
 }

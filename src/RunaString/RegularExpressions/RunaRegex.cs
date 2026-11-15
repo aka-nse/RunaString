@@ -104,6 +104,7 @@ public partial class RunaRegex
         _culture = culture ?? ((options & RegexOptions.CultureInvariant) != 0 ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
 
         var tree = RegexParser.Parse(_pattern, _options, _culture);
-        _factory = new RegexInterpreterFactory(tree);
+#pragma warning
+        // _factory = new RegexInterpreterFactory(tree);
     }
 }

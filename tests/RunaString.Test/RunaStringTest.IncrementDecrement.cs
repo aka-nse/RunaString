@@ -136,7 +136,7 @@ public partial class RunaStringTest
 
 
     private static void IncrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
-        where TStr : IRunaString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaStringBase<TStr, TIndex>, allows ref struct
         where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         Assert.Equal(expected, input.Increment(ref index));
@@ -144,7 +144,7 @@ public partial class RunaStringTest
     }
 
     private static void IncrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
-        where TStr : IRunaString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaStringBase<TStr, TIndex>, allows ref struct
         where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         input.Increment(ref index);
@@ -152,7 +152,7 @@ public partial class RunaStringTest
     }
 
     private static void DecrementTestCore_True<TStr, TIndex>(TStr input, TIndex index, TIndex expected)
-        where TStr : IRunaString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaStringBase<TStr, TIndex>, allows ref struct
         where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         Assert.Equal(expected, input.Decrement(ref index));
@@ -160,7 +160,7 @@ public partial class RunaStringTest
     }
 
     private static void DecrementTestCore_False<TStr, TIndex>(TStr input, TIndex index)
-        where TStr : IRunaString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaStringBase<TStr, TIndex>, allows ref struct
         where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         input.Decrement(ref index);
@@ -168,7 +168,7 @@ public partial class RunaStringTest
     }
 
     private static void WholeIncrementTestCore<TStr, TIndex>(TStr input, TIndex _, string expected)
-        where TStr : IRunaString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaStringBase<TStr, TIndex>, allows ref struct
         where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         var sb = new StringBuilder();
@@ -180,7 +180,7 @@ public partial class RunaStringTest
     }
 
     private static void WholeDecrementTestCore<TStr, TIndex>(TStr input, TIndex _, string expected)
-        where TStr : IRunaString<TStr, TIndex>, allows ref struct
+        where TStr : IRunaStringBase<TStr, TIndex>, allows ref struct
         where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         var sb = new StringBuilder();

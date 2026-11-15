@@ -7,12 +7,17 @@ public interface IRunaIndex
     /// Gets the zero-based index of the current rune in the source buffer.
     /// </summary>
     public int RuneIndex { get; }
+
+    /// <summary>
+    /// Gets the zero-based index of the current code unit of the target encoding in the source buffer.
+    /// </summary>
+    public int CodeUnitIndex { get; }
 }
 
 
 /// <summary>
 /// Defines a type that represents a seekable index into a source buffer for an
-/// <see cref="IRunaString{TSelf, TEnumerator, TIndex}"/> and <see cref="IRunaEnumerator{TSelf, TIndex, TBuffer}"/>.
+/// <see cref="IRunaStringViewable{TSelf, TEnumerator, TIndex}"/> and <see cref="IRunaEnumerator{TSelf, TIndex, TBuffer}"/>.
 /// </summary>
 /// <typeparam name="TSelf">The type that implements this interface.</typeparam>
 public interface IRunaIndex<TSelf> : IRunaIndex, IEquatable<TSelf>, IComparable<TSelf>
