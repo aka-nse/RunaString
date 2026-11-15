@@ -158,27 +158,27 @@ public readonly partial struct CharsString
 
     /// <inheritdoc />
     public CharsIndex Increment(ref CharsIndex index) =>
-        FileHelpers.Increment(Source.Span, ref index);
+        ((CharsSpanString)this).Increment(ref index);
 
     /// <inheritdoc />
-    public CharsIndex IncrementBegin => CharsIndex.IncrementBegin;
+    public CharsIndex IncrementBegin =>
+        ((CharsSpanString)this).IncrementBegin;
 
     /// <inheritdoc />
-    public CharsIndex GetIncrementEnd() => new(Source.Length, GetRuneCount());
+    public CharsIndex GetIncrementEnd() =>
+        ((CharsSpanString)this).GetIncrementEnd();
 
     /// <inheritdoc />
     public CharsIndex Decrement(ref CharsIndex index) =>
-        FileHelpers.Decrement(Source.Span, ref index);
+        ((CharsSpanString)this).Decrement(ref index);
 
     /// <inheritdoc />
-    public CharsIndex DecrementEnd => CharsIndex.DecrementEnd;
+    public CharsIndex DecrementEnd =>
+        ((CharsSpanString)this).DecrementEnd;
 
     /// <inheritdoc />
-    public CharsIndex GetDecrementBegin()
-    {
-        var index = new CharsIndex(Source.Length, GetRuneCount());
-        return Decrement(ref index);
-    }
+    public CharsIndex GetDecrementBegin() =>
+        ((CharsSpanString)this).GetDecrementBegin();
 
     /// <inheritdoc />
     public CharsMemoryEnumerator GetEnumerator() =>
@@ -190,27 +190,19 @@ public readonly partial struct CharsString
 
     /// <inheritdoc />
     public bool TryGetRune(CharsIndex index, out Rune rune, out int codeUnitConsumed) =>
-        FileHelpers.TryGetRune(Source.Span, index, out rune, out codeUnitConsumed);
+        ((CharsSpanString)this).TryGetRune(index, out rune, out codeUnitConsumed);
 
     /// <inheritdoc />
-    public CharsIndex GetIndexByRuneIndex(int runeIndex)
-    {
-        for (CharsIndex i = IncrementBegin, end = GetIncrementEnd(); i != end; Increment(ref i))
-        {
-            if (i.RuneIndex == runeIndex)
-            {
-                return i;
-            }
-        }
-        return Guard.ThrowArgument<CharsIndex>(nameof(runeIndex), "The specified rune index is out of range.");
-    }
+    public CharsIndex GetIndexByRuneIndex(int runeIndex) =>
+        ((CharsSpanString)this).GetIndexByRuneIndex(runeIndex);
 
     /// <inheritdoc />
     public bool IsInRange(CharsIndex index) =>
-        FileHelpers.IsInRange(Source.Span, index);
+        ((CharsSpanString)this).IsInRange(index);
 
     /// <inheritdoc />
-    public int GetRuneCount() => CharHelpers.GetRuneCount(Source.Span);
+    public int GetRuneCount() =>
+        ((CharsSpanString)this).GetRuneCount();
 
     #endregion
 
@@ -218,15 +210,15 @@ public readonly partial struct CharsString
 
     /// <inheritdoc />
     public int CodeUnitIndexOf(CharsSpanString pattern) =>
-        MemoryExtensions.IndexOf(Source.Span, pattern.Source);
+        ((CharsSpanString)this).CodeUnitIndexOf(pattern);
 
     /// <inheritdoc />
     public bool StartsWith(CharsSpanString pattern) =>
-        MemoryExtensions.StartsWith(Source.Span, pattern.Source);
+        ((CharsSpanString)this).StartsWith(pattern);
 
     /// <inheritdoc />
     public bool EndsWith(CharsSpanString pattern) =>
-        MemoryExtensions.EndsWith(Source.Span, pattern.Source);
+        ((CharsSpanString)this).EndsWith(pattern);
 
     /// <inheritdoc />
     public override bool Equals([NotNullWhen(true)] object? obj) =>
@@ -242,27 +234,27 @@ public readonly partial struct CharsString
 
     /// <inheritdoc />
     public static bool Equals(CharsString x, CharsString y) =>
-        InternalHelpers.Equals(x.Source.Span, y.Source.Span);
+        CharsSpanString.Equals(x, y);
 
     /// <inheritdoc />
     public static bool Equals(CharsString x, CharsSpanString y) =>
-        InternalHelpers.Equals(x.Source.Span, y.Source);
+        CharsSpanString.Equals(x, y);
 
     /// <inheritdoc />
     public static bool Equals(CharsSpanString x, CharsString y) =>
-        InternalHelpers.Equals(x.Source, y.Source.Span);
+        CharsSpanString.Equals(x, y);
 
     /// <inheritdoc />
     public static int Compare(CharsString x, CharsString y) =>
-        InternalHelpers.Compare<CharsString, CharsMemoryEnumerator>(x, y);
+        CharsSpanString.Compare(x, y);
 
     /// <inheritdoc />
     public static int Compare(CharsString x, CharsSpanString y) =>
-        InternalHelpers.Compare<CharsSpanString, CharsSpanEnumerator>(x, y);
+        CharsSpanString.Compare(x, y);
 
     /// <inheritdoc />
     public static int Compare(CharsSpanString x, CharsString y) =>
-        InternalHelpers.Compare<CharsSpanString, CharsSpanEnumerator>(x, y);
+        CharsSpanString.Compare(x, y);
 
     /// <inheritdoc />
     public static bool operator ==(CharsString x, CharsString y) =>
@@ -403,8 +395,16 @@ public readonly ref partial struct CharsSpanString
     #region enumerations
 
     /// <inheritdoc />
-    public CharsIndex Increment(ref CharsIndex index) =>
-        FileHelpers.Increment(Source, ref index);
+    public CharsIndex Increment(ref CharsIndex index)
+    {
+        if ((uint)index.CharIndex < (uint)Source.Length)
+        {
+            var newRuneIndex = index.RuneIndex + 1;
+            var newCharIndex = index.CharIndex + (char.IsHighSurrogate(Source[index.CharIndex]) ? 2 : 1);
+            index = new(newCharIndex, newRuneIndex);
+        }
+        return index;
+    }
 
     /// <inheritdoc />
     public CharsIndex IncrementBegin =>
@@ -415,8 +415,20 @@ public readonly ref partial struct CharsSpanString
         new(Source.Length, GetRuneCount());
 
     /// <inheritdoc />
-    public CharsIndex Decrement(ref CharsIndex index) =>
-        FileHelpers.Decrement(Source, ref index);
+    public CharsIndex Decrement(ref CharsIndex index)
+    {
+        if (index.CharIndex <= 0)
+        {
+            return index = CharsIndex.DecrementEnd;
+        }
+        var newRuneIndex = index.RuneIndex - 1;
+        var newCharIndex = index.CharIndex - 1;
+        if (char.IsLowSurrogate(Source[newCharIndex]))
+        {
+            --newCharIndex;
+        }
+        return index = new(newCharIndex, newRuneIndex);
+    }
 
     /// <inheritdoc />
     public CharsIndex DecrementEnd =>
@@ -442,8 +454,11 @@ public readonly ref partial struct CharsSpanString
         MemoryExtensions.IndexOf(Source, pattern.Source);
 
     /// <inheritdoc />
-    public bool TryGetRune(CharsIndex index, out Rune rune, out int codeUnitConsumed) =>
-        FileHelpers.TryGetRune(Source, index, out rune, out codeUnitConsumed);
+    public bool TryGetRune(CharsIndex index, out Rune rune, out int codeUnitConsumed)
+    {
+        Rune.DecodeFromUtf16(Source.Slice(index.CharIndex), out rune, out codeUnitConsumed);
+        return codeUnitConsumed > 0;
+    }
 
     /// <inheritdoc />
     public CharsIndex GetIndexByRuneIndex(int runeIndex)
@@ -460,10 +475,11 @@ public readonly ref partial struct CharsSpanString
 
     /// <inheritdoc />
     public bool IsInRange(CharsIndex index) =>
-        FileHelpers.IsInRange(Source, index);
+        (uint)index.CharIndex < (uint)Source.Length;
 
     /// <inheritdoc />
-    public int GetRuneCount() => CharHelpers.GetRuneCount(Source);
+    public int GetRuneCount() =>
+        CharHelpers.GetRuneCount(Source);
 
     #endregion
 
@@ -534,39 +550,4 @@ file static class FileHelpers
         var endCharIndex = enumerator.NextCharIndex;
         return (startCharIndex, endCharIndex - startCharIndex);
     }
-
-    public static bool TryGetRune(scoped ReadOnlySpan<char> source, CharsIndex index, out Rune rune, out int codeUnitConsumed)
-    {
-        Rune.DecodeFromUtf16(source.Slice(index.CharIndex), out rune, out codeUnitConsumed);
-        return codeUnitConsumed > 0;
-    }
-
-    public static CharsIndex Increment(scoped ReadOnlySpan<char> Source, ref CharsIndex index)
-    {
-        if ((uint)index.CharIndex < (uint)Source.Length)
-        {
-            var newRuneIndex = index.RuneIndex + 1;
-            var newCharIndex = index.CharIndex + (char.IsHighSurrogate(Source[index.CharIndex]) ? 2 : 1);
-            index = new(newCharIndex, newRuneIndex);
-        }
-        return index;
-    }
-
-    public static CharsIndex Decrement(scoped ReadOnlySpan<char> source, ref CharsIndex index)
-    {
-        if (index.CharIndex <= 0)
-        {
-            return index = CharsIndex.DecrementEnd;
-        }
-        var newRuneIndex = index.RuneIndex - 1;
-        var newCharIndex = index.CharIndex - 1;
-        if (char.IsLowSurrogate(source[newCharIndex]))
-        {
-            --newCharIndex;
-        }
-        return index = new(newCharIndex, newRuneIndex);
-    }
-
-    public static bool IsInRange(scoped ReadOnlySpan<char> source, CharsIndex index) =>
-        (uint)index.CharIndex < (uint)source.Length;
 }
