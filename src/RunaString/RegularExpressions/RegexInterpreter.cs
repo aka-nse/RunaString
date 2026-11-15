@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace RunaString.RegularExpressions;
@@ -30,16 +31,18 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
     where TString : IRunaString<TString, TIndex>, allows ref struct
     where TIndex : unmanaged, IRunaIndex<TIndex>
 {
+#pragma warning disable IDE1006
     private RunaRegex? runregex;
+    private RunaMatch? runmatch;
     private readonly RegexInterpreterCode _code = code;
     private readonly CultureInfo? _culture = culture;
     private RegexOpcode _operator;
     private int _codepos;
     private bool _rightToLeft;
-    private TIndex runtextstart;
-    private TIndex runtextend;
-    private TIndex runtextbeg;
-    private TIndex runtextpos;
+    private int runtextstart;
+    private int runtextend;
+    private int runtextbeg;
+    private int runtextpos;
     private int[]? runtrack;
     private int[]? runstack;
     private int[]? runcrawl;
@@ -50,6 +53,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
     private bool _checkTimeout;
     private int _timeout; // [msec]
     private long _timeoutOccursAt;
+#pragma warning restore IDE1006
 
 
     public override void Scan(TString text)
@@ -59,13 +63,14 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
         Debug.Assert(runstack is not null);
         Debug.Assert(runcrawl is not null);
 
+        var xtext = new RunaIndexMappedString<TString, TIndex>(text);
         if (runregex.RightToLeft)
         {
-            while (text.IsInRange(runtextpos))
+            while (runtextpos > 0)
             {
-                CheckTimeout();
+                CheckTimeout(text);
 
-                if (TryMatchAtCurrentPosition(text))
+                if (TryMatchAtCurrentPosition(text, xtext))
                 {
                     // The match was successful, so we can exit the loop and return.
                     return;
@@ -75,16 +80,16 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                 runtrackpos = runtrack.Length;
                 runstackpos = runstack.Length;
                 runcrawlpos = runcrawl.Length;
-                text.Decrement(ref runtextpos);
+                runtextpos--;
             }
         }
         else
         {
-            while (text.IsInRange(runtextpos))
+            while (runtextpos < xtext.Length)
             {
-                CheckTimeout();
+                CheckTimeout(text);
 
-                if (TryMatchAtCurrentPosition(text))
+                if (TryMatchAtCurrentPosition(text, xtext))
                 {
                     // The match was successful, so we can exit the loop and return.
                     return;
@@ -94,16 +99,14 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                 runtrackpos = runtrack.Length;
                 runstackpos = runstack.Length;
                 runcrawlpos = runcrawl.Length;
-                text.Increment(ref runtextpos);
+                runtextpos++;
             }
         }
     }
 
 
-    private bool TryMatchAtCurrentPosition(TString inputSpan)
+    private bool TryMatchAtCurrentPosition(TString original, RunaIndexMappedString<TString, TIndex> inputSpan)
     {
-        throw new NotImplementedException();
-        /*
         SetOperator((RegexOpcode)_code.Codes[0]);
         _codepos = 0;
         int advance = -1;
@@ -257,10 +260,12 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                     }
                     else
                     {
-                        // The inner expression found an empty match. We'll go directly to BacktrackingSecond
-                        // if we backtrack. We do not touch the grouping stack here... instead, we record the
-                        // old mark and a "no-stack-pop" flag (0) on the backtracking stack.
-                        TrackPush2(oldMarkPos, 0);
+                        // The inner expression found an empty match, so we'll go directly to 'back2' if we
+                        // backtrack.  In this case, we need to push something on the stack, since back2 pops.
+                        // However, in the case of ()+? or similar, this empty match may be legitimate, so push the text
+                        // position associated with that empty match.
+                        StackPush(oldMarkPos);
+                        TrackPush2(StackPeek()); // Save old mark
                     }
                 }
                 advance = 1;
@@ -275,11 +280,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                     // fails, we go to Lazybranchmark | RegexOpcode.Back2
                     TrackPop(2);
                     int pos = TrackPeek(1);
-
-                    // Store the previous mark. The second value (1) flags that a grouping stack frame
-                    // must be popped when backtracking, because a new frame will be pushed next.
-                    TrackPush2(TrackPeek(), 1);
-
+                    TrackPush2(TrackPeek()); // Save old mark
                     StackPush(pos);          // Make new mark
                     runtextpos = pos;        // Recall position
                     Goto(Operand(0));        // Loop
@@ -289,17 +290,9 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
             case RegexOpcode.Lazybranchmark | RegexOpcode.BacktrackingSecond:
                 // The lazy loop has failed.  We'll do a true backtrack and
                 // start over before the lazy loop.
-                int needsPop = runtrack![runtrackpos]; // flag: 0 or 1
-                int oldMark = runtrack[runtrackpos + 1]; // saved old mark
-                runtrackpos += 2; // consume both payload ints
-                if (needsPop != 0)
-                {
-                    // We pushed on the grouping stack in the Backtracking arm; balance it now.
-                    StackPop();
-                }
-
-                // Restore the old mark and backtrack
-                StackPush(oldMark);
+                StackPop();
+                TrackPop();
+                StackPush(TrackPeek()); // Recall old mark
                 break;
 
             case RegexOpcode.Setcount:
@@ -434,7 +427,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                 break;                                    // Backtrack
 
             case RegexOpcode.Setjump:
-                CheckTimeout(); // to ensure that positive/negative lookarounds have a timeout check
+                CheckTimeout(original); // to ensure that positive/negative lookarounds have a timeout check
                 StackPush(Trackpos(), Crawlpos());
                 TrackPush();
                 advance = 0;
@@ -475,7 +468,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
             case RegexOpcode.Bol:
                 {
                     int m1 = runtextpos - 1;
-                    if ((uint)m1 < (uint)inputSpan.Length && inputSpan[m1] != '\n')
+                    if ((uint)m1 < (uint)inputSpan.Length && inputSpan[m1].Value != '\n')
                     {
                         break;
                     }
@@ -486,7 +479,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
             case RegexOpcode.Eol:
                 {
                     int runtextpos = this.runtextpos;
-                    if ((uint)runtextpos < (uint)inputSpan.Length && inputSpan[runtextpos] != '\n')
+                    if ((uint)runtextpos < (uint)inputSpan.Length && inputSpan[runtextpos].Value != '\n')
                     {
                         break;
                     }
@@ -545,7 +538,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
             case RegexOpcode.EndZ:
                 {
                     int runtextpos = this.runtextpos;
-                    if (runtextpos < inputSpan.Length - 1 || ((uint)runtextpos < (uint)inputSpan.Length && inputSpan[runtextpos] != '\n'))
+                    if (runtextpos < inputSpan.Length - 1 || ((uint)runtextpos < (uint)inputSpan.Length && inputSpan[runtextpos].Value != '\n'))
                     {
                         break;
                     }
@@ -562,7 +555,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                 continue;
 
             case RegexOpcode.One:
-                if (Forwardchars() < 1 || Forwardcharnext(inputSpan) != (char)Operand(0))
+                if (Forwardchars() < 1 || Forwardcharnext(inputSpan).Value != Operand(0))
                 {
                     break;
                 }
@@ -570,7 +563,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                 continue;
 
             case RegexOpcode.Notone:
-                if (Forwardchars() < 1 || Forwardcharnext(inputSpan) == (char)Operand(0))
+                if (Forwardchars() < 1 || Forwardcharnext(inputSpan).Value == Operand(0))
                 {
                     break;
                 }
@@ -614,7 +607,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                     }
                     else
                     {
-                        if ((runregex!.roptions & RegexOptions.ECMAScript) == 0)
+                        if ((runregex!.Options & RegexOptions.ECMAScript) == 0)
                         {
                             break;
                         }
@@ -631,10 +624,10 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                         break;
                     }
 
-                    char ch = (char)Operand(0);
+                    int ch = Operand(0);
                     while (c-- > 0)
                     {
-                        if (Forwardcharnext(inputSpan) != ch)
+                        if (Forwardcharnext(inputSpan).Value != ch)
                         {
                             goto BreakBackward;
                         }
@@ -651,10 +644,10 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                         break;
                     }
 
-                    char ch = (char)Operand(0);
+                    int ch = Operand(0);
                     while (c-- > 0)
                     {
-                        if (Forwardcharnext(inputSpan) == ch)
+                        if (Forwardcharnext(inputSpan).Value == ch)
                         {
                             goto BreakBackward;
                         }
@@ -690,12 +683,12 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
             case RegexOpcode.Oneloopatomic:
                 {
                     int len = Math.Min(Operand(1), Forwardchars());
-                    char ch = (char)Operand(0);
+                    int ch = Operand(0);
                     int i;
 
                     for (i = len; i > 0; i--)
                     {
-                        if (Forwardcharnext(inputSpan) != ch)
+                        if (Forwardcharnext(inputSpan).Value != ch)
                         {
                             Backwardnext();
                             break;
@@ -714,7 +707,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
             case RegexOpcode.Notoneloopatomic:
                 {
                     int len = Math.Min(Operand(1), Forwardchars());
-                    char ch = (char)Operand(0);
+                    int ch = Operand(0);
                     int i;
 
                     if (!_rightToLeft)
@@ -737,7 +730,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                     {
                         for (i = len; i > 0; i--)
                         {
-                            if (Forwardcharnext(inputSpan) == ch)
+                            if (Forwardcharnext(inputSpan).Value == ch)
                             {
                                 Backwardnext();
                                 break;
@@ -814,7 +807,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                     int pos = TrackPeek(1);
                     runtextpos = pos;
 
-                    if (Forwardcharnext(inputSpan) != (char)Operand(0))
+                    if (Forwardcharnext(inputSpan).Value != Operand(0))
                     {
                         break;
                     }
@@ -834,7 +827,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                     int pos = TrackPeek(1);
                     runtextpos = pos;
 
-                    if (Forwardcharnext(inputSpan) == (char)Operand(0))
+                    if (Forwardcharnext(inputSpan).Value == Operand(0))
                     {
                         break;
                     }
@@ -870,12 +863,9 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
                 continue;
 
             case RegexOpcode.UpdateBumpalong:
-                // UpdateBumpalong should only exist in the code stream at such a point where the root
-                // of the backtracking stack contains the runtextpos from the start of this Go call. Replace
-                // that tracking value with the current runtextpos value if it's greater.
                 {
                     Debug.Assert(!_rightToLeft, "UpdateBumpalongs aren't added for RTL");
-                    ref int trackingpos = ref runtrack![runtrack.Length - 1];
+                    ref int trackingpos = ref runtrack![^1];
                     if (trackingpos < runtextpos)
                     {
                         trackingpos = runtextpos;
@@ -890,8 +880,7 @@ internal partial class RegexInterpreter<TString, TIndex>(RegexInterpreterCode co
             }
 
         BreakBackward:
-            Backtrack();
+            Backtrack(original);
         }
-        */
     }
 }

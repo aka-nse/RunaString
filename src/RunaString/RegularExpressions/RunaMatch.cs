@@ -12,6 +12,8 @@ public partial class RunaMatch
     public int Index => throw new NotImplementedException();
     public int Length => throw new NotImplementedException();
 
+    internal bool FoundMatch => throw new NotImplementedException();
+
     internal ReadOnlyMemory<char> LastGroupToStringImpl() =>
             GroupToStringImpl(_matchcount.Length - 1);
 
@@ -26,6 +28,11 @@ public partial class RunaMatch
     }
 
     internal ReadOnlyMemory<char> GetRightSubstring()
+    {
+        throw new NotImplementedException();
+    }
+
+    internal bool IsMatched(int cap)
     {
         throw new NotImplementedException();
     }

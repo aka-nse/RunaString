@@ -10,7 +10,7 @@ namespace RunaString;
 /// <typeparam name="TString"></typeparam>
 /// <typeparam name="TIndex"></typeparam>
 public readonly ref struct RunaIndexMappedString<TString, TIndex>
-    where TString : IRunaString<TString, TIndex>
+    where TString : IRunaString<TString, TIndex>, allows ref struct
     where TIndex : unmanaged, IRunaIndex<TIndex>
 {
     private readonly TString _entity;
@@ -72,6 +72,31 @@ public readonly ref struct RunaIndexMappedString<TString, TIndex>
             sb.Append(this[i]);
         }
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Searches for the specified rune and returns the zero-based index of the first occurrence within the current value.
+    /// </summary>
+    /// <param name="rune">The rune to locate in the current value.</param>
+    /// <returns>The zero-based index of the first occurrence of the specified rune within the current value, if found; otherwise, -1.</returns>
+    public int IndexOf(Rune rune) =>
+        IndexOf(TString.FromRunes([rune]));
+
+    /// <summary>
+    /// Searches for the specified string and returns the zero-based index of the first occurrence within the current value.
+    /// </summary>
+    /// <param name="str">The string to locate in the current value.</param>
+    /// <returns>The zero-based index of the first occurrence of the specified string within the current value, if found; otherwise, -1.</returns>
+    public int IndexOf(scoped TString str)
+    {
+        for (var i = 0; i < _indexMapping.Length; ++i)
+        {
+            if (_entity.Slice(_indexMapping[i]).StartsWith(str))
+            {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /// <summary>

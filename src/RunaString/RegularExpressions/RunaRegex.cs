@@ -64,6 +64,8 @@ public partial class RunaRegex
 
     public string Pattern => _pattern;
 
+    internal RegexOptions Options => _options;
+
     /// <inheritdoc cref="RunaRegex(string, RegexOptions, TimeSpan, CultureInfo?)" />
     public RunaRegex(string pattern)
         : this(pattern, RegexOptions.None, _defaultMatchTimeout, null)

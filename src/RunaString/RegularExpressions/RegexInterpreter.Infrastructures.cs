@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -6,18 +7,23 @@ namespace RunaString.RegularExpressions;
 
 partial class RegexInterpreter<TString, TIndex>
 {
-    private void CheckTimeout()
+    #region from RegexRunner
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void CheckTimeout(TString runtext)
     {
         if (_checkTimeout && Environment.TickCount64 >= _timeoutOccursAt)
         {
-            throwRegexTimeout();
+            ThrowRegexTimeout(runtext);
         }
 
-        void throwRegexTimeout() => throw new RegexMatchTimeoutException(
-            string.Empty,
-            runregex!.Pattern,
-            TimeSpan.FromMilliseconds(_timeout));
+        void ThrowRegexTimeout(TString runtext) =>
+            throw new RegexMatchTimeoutException(runtext.ToString() ?? string.Empty, runregex!.pattern!, TimeSpan.FromMilliseconds(_timeout));
     }
+
+    private void Go() => throw new NotImplementedException();
+
+    private bool FindFirstChar() => throw new NotImplementedException();
 
     private void EnsureStorage()
     {
@@ -30,13 +36,48 @@ partial class RegexInterpreter<TString, TIndex>
             DoubleTrack();
     }
 
-    private void DoubleStack()
+    private bool IsBoundary(int index, int startpos, int endpos)
     {
-        int[] newstack = new int[runstack!.Length * 2];
+        return (index > startpos && RegexCharClass.IsBoundaryWordChar(runtext![index - 1])) !=
+               (index < endpos && RegexCharClass.IsBoundaryWordChar(runtext![index]));
+    }
 
-        Array.Copy(runstack, 0, newstack, runstack.Length, runstack.Length);
-        runstackpos += runstack.Length;
-        runstack = newstack;
+    internal static bool IsBoundary(RunaIndexMappedString<TString, TIndex> inputSpan, int index)
+    {
+        int indexM1 = index - 1;
+        return ((uint)indexM1 < (uint)inputSpan.Length && RegexCharClass.IsBoundaryWordChar(inputSpan[indexM1])) !=
+               ((uint)index < (uint)inputSpan.Length && RegexCharClass.IsBoundaryWordChar(inputSpan[index]));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsPreWordCharBoundary(RunaIndexMappedString<TString, TIndex> inputSpan, int index)
+    {
+        int indexMinus1 = index - 1;
+        return (uint)indexMinus1 >= (uint)inputSpan.Length || !RegexCharClass.IsBoundaryWordChar(inputSpan[indexMinus1]);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsPostWordCharBoundary(RunaIndexMappedString<TString, TIndex> inputSpan, int index) =>
+        (uint)index >= (uint)inputSpan.Length || !RegexCharClass.IsBoundaryWordChar(inputSpan[index]);
+
+    internal static bool IsWordChar(char ch) => RegexCharClass.IsWordChar(ch);
+
+    private bool IsECMABoundary(int index, int startpos, int endpos)
+    {
+        return (index > startpos && RegexCharClass.IsECMAWordChar(runtext![index - 1])) !=
+               (index < endpos && RegexCharClass.IsECMAWordChar(runtext![index]));
+    }
+
+    internal static bool IsECMABoundary(RunaIndexMappedString<TString, TIndex> inputSpan, int index)
+    {
+        int indexM1 = index - 1;
+        return ((uint)indexM1 < (uint)inputSpan.Length && RegexCharClass.IsECMAWordChar(inputSpan[indexM1])) !=
+               ((uint)index < (uint)inputSpan.Length && RegexCharClass.IsECMAWordChar(inputSpan[index]));
+    }
+
+    public static bool CharInClass(char ch, string charClass)
+    {
+        return RegexCharClass.CharInClass(ch, charClass);
     }
 
     private void DoubleTrack()
@@ -47,6 +88,119 @@ partial class RegexInterpreter<TString, TIndex>
         runtrackpos += runtrack.Length;
         runtrack = newtrack;
     }
+
+    private void DoubleStack()
+    {
+        int[] newstack = new int[runstack!.Length * 2];
+
+        Array.Copy(runstack, 0, newstack, runstack.Length, runstack.Length);
+        runstackpos += runstack.Length;
+        runstack = newstack;
+    }
+
+    private void DoubleCrawl()
+    {
+        int[] newcrawl = new int[runcrawl!.Length * 2];
+
+        Array.Copy(runcrawl, 0, newcrawl, runcrawl.Length, runcrawl.Length);
+        runcrawlpos += runcrawl.Length;
+        runcrawl = newcrawl;
+    }
+
+    private void Crawl(int i)
+    {
+        if (runcrawlpos == 0)
+            DoubleCrawl();
+
+        runcrawl![--runcrawlpos] = i;
+    }
+
+    private int Popcrawl()
+    {
+        return runcrawl![runcrawlpos++];
+    }
+
+    private int Crawlpos()
+    {
+        return runcrawl!.Length - runcrawlpos;
+    }
+
+    private void Capture(int capnum, int start, int end)
+    {
+        if (end < start)
+        {
+            int t = end;
+            end = start;
+            start = t;
+        }
+
+        Crawl(capnum);
+        runmatch!.AddMatch(capnum, start, end - start);
+    }
+
+    private void TransferCapture(int capnum, int uncapnum, int start, int end)
+    {
+        if (end < start)
+        {
+            int t = end;
+            end = start;
+            start = t;
+        }
+
+        int start2 = MatchIndex(uncapnum);
+        int end2 = start2 + MatchLength(uncapnum);
+
+        if (start >= end2)
+        {
+            end = start;
+            start = end2;
+        }
+        else if (end <= start2)
+        {
+            start = start2;
+        }
+        else
+        {
+            if (end > end2)
+                end = end2;
+            if (start2 > start)
+                start = start2;
+        }
+
+        Crawl(uncapnum);
+        runmatch!.BalanceMatch(uncapnum);
+
+        if (capnum != -1)
+        {
+            Crawl(capnum);
+            runmatch.AddMatch(capnum, start, end - start);
+        }
+    }
+
+    private void Uncapture()
+    {
+        int capnum = Popcrawl();
+        runmatch!.RemoveMatch(capnum);
+    }
+
+    private bool IsMatched(int cap)
+    {
+        return runmatch!.IsMatched(cap);
+    }
+
+    private int MatchIndex(int cap)
+    {
+        return runmatch!.MatchIndex(cap);
+    }
+
+    private int MatchLength(int cap)
+    {
+        return runmatch!.MatchLength(cap);
+    }
+
+    #endregion
+
+    #region from RegexInterpreter
 
     private void InitTrackCount() => runtrackcount = _code.TrackCount;
 
@@ -129,9 +283,9 @@ partial class RegexInterpreter<TString, TIndex>
         runtrackpos = localruntrackpos;
     }
 
-    private void Backtrack()
+    private void Backtrack(TString runtext)
     {
-        CheckTimeout();
+        CheckTimeout(runtext);
 
         int newpos = runtrack![runtrackpos];
         runtrackpos++;
@@ -189,19 +343,129 @@ partial class RegexInterpreter<TString, TIndex>
 
     private int Bump() => _rightToLeft ? -1 : 1;
 
-    private TIndex Forwardchars(TString text) =>
-     _rightToLeft
-      ? runtextpos
-      : text.Decrement(runtextend, runtextpos.RuneIndex);
+    private int Forwardchars() => _rightToLeft ? runtextpos : runtextend - runtextpos;
 
-    private Rune Forwardcharnext(TString inputSpan)
+    private Rune Forwardcharnext(RunaIndexMappedString<TString, TIndex> inputSpan)
     {
-        var i = _rightToLeft
-            ? inputSpan.Decrement(ref runtextpos)
-            : inputSpan.Increment(ref runtextpos);
+        int i = _rightToLeft ? --runtextpos : runtextpos++;
         return inputSpan[i];
     }
 
+    private bool MatchString(string str, RunaIndexMappedString<TString, TIndex> inputSpan)
+    {
+        int c = str.Length;
+        int pos;
+
+        if (!_rightToLeft)
+        {
+            if (inputSpan.Length - runtextpos < c)
+            {
+                return false;
+            }
+
+            pos = runtextpos + c;
+        }
+        else
+        {
+            if (runtextpos < c)
+            {
+                return false;
+            }
+
+            pos = runtextpos;
+        }
+
+        while (c != 0)
+        {
+            if (str[--c] != inputSpan[--pos])
+            {
+                return false;
+            }
+        }
+
+        if (!_rightToLeft)
+        {
+            pos += str.Length;
+        }
+
+        runtextpos = pos;
+
+        return true;
+    }
+
+    private bool MatchRef(int index, int length, RunaIndexMappedString<TString, TIndex> inputSpan, bool caseInsensitive)
+    {
+        int pos;
+        if (!_rightToLeft)
+        {
+            if (inputSpan.Length - runtextpos < length)
+            {
+                return false;
+            }
+
+            pos = runtextpos + length;
+        }
+        else
+        {
+            if (runtextpos < length)
+            {
+                return false;
+            }
+
+            pos = runtextpos;
+        }
+
+        int cmpos = index + length;
+        int c = length;
+
+        if (!caseInsensitive)
+        {
+            while (c-- != 0)
+            {
+                if (inputSpan[--cmpos] != inputSpan[--pos])
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            while (c-- != 0)
+            {
+                Rune backreferenceChar = inputSpan[--cmpos];
+                Rune currentChar = inputSpan[--pos];
+
+                // If we are evaluating a backreference case-insensitive match, we first check if the characters at the position
+                // are the same character.
+                if (backreferenceChar != currentChar)
+                {
+                    // If they are not the same character, then we need to check if the backreference character participates in case conversion
+                    // and if so, we need to fetch the case equivalences from our casing tables.
+                    Debug.Assert(_culture != null, "If the pattern has backreferences and is IgnoreCase, then _culture must not be null.");
+                    if (!RegexCaseEquivalences.TryFindCaseEquivalencesForCharWithIBehavior(backreferenceChar, _culture, ref _caseBehavior, out ReadOnlySpan<char> equivalences) ||
+                        equivalences.IndexOf(inputSpan[pos]) < 0)
+                    {
+                        // The backreference character doesn't participate in case conversions, or it does but the input character
+                        // doesn't match any of its equivalents.  Either way, we fail to match.
+                        return false;
+                    }
+                }
+            }
+        }
+
+        if (!_rightToLeft)
+        {
+            pos += length;
+        }
+
+        runtextpos = pos;
+
+        return true;
+    }
+
+    private void Backwardnext() => runtextpos += _rightToLeft ? 1 : -1;
+
+    #endregion
 }
 
 
