@@ -10,7 +10,7 @@ namespace RunaString;
 /// <typeparam name="TString"></typeparam>
 /// <typeparam name="TIndex"></typeparam>
 public readonly ref struct RunaIndexMappedString<TString, TIndex>
-    where TString : IRunaString<TString, TIndex>
+    where TString : IRunaStringBase<TString, TIndex>
     where TIndex : unmanaged, IRunaIndex<TIndex>
 {
     private readonly TString _entity;
@@ -133,7 +133,7 @@ public static class RunaIndexMappedString
     /// <param name="entity">The source string entity to map.</param>
     /// <returns>A new RunaIndexMappedString{TString, TIndex} that wraps the specified entity.</returns>
     public static RunaIndexMappedString<TString, TIndex> Create<TString, TIndex>(TString entity)
-        where TString : IRunaString<TString, TIndex>
+        where TString : IRunaStringBase<TString, TIndex>
         where TIndex : unmanaged, IRunaIndex<TIndex> =>
         new(entity);
 
@@ -143,7 +143,7 @@ public static class RunaIndexMappedString
     /// </summary>
     /// <remarks>Only the consumed portion of <paramref name="buffer"/> is included in the created mapped
     /// string.</remarks>
-    /// <typeparam name="TString">The string representation type that implements <see cref="IRunaString{TString, TIndex}"/>.</typeparam>
+    /// <typeparam name="TString">The string representation type that implements <see cref="IRunaStringBase{TString, TIndex}"/>.</typeparam>
     /// <typeparam name="TIndex">The unmanaged index type that implements <see cref="IRunaIndex{TIndex}"/>.</typeparam>
     /// <param name="entity">The source string value to map.</param>
     /// <param name="buffer">The destination buffer used to store the generated index mapping.</param>
@@ -151,7 +151,7 @@ public static class RunaIndexMappedString
     /// value.</param>
     /// <returns><see langword="true"/> if the index mapping is created successfully; otherwise, <see langword="false"/>.</returns>
     public static bool TryCreate<TString, TIndex>(TString entity, Span<TIndex> buffer, out RunaIndexMappedString<TString, TIndex> mappedString)
-        where TString : IRunaString<TString, TIndex>
+        where TString : IRunaStringBase<TString, TIndex>
         where TIndex : unmanaged, IRunaIndex<TIndex>
     {
         if(!RunaIndexMappedString<TString, TIndex>.TryGetIndexMapping(entity, buffer, out var consumed))

@@ -21,8 +21,11 @@ public readonly struct CharsIndex : IRunaIndex<CharsIndex>
     /// <summary></summary>
     public int CharIndex { get; }
 
-    /// <summary></summary>
+    /// <inheritdoc />
     public int RuneIndex { get; }
+
+    /// <inheritdoc />
+    public int CodeUnitIndex => CharIndex;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CharsIndex"/> struct with the specified byte index and rune position.

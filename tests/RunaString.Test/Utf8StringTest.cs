@@ -49,7 +49,7 @@ public class Utf8StringTest
     public void TryGetRune_CanEnumerateValidly(Utf8TestCase test)
     {
         static void core<TString>(TString srt, StringRuneEnumerator expectedEnumerator)
-            where TString : IRunaString<TString, Utf8Index>, allows ref struct
+            where TString : IRunaStringBase<TString, Utf8Index>, allows ref struct
         {
             var byteIndex = 0;
             var runeIndex = 0;
